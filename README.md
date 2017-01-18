@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/dividiti/crowdsource-video-experiments-on-android.svg?branch=master)](https://travis-ci.org/dividiti/crowdsource-video-experiments-on-android)
 
-NEWS
-====
 
 Introduction
 ============
