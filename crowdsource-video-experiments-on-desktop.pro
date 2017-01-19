@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,6 +23,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += $$_PRO_FILE_PWD_/src/core
 
 SOURCES += \
     src/main.cpp\
@@ -32,7 +33,14 @@ SOURCES += \
     src/gui/featurespanel.cpp \
     src/gui/resultspanel.cpp \
     src/gui/infolabel.cpp \
-    src/gui/framewidget.cpp
+    src/gui/framewidget.cpp \
+    src/shell/shellcommands.cpp \
+    src/core/appconfig.cpp \
+    src/core/webclient.cpp \
+    src/core/remotedataaccess.cpp \
+    src/core/utils.cpp \
+    src/core/appevents.cpp \
+    src/core/appmodels.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -41,7 +49,14 @@ HEADERS += \
     src/gui/featurespanel.h \
     src/gui/resultspanel.h \
     src/gui/infolabel.h \
-    src/gui/framewidget.h
+    src/gui/framewidget.h \
+    src/shell/shellcommands.h \
+    src/core/appconfig.h \
+    src/core/webclient.h \
+    src/core/remotedataaccess.h \
+    src/core/utils.h \
+    src/core/appevents.h \
+    src/core/appmodels.h
 
 RESOURCES += \
     src/resources.qrc
