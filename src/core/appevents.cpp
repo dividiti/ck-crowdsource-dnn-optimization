@@ -8,8 +8,14 @@ AppEvents* AppEvents::instance()
     return &obj;
 }
 
-void AppEvents::reportError(const QString& msg)
+void AppEvents::info(const QString& msg)
+{
+    qInfo() << msg;
+    emit instance()->onInfo(msg);
+}
+
+void AppEvents::error(const QString& msg)
 {
     qCritical() << "ERROR:" << msg;
-    emit error(msg);
+    emit instance()->onError(msg);
 }

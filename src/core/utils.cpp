@@ -35,7 +35,7 @@ void jsonObjectToList(const QJsonObject& obj, QStringList& report, int level)
         if (value.isObject())
         {
             report << QString("%1%2: ").arg(intend, key);
-            jsonObjectToList(value.toObject(), report, ++level);
+            jsonObjectToList(value.toObject(), report, level+1);
         }
         else
             report << QString("%1%2: %3").arg(intend, key, jsonValueToString(value));

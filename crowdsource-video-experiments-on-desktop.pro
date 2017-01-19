@@ -39,7 +39,8 @@ SOURCES += \
     src/core/remotedataaccess.cpp \
     src/core/utils.cpp \
     src/core/appevents.cpp \
-    src/core/appmodels.cpp
+    src/core/appmodels.cpp \
+    src/core/platformfeaturesprovider.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -54,7 +55,8 @@ HEADERS += \
     src/core/remotedataaccess.h \
     src/core/utils.h \
     src/core/appevents.h \
-    src/core/appmodels.h
+    src/core/appmodels.h \
+    src/core/platformfeaturesprovider.h
 
 RESOURCES += \
     src/resources.qrc

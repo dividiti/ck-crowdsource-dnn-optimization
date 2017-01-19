@@ -20,13 +20,18 @@ public:
     bool process(const QApplication& app);
 
 private:
-    void command_querySharedResourcesInfo();
+    void command_querySharedRepoInfo();
+    void command_showCachedPlatformFeatures();
+    void command_loadScenariosForCachedFeatures();
 
 private slots:
-    void sharedRepoInfoAqcuired(SharedRepoInfo info);
+    void sharedRepoInfoReceived(SharedRepoInfo info);
+    void recognitionScenariosReceived(RecognitionScenarios scenarios);
 
 private:
     QTextStream& cout();
+
+    bool loadCachedPlatformFeatures(PlatformFeatures &features);
 };
 
 #endif // SHELLCOMMANDS_H

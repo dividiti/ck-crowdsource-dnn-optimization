@@ -18,21 +18,20 @@ public:
     explicit RemoteDataAccess(QObject *parent = 0);
 
     void querySharedRepoInfo(const QString& url);
+    void queryRecognitionScenarios(const QString &url, const PlatformFeatures& features);
 
 signals:
     void requestFinished();
-    void sharedRepoInfoAqcuired(SharedRepoInfo info);
-    void platformFeaturesAqcuired();
-    void recognitionScenariosAqcuired();
+    void sharedRepoInfoReceived(SharedRepoInfo info);
+    void recognitionScenariosReceived(RecognitionScenarios scenarios);
 
 private slots:
     void querySharedRepoInfo_finished();
+    void queryRecognitionScenarios_finished();
     void queryAny_finished(QNetworkReply *reply);
 
 private:
     QNetworkAccessManager* _network;
-
-    QNetworkReply* httpGet(const QString& url);
 };
 
 #endif // REMOTEDATAACCESS_H

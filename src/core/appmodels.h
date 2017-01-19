@@ -2,10 +2,9 @@
 #define APPMODELS_H
 
 #include <QString>
-
-QT_BEGIN_NAMESPACE
-//class QJsonObject;
-QT_END_NAMESPACE
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QList>
 
 class SharedRepoInfo
 {
@@ -26,16 +25,23 @@ private:
 class PlatformFeatures
 {
 public:
+    QJsonObject json;
+
+    QString parseJson(const QByteArray& text);
 };
 
 
 class RecognitionScenario
 {
-public:
-    const QString& title() const { return _title; }
+};
 
-private:
-    QString _title;
+
+class RecognitionScenarios
+{
+public:
+    QList<QJsonObject> jsons;
+
+    QString parseJson(const QByteArray& text);
 };
 
 

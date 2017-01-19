@@ -35,12 +35,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setCentralWidget(content);
     setInitialWindowGeometry(this);
 
-    connect(AppEvents::instance(), &AppEvents::error, this, &MainWindow::onError);
+    connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
+    connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
+    //connect(&_network, &RemoteDataAccess::sharedRepoInfoReceived, this, &MainWindow::sharedRepoInfoAqcuired);
+    connect(&_network, &RemoteDataAccess::recognitionScenariosReceived, this, &MainWindow::recognitionScenariosReceived);
+    connect(&_platformFeaturesProvider, &PlatformFeaturesProvider::platformFeaturesReceived, this, &MainWindow::platformFeaturesReceived);
     connect(&_network, &RemoteDataAccess::requestFinished, statusBar(), &QStatusBar::clearMessage);
-    connect(&_network, &RemoteDataAccess::sharedRepoInfoAqcuired, this, &MainWindow::sharedRepoInfoAqcuired);
-    connect(&_network, &RemoteDataAccess::platformFeaturesAqcuired, this, &MainWindow::platformFeaturesAqcuired);
-    connect(&_network, &RemoteDataAccess::recognitionScenariosAqcuired, this, &MainWindow::recognitionScenariosAqcuired);
 
     initialize();
 }
@@ -52,7 +53,11 @@ MainWindow::~MainWindow()
 void MainWindow::initialize()
 {
     qDebug() << "initialize";
-    auto sharedRepoUrl = AppConfig::sharedRepoUrl();
+
+    _platformFeaturesProvider.queryPlatformFeatures();
+
+
+    /*auto sharedRepoUrl = AppConfig::sharedRepoUrl();
     qDebug() << "sharedRepoUrl" << sharedRepoUrl;
     if (sharedRepoUrl.isEmpty())
     {
@@ -61,38 +66,43 @@ void MainWindow::initialize()
         _network.querySharedRepoInfo(AppConfig::sharedResourcesUrl());
         return;
     }
-    collectPlatformFeatures(sharedRepoUrl);
+    collectPlatformFeatures(sharedRepoUrl);*/
 }
 
-void MainWindow::sharedRepoInfoAqcuired(SharedRepoInfo info)
+/*void MainWindow::sharedRepoInfoAqcuired(SharedRepoInfo info)
 {
     qDebug() << "sharedRepoInfoAqcuired" << info.url() << info.weight() << info.note();
     AppConfig::setSharedRepoUrl(info.url());
     collectPlatformFeatures(info.url());
-}
+}*/
 
-void MainWindow::collectPlatformFeatures(const QString& sharedRepoUrl)
-{
-    qDebug() << "collectPlatformFeatures" << sharedRepoUrl;
-    statusBar()->showMessage(tr("Collecting platform features..."));
-}
-
+/*
 void MainWindow::platformFeaturesCollected()
 {
     qDebug() << "platformFeaturesCollected";
-}
+}*/
 
-void MainWindow::platformFeaturesAqcuired()
+void MainWindow::platformFeaturesReceived(PlatformFeatures features)
 {
     qDebug() << "platformFeaturesAqcuired";
+    auto url = AppConfig::sharedRepoUrl();
+    // TODO: query url if it is empty
+    _network.queryRecognitionScenarios(url, features);
 }
 
-void MainWindow::recognitionScenariosAqcuired()
+void MainWindow::recognitionScenariosReceived(RecognitionScenarios scenarios)
 {
     qDebug() << "recognitionScenariosAqcuired";
+    // TODO: load scenarios into gui
 }
 
 void MainWindow::onError(const QString& msg)
 {
+    statusBar()->clearMessage();
     QMessageBox::critical(this, windowTitle(), msg);
+}
+
+void MainWindow::onInfo(const QString& msg)
+{
+    statusBar()->showMessage(msg);
 }

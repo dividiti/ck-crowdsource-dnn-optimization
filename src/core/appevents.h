@@ -10,10 +10,12 @@ class AppEvents : public QObject
 public:
     static AppEvents* instance();
 
-    void reportError(const QString& msg);
+    static void info(const QString& msg);
+    static void error(const QString& msg);
 
 signals:
-    void error(const QString& msg);
+    void onInfo(const QString& msg);
+    void onError(const QString& msg);
 
 private:
     AppEvents() {}
