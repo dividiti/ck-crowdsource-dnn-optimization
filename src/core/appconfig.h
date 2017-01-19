@@ -7,7 +7,8 @@ class AppConfig
 {
 public:
     static QString sharedResourcesUrl();
-    static QString remoteServerUrl();
+    static QString sharedRepoUrl();
+    static void setSharedRepoUrl(const QString& url);
 
 private:
     static QString configFileName();

@@ -3,12 +3,23 @@
 
 #include <QString>
 
-class SharedResourcesInfo
+QT_BEGIN_NAMESPACE
+//class QJsonObject;
+QT_END_NAMESPACE
+
+class SharedRepoInfo
 {
 public:
-    QString url;
-    QString note;
-    int weight;
+    QString url() const { return _url; }
+    QString note() const { return _note; }
+    int weight() const { return _weight; }
+
+    QString parseJson(const QByteArray& text);
+
+private:
+    QString _url;
+    QString _note;
+    int _weight;
 };
 
 

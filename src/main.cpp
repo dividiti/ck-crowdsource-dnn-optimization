@@ -9,7 +9,8 @@ int main(int argc, char *argv[])
     app.addLibraryPath(app.applicationDirPath());
     app.setApplicationVersion("1.0.0.0");
 
-    if (ShellCommands::process(app))
+    ShellCommands cmds;
+    if (cmds.process(app))
     {
         return 0;
 

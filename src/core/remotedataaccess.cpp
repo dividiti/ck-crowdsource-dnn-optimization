@@ -3,52 +3,59 @@
 #include "webclient.h"
 
 #include <QApplication>
-#include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
-SharedResourcesInfo RemoteDataAccess::querySharedResourcesInfo(const QString& url)
+namespace InternalWebClient
 {
-    SharedResourcesInfo result;
-
-    auto res = WebClient::loadStringData(url);
-    if (res.failed())
+    QNetworkAccessManager* network()
     {
-        AppEvents::instance()->reportError(
-            qApp->tr("Unable to load shared resources from %1: %2").arg(url).arg(res.error()));
-        return result;
+        static QNetworkAccessManager n;
+        return &n;
     }
 
-    QJsonParseError error;
-    auto json = QJsonDocument::fromJson(res.data().toUtf8(), &error);
-    if (json.isNull())
+    QNetworkReply* get(const QString& url)
     {
-        AppEvents::instance()->reportError(
-            qApp->tr("Unable to parse shared resources json data: %1").arg(error.errorString()));
-        return result;
+        QNetworkRequest request(url);
+        request.setHeader(QNetworkRequest::UserAgentHeader,
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0");
+
+        return network()->get(request);
     }
 
-    static QString sharedDataKey("default");
-    static QString remoteServerKey("url");
+} // namespace InternalWebClient
 
-    auto data = json.object();
-    if (!data.contains(sharedDataKey))
-    {
-        AppEvents::instance()->reportError(
-            qApp->tr("Shared resources json data does not contain mandatory key '%1'").arg(sharedDataKey));
-        return result;
-    }
+//-----------------------------------------------------------------------------
 
-    auto sharedData = data[sharedDataKey].toObject();
-    if (!sharedData.contains(remoteServerKey))
-    {
-        AppEvents::instance()->reportError(
-            qApp->tr("Shared resources json data does not contain mandatory key '%1'").arg(remoteServerKey));
-        return result;
-    }
+RemoteDataAccess::RemoteDataAccess(QObject *parent) : QObject(parent)
+{
+    connect(InternalWebClient::network(), SIGNAL(finished(QNetworkReply*)), this, SLOT(queryAny_finished(QNetworkReply*)));
+}
 
-    result.url = sharedData[remoteServerKey].toString();
-    result.note = sharedData["note"].toString();
-    result.weight = int(sharedData["weight"].toDouble());
-    return result;
+void RemoteDataAccess::querySharedRepoInfo(const QString& url)
+{
+    auto reply = InternalWebClient::get(url);
+    connect(reply, SIGNAL(finished()), this, SLOT(querySharedRepoInfo_finished()));
+}
+
+void RemoteDataAccess::querySharedRepoInfo_finished()
+{
+    auto reply = qobject_cast<QNetworkReply*>(sender());
+    if (reply->error())
+        return AppEvents::instance()->reportError(
+            qApp->tr("Unable to load shared resources: %1").arg(reply->errorString()));
+
+    SharedRepoInfo repoInfo;
+    auto res = repoInfo.parseJson(reply->readAll());
+    if (!res.isEmpty())
+        return AppEvents::instance()->reportError(res);
+
+    emit sharedRepoInfoAqcuired(repoInfo);
+}
+
+void RemoteDataAccess::queryAny_finished(QNetworkReply *reply)
+{
+    reply->deleteLater();
+    emit requestFinished();
 }

@@ -1,5 +1,4 @@
 #include "appconfig.h"
-#include "remotedataaccess.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -19,18 +18,16 @@ QString AppConfig::sharedResourcesUrl()
     return QStringLiteral("http://cTuning.org/shared-computing-resources-json/ck.json");
 }
 
-QString AppConfig::remoteServerUrl()
+QString AppConfig::sharedRepoUrl()
 {
     QSettings cfg(configFileName(), QSettings::IniFormat);
+    return cfg.value(ConfigKeys::remoteServer).toString();
+}
 
-    auto url = cfg.value(ConfigKeys::remoteServer).toString();
-    if (url.isEmpty())
-    {
-        url = RemoteDataAccess::querySharedResourcesInfo(sharedResourcesUrl()).url;
-        cfg.setValue(ConfigKeys::remoteServer, url);
-    }
-
-    return url;
+void AppConfig::setSharedRepoUrl(const QString& url)
+{
+    QSettings cfg(configFileName(), QSettings::IniFormat);
+    cfg.setValue(ConfigKeys::remoteServer, url);
 }
 
 QString AppConfig::configFileName()

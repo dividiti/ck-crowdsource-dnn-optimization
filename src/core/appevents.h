@@ -12,6 +12,9 @@ public:
 
     void reportError(const QString& msg);
 
+signals:
+    void error(const QString& msg);
+
 private:
     AppEvents() {}
 };

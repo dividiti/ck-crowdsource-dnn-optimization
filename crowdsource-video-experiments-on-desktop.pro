@@ -36,7 +36,6 @@ SOURCES += \
     src/gui/framewidget.cpp \
     src/shell/shellcommands.cpp \
     src/core/appconfig.cpp \
-    src/core/webclient.cpp \
     src/core/remotedataaccess.cpp \
     src/core/utils.cpp \
     src/core/appevents.cpp \
@@ -52,7 +51,6 @@ HEADERS += \
     src/gui/framewidget.h \
     src/shell/shellcommands.h \
     src/core/appconfig.h \
-    src/core/webclient.h \
     src/core/remotedataaccess.h \
     src/core/utils.h \
     src/core/appevents.h \
