@@ -6,6 +6,7 @@
 #include <QObject>
 
 QT_BEGIN_NAMESPACE
+class QNetworkAccessManager;
 class QNetworkReply;
 QT_END_NAMESPACE
 
@@ -27,6 +28,11 @@ signals:
 private slots:
     void querySharedRepoInfo_finished();
     void queryAny_finished(QNetworkReply *reply);
+
+private:
+    QNetworkAccessManager* _network;
+
+    QNetworkReply* httpGet(const QString& url);
 };
 
 #endif // REMOTEDATAACCESS_H
