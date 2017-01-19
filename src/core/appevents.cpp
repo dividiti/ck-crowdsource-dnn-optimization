@@ -14,6 +14,11 @@ void AppEvents::info(const QString& msg)
     emit instance()->onInfo(msg);
 }
 
+void AppEvents::warning(const QString& msg)
+{
+    qWarning() << msg;
+}
+
 void AppEvents::error(const QString& msg)
 {
     qCritical() << "ERROR:" << msg;

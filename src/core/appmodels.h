@@ -13,35 +13,56 @@ public:
     QString note() const { return _note; }
     int weight() const { return _weight; }
 
-    QString parseJson(const QByteArray& text);
+    bool isEmpty() const { return _url.isEmpty(); }
+    QString str() const;
+
+    void parseJson(const QByteArray& text);
+
+    void loadFromConfig();
+    void saveToConfig();
 
 private:
     QString _url;
     QString _note;
-    int _weight;
+    int _weight = 0;
 };
 
+//-----------------------------------------------------------------------------
 
 class PlatformFeatures
 {
 public:
     QJsonObject json;
 
-    QString parseJson(const QByteArray& text);
+    bool isEmpty() const { return json.isEmpty(); }
+    QString str() const;
+
+    void parseJson(const QByteArray& text);
+
+    void loadFromFile(const QString& path);
+    void saveToFile(const QString& path);
 };
 
+//-----------------------------------------------------------------------------
 
 class RecognitionScenario
 {
 };
 
+//-----------------------------------------------------------------------------
 
 class RecognitionScenarios
 {
 public:
     QList<QJsonObject> jsons;
 
-    QString parseJson(const QByteArray& text);
+    bool isEmpty() const { return jsons.isEmpty(); }
+    QString str() const;
+
+    void parseJson(const QByteArray& text);
+
+    void loadFromFile(const QString& path);
+    void saveToFile(const QString& path);
 };
 
 

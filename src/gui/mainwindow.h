@@ -23,12 +23,12 @@ private:
     PlatformFeaturesProvider _platformFeaturesProvider;
 
     void initialize();
-    //void collectPlatformFeatures(const QString& sharedRepoUrl);
+    void loadIntoGui(const RecognitionScenarios& scenarios);
 
 private slots:
-    //void sharedRepoInfoReceived(SharedRepoInfo info);
+    void sharedRepoInfoReceived(SharedRepoInfo info);
     void platformFeaturesReceived(PlatformFeatures features);
-    void recognitionScenariosReceived(RecognitionScenarios scenarios);
+    void scenariosReceived(RecognitionScenarios scenarios);
     void onError(const QString& msg);
     void onInfo(const QString& msg);
 };

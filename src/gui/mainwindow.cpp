@@ -12,7 +12,7 @@
 
 void setInitialWindowGeometry(QWidget* w)
 {
-    auto desktop = QApplication::desktop()->screen()->rect();
+    auto desktop = QApplication::desktop()->availableGeometry(w);
     w->adjustSize();
     // take some more space on the screen then auto-sized
     w->resize(desktop.width()*0.75, w->height()*1.1);
@@ -38,8 +38,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
     connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
-    //connect(&_network, &RemoteDataAccess::sharedRepoInfoReceived, this, &MainWindow::sharedRepoInfoAqcuired);
-    connect(&_network, &RemoteDataAccess::recognitionScenariosReceived, this, &MainWindow::recognitionScenariosReceived);
+    connect(&_network, &RemoteDataAccess::sharedRepoInfoReceived, this, &MainWindow::sharedRepoInfoReceived);
+    connect(&_network, &RemoteDataAccess::scenariosReceived, this, &MainWindow::scenariosReceived);
     connect(&_platformFeaturesProvider, &PlatformFeaturesProvider::platformFeaturesReceived, this, &MainWindow::platformFeaturesReceived);
     connect(&_network, &RemoteDataAccess::requestFinished, statusBar(), &QStatusBar::clearMessage);
 
@@ -54,46 +54,61 @@ void MainWindow::initialize()
 {
     qDebug() << "initialize";
 
-    _platformFeaturesProvider.queryPlatformFeatures();
+/*    RecognitionScenarios scenarios;
+    scenarios.loadFromFile(AppConfig::scenariosCacheFile());
+    if (!scenarios.isEmpty())
+        return scenariosReceived(scenarios);
 
+    PlatformFeatures features;
+    features.loadFromFile(AppConfig::platformFeaturesCacheFile());
+    if (!features.isEmpty())
+        return platformFeaturesReceived(features);
 
-    /*auto sharedRepoUrl = AppConfig::sharedRepoUrl();
-    qDebug() << "sharedRepoUrl" << sharedRepoUrl;
-    if (sharedRepoUrl.isEmpty())
-    {
-        qDebug() << "_network.querySharedRepoInfo" << AppConfig::sharedResourcesUrl();
-        statusBar()->showMessage(tr("Request for Public Collective Knowledge Server..."));
-        _network.querySharedRepoInfo(AppConfig::sharedResourcesUrl());
-        return;
-    }
-    collectPlatformFeatures(sharedRepoUrl);*/
+    SharedRepoInfo repo;
+    repo.loadFromConfig();
+    if (!repo.isEmpty())
+        return sharedRepoInfoReceived(repo);
+
+    _network.querySharedRepoInfo(AppConfig::sharedResourcesUrl());*/
+
+    SharedRepoInfo repo;
+    repo.loadFromConfig();
+    if (repo.isEmpty())
+        return _network.querySharedRepoInfo(AppConfig::sharedResourcesUrl());
+
+    PlatformFeatures features;
+    features.loadFromFile(AppConfig::platformFeaturesCacheFile());
+    if (features.isEmpty())
+        return _platformFeaturesProvider.queryPlatformFeatures(AppConfig::sharedRepoUrl());
+
+    RecognitionScenarios scenarios;
+    scenarios.loadFromFile(AppConfig::scenariosCacheFile());
+    if (scenarios.isEmpty())
+        return _network.queryScenarios(AppConfig::sharedRepoUrl(), features);
 }
 
-/*void MainWindow::sharedRepoInfoAqcuired(SharedRepoInfo info)
+void MainWindow::sharedRepoInfoReceived(SharedRepoInfo info)
 {
-    qDebug() << "sharedRepoInfoAqcuired" << info.url() << info.weight() << info.note();
-    AppConfig::setSharedRepoUrl(info.url());
-    collectPlatformFeatures(info.url());
-}*/
+    qDebug() << "sharedRepoInfoReceived" << info.str();
+    info.saveToConfig();
 
-/*
-void MainWindow::platformFeaturesCollected()
-{
-    qDebug() << "platformFeaturesCollected";
-}*/
+    _platformFeaturesProvider.queryPlatformFeatures(info.url());
+}
 
 void MainWindow::platformFeaturesReceived(PlatformFeatures features)
 {
     qDebug() << "platformFeaturesAqcuired";
-    auto url = AppConfig::sharedRepoUrl();
-    // TODO: query url if it is empty
-    _network.queryRecognitionScenarios(url, features);
+    features.saveToFile(AppConfig::platformFeaturesCacheFile());
+
+    _network.queryScenarios(AppConfig::sharedRepoUrl(), features);
 }
 
-void MainWindow::recognitionScenariosReceived(RecognitionScenarios scenarios)
+void MainWindow::scenariosReceived(RecognitionScenarios scenarios)
 {
     qDebug() << "recognitionScenariosAqcuired";
-    // TODO: load scenarios into gui
+    scenarios.saveToFile(AppConfig::scenariosCacheFile());
+
+    loadIntoGui(scenarios);
 }
 
 void MainWindow::onError(const QString& msg)
@@ -105,4 +120,9 @@ void MainWindow::onError(const QString& msg)
 void MainWindow::onInfo(const QString& msg)
 {
     statusBar()->showMessage(msg);
+}
+
+void MainWindow::loadIntoGui(const RecognitionScenarios& scenarios)
+{
+    // TODO
 }

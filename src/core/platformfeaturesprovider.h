@@ -12,10 +12,7 @@ class PlatformFeaturesProvider : public QObject
 public:
     explicit PlatformFeaturesProvider(QObject *parent = 0) : QObject(parent) {}
 
-    void queryPlatformFeatures();
-
-    QString loadCachedPlatformFeatures(PlatformFeatures &features);
-    void collectPlatformFeatures();
+    void queryPlatformFeatures(const QString &sharedRepoUrl);
 
 signals:
     void platformFeaturesReceived(PlatformFeatures features);

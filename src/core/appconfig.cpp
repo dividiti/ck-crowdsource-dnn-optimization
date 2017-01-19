@@ -47,5 +47,10 @@ QString AppConfig::configFileName()
 
 QString AppConfig::platformFeaturesCacheFile()
 {
-    return qApp->applicationDirPath() + QDir::separator() + "platformFeaturesFile.json";
+    return qApp->applicationDirPath() + QDir::separator() + "platformFeatures.json";
+}
+
+QString AppConfig::scenariosCacheFile()
+{
+    return qApp->applicationDirPath() + QDir::separator() + "recognitionScenarios.json";
 }

@@ -10,6 +10,9 @@ QT_END_NAMESPACE
 namespace Utils
 {
 QString jsonObjectToString(const QJsonObject& obj);
+
+QByteArray loadTtextFromFile(const QString& path);
+void saveTextToFile(const QString& path, const QByteArray text);
 }
 
 #endif // UTILS_H

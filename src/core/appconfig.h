@@ -18,6 +18,7 @@ public:
     static QString email();
 
     static QString platformFeaturesCacheFile();
+    static QString scenariosCacheFile();
 
 private:
     static QString configFileName();

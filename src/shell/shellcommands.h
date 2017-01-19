@@ -15,7 +15,7 @@ class ShellCommands : public QObject
     Q_OBJECT
 
 public:
-    explicit ShellCommands(QObject *parent = 0);
+    explicit ShellCommands(QObject *parent = 0) : QObject(parent) {}
 
     bool process(const QApplication& app);
 
@@ -26,12 +26,10 @@ private:
 
 private slots:
     void sharedRepoInfoReceived(SharedRepoInfo info);
-    void recognitionScenariosReceived(RecognitionScenarios scenarios);
+    void scenariosReceived(RecognitionScenarios scenarios);
 
 private:
     QTextStream& cout();
-
-    bool loadCachedPlatformFeatures(PlatformFeatures &features);
 };
 
 #endif // SHELLCOMMANDS_H

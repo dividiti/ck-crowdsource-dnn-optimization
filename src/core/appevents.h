@@ -11,6 +11,7 @@ public:
     static AppEvents* instance();
 
     static void info(const QString& msg);
+    static void warning(const QString& msg);
     static void error(const QString& msg);
 
 signals:
@@ -22,3 +23,4 @@ private:
 };
 
 #endif // APPEVENTS_H
+
