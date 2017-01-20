@@ -41,7 +41,10 @@ SOURCES += \
     src/core/appevents.cpp \
     src/core/appmodels.cpp \
     src/core/platformfeaturesprovider.cpp \
-    src/core/scenariosprovider.cpp
+    src/core/scenariosprovider.cpp \
+    src/ori/OriWidgets.cpp \
+    src/ori/OriLabels.cpp \
+    src/core/experimentcontext.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -58,7 +61,10 @@ HEADERS += \
     src/core/appevents.h \
     src/core/appmodels.h \
     src/core/platformfeaturesprovider.h \
-    src/core/scenariosprovider.h
+    src/core/scenariosprovider.h \
+    src/ori/OriWidgets.h \
+    src/ori/OriLabels.h \
+    src/core/experimentcontext.h
 
 RESOURCES += \
     src/resources.qrc

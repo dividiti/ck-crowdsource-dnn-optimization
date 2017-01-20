@@ -4,11 +4,19 @@
 #include <QMainWindow>
 
 #include "appmodels.h"
+#include "experimentcontext.h"
 #include "remotedataaccess.h"
 #include "platformfeaturesprovider.h"
 #include "scenariosprovider.h"
 
 class ExperimentPanel;
+
+class Experiment
+{
+public:
+    ExperimentPanel* panel;
+    ExperimentContext context;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -19,13 +27,14 @@ public:
     ~MainWindow();
 
 private:
-    QList<ExperimentPanel*> _experimentPanels;
+    QList<Experiment*> _experiments;
     RemoteDataAccess _network;
     PlatformFeaturesProvider _platformFeaturesProvider;
     ScenariosProvider* _scenariosProvider;
 
+
     void initialize();
-    void loadIntoGui(const RecognitionScenarios& scenarios);
+    void updateExperimentConditions();
 
 private slots:
     void sharedRepoInfoReceived(SharedRepoInfo info);

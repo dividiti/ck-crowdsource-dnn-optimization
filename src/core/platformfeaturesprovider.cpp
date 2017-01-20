@@ -13,3 +13,21 @@ void PlatformFeaturesProvider::queryPlatformFeatures(const QString& sharedRepoUr
 
     emit platformFeaturesReceived(features);
 }
+
+PlatformFeatures PlatformFeaturesProvider::loadFromCache()
+{
+    PlatformFeatures features;
+    features.loadFromFile(AppConfig::platformFeaturesCacheFile());
+
+    if (!features.isEmpty())
+        _current = features;
+
+    return features;
+}
+
+void PlatformFeaturesProvider::setCurrent(const PlatformFeatures& features)
+{
+    _current = features;
+
+    features.saveToFile(AppConfig::platformFeaturesCacheFile());
+}

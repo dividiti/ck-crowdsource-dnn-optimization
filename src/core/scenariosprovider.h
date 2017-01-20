@@ -16,6 +16,11 @@ public:
 
     void queryScenarios(const QString &url, const PlatformFeatures& features);
 
+    RecognitionScenarios loadFromCache();
+
+    const RecognitionScenarios& currentList() const { return _current; }
+    void setCurrent(const RecognitionScenarios& scenarios);
+
 signals:
     void scenariosReceived(RecognitionScenarios scenarios);
 
@@ -24,6 +29,7 @@ private slots:
 
 private:
     RemoteDataAccess* _network;
+    RecognitionScenarios _current;
 };
 
 #endif // SCENARIOSPROVIDER_H

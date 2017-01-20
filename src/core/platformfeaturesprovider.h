@@ -12,10 +12,18 @@ class PlatformFeaturesProvider : public QObject
 public:
     explicit PlatformFeaturesProvider(QObject *parent = 0) : QObject(parent) {}
 
+    PlatformFeatures loadFromCache();
+
+    const PlatformFeatures& current() const { return _current; }
+    void setCurrent(const PlatformFeatures& features);
+
     void queryPlatformFeatures(const QString &sharedRepoUrl);
 
 signals:
     void platformFeaturesReceived(PlatformFeatures features);
+
+private:
+    PlatformFeatures _current;
 };
 
 #endif // PLATFORMFEATURESPROVIDER_H

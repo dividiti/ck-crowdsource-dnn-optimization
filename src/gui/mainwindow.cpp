@@ -2,6 +2,7 @@
 #include "appevents.h"
 #include "mainwindow.h"
 #include "experimentpanel.h"
+#include "utils.h"
 
 #include <QApplication>
 #include <QBoxLayout>
@@ -10,32 +11,39 @@
 #include <QMessageBox>
 #include <QStatusBar>
 
+#define EXPERIMENT_COUNT 2
+
 void setInitialWindowGeometry(QWidget* w)
 {
     auto desktop = QApplication::desktop()->availableGeometry(w);
     w->adjustSize();
     // take some more space on the screen then auto-sized
     w->resize(desktop.width()*0.75, w->height()*1.1);
-    // position at desktop center
-    w->move(desktop.center() - w->rect().center());
 }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setWindowIcon(QIcon(":/icon/main"));
 
-    _experimentPanels.append(new ExperimentPanel(this));
-    _experimentPanels.append(new ExperimentPanel(this));
-
-    auto content = new QWidget;
-    content->setLayout(new QVBoxLayout);
-    for (auto panel: _experimentPanels)
-        content->layout()->addWidget(panel);
-
-    setCentralWidget(content);
-    setInitialWindowGeometry(this);
+    auto experimentsWidget = new QWidget;
+    experimentsWidget->setLayout(new QVBoxLayout);
 
     _scenariosProvider = new ScenariosProvider(&_network, this);
+
+    for (int i = 0; i < EXPERIMENT_COUNT; i++)
+    {
+        auto e = new Experiment;
+        e->context.platformFeaturesProvider = &_platformFeaturesProvider;
+        e->context.scenariosProvider = _scenariosProvider;
+        e->panel = new ExperimentPanel(&e->context);
+        _experiments.append(e);
+
+        experimentsWidget->layout()->addWidget(e->panel);
+    }
+
+    setCentralWidget(experimentsWidget);
+    setInitialWindowGeometry(this);
+    Utils::moveToDesktopCenter(this);
 
     connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
     connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
@@ -50,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
+    for (auto e: _experiments) delete e;
 }
 
 void MainWindow::initialize()
@@ -61,15 +70,15 @@ void MainWindow::initialize()
     if (repo.isEmpty())
         return _network.querySharedRepoInfo(AppConfig::sharedResourcesUrl());
 
-    PlatformFeatures features;
-    features.loadFromFile(AppConfig::platformFeaturesCacheFile());
+    auto features = _platformFeaturesProvider.loadFromCache();
     if (features.isEmpty())
         return _platformFeaturesProvider.queryPlatformFeatures(AppConfig::sharedRepoUrl());
 
-    RecognitionScenarios scenarios;
-    scenarios.loadFromFile(AppConfig::scenariosCacheFile());
+    auto scenarios = _scenariosProvider->loadFromCache();
     if (scenarios.isEmpty())
         return _scenariosProvider->queryScenarios(AppConfig::sharedRepoUrl(), features);
+
+    updateExperimentConditions();
 }
 
 void MainWindow::sharedRepoInfoReceived(SharedRepoInfo info)
@@ -83,17 +92,15 @@ void MainWindow::sharedRepoInfoReceived(SharedRepoInfo info)
 void MainWindow::platformFeaturesReceived(PlatformFeatures features)
 {
     qDebug() << "platformFeaturesAqcuired";
-    features.saveToFile(AppConfig::platformFeaturesCacheFile());
-
+    _platformFeaturesProvider.setCurrent(features);
     _scenariosProvider->queryScenarios(AppConfig::sharedRepoUrl(), features);
 }
 
 void MainWindow::scenariosReceived(RecognitionScenarios scenarios)
 {
     qDebug() << "recognitionScenariosAqcuired";
-    scenarios.saveToFile(AppConfig::scenariosCacheFile());
-
-    loadIntoGui(scenarios);
+    _scenariosProvider->setCurrent(scenarios);
+    updateExperimentConditions();
 }
 
 void MainWindow::onError(const QString& msg)
@@ -107,7 +114,8 @@ void MainWindow::onInfo(const QString& msg)
     statusBar()->showMessage(msg);
 }
 
-void MainWindow::loadIntoGui(const RecognitionScenarios& scenarios)
+void MainWindow::updateExperimentConditions()
 {
-    // TODO
+    for (auto e: _experiments)
+       e->panel->updateExperimentConditions();
 }

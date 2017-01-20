@@ -3,15 +3,20 @@
 
 #include <QFrame>
 
+class ExperimentContext;
+class FeaturesPanel;
+
 class ExperimentPanel : public QFrame
 {
     Q_OBJECT
+
 public:
-    explicit ExperimentPanel(QWidget *parent = 0);
+    explicit ExperimentPanel(ExperimentContext* context, QWidget *parent = 0);
 
-signals:
+    void updateExperimentConditions();
 
-public slots:
+private:
+    FeaturesPanel* _featuresPanel;
 };
 
 #endif // EXPERIMENTPANEL_H

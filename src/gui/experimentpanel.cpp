@@ -1,3 +1,4 @@
+#include "experimentcontext.h"
 #include "experimentpanel.h"
 #include "framespanel.h"
 #include "featurespanel.h"
@@ -5,12 +6,19 @@
 
 #include <QBoxLayout>
 
-ExperimentPanel::ExperimentPanel(QWidget *parent) : QFrame(parent)
+ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
-    setFrameShape(QFrame::StyledPanel);
-    setLayout(new QHBoxLayout);
+    auto layout = new QHBoxLayout;
+    layout->setSpacing(12);
+    layout->addWidget(new FramesPanel);
+    layout->addWidget(_featuresPanel = new FeaturesPanel(context));
+    layout->addWidget(new ResultsPanel);
 
-    layout()->addWidget(new FramesPanel);
-    layout()->addWidget(new FeaturesPanel);
-    layout()->addWidget(new ResultsPanel);
+    setFrameShape(QFrame::StyledPanel);
+    setLayout(layout);
+}
+
+void ExperimentPanel::updateExperimentConditions()
+{
+    _featuresPanel->updateExperimentConditions();
 }

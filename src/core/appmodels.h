@@ -38,10 +38,13 @@ public:
     QString str() const;
 
     void loadFromFile(const QString& path);
-    void saveToFile(const QString& path);
+    void saveToFile(const QString& path) const;
+
+    QString osName() const { return _osName; }
 
 private:
     QJsonObject _json;
+    QString _osName;
 };
 
 //-----------------------------------------------------------------------------
@@ -51,6 +54,9 @@ class RecognitionScenario
 public:
     bool parseJson(const QJsonObject& json);
     const QJsonObject& json() const { return _json; }
+
+    bool isEmpty() const { return _json.isEmpty(); }
+    QString str() const;
 
     long fileSizeBytes() const { return _fileSizeBytes; }
     QString fileSizeMB() const { return _fileSizeMB; }
@@ -73,7 +79,7 @@ public:
     void parseJson(const QByteArray& text);
 
     void loadFromFile(const QString& path);
-    void saveToFile(const QString& path);
+    void saveToFile(const QString& path) const;
 
 private:
     QList<RecognitionScenario> _items;

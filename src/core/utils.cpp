@@ -2,9 +2,12 @@
 #include "utils.h"
 
 #include <QApplication>
-#include <QJsonObject>
-#include <QStringList>
+#include <QDesktopWidget>
 #include <QFile>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QStringList>
+#include <QTextBrowser>
 
 namespace Utils
 {
@@ -103,6 +106,32 @@ QString bytesIntoHumanReadable(long bytes)
         return qApp->tr("%1 TB").arg(qRound(bytes / terabyte));
 
     return qApp->tr("%1 Bytes").arg(bytes);
+}
+
+void moveToDesktopCenter(QWidget* w)
+{
+    auto desktop = QApplication::desktop()->availableGeometry(w);
+    w->move(desktop.center() - w->rect().center());
+}
+
+void showTextInfoWindow(const QString& text, int w, int h)
+{
+    // TODO: rememeber all opened windows and close them when main window is closed
+    auto window = new QTextBrowser;
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->setPlainText(text);
+    auto f = window->font();
+    f.setPointSize(11);
+    window->setFont(f);
+    if (w > 0 && h > 0)
+        window->resize(w, h);
+    window->show();
+    moveToDesktopCenter(window);
+}
+
+void infoDlg(const QString& text)
+{
+    QMessageBox::information(qApp->activeWindow(), qApp->activeWindow()->windowTitle(), text);
 }
 
 } // namespace Utils

@@ -13,6 +13,7 @@ InfoLabel::InfoLabel(QWidget *parent) : QWidget(parent)
     _info = new QLabel;
 
     setLayout(new QVBoxLayout);
+    layout()->setMargin(0);
     layout()->addWidget(_title);
     layout()->addWidget(_info);
 }

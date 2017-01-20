@@ -5,6 +5,7 @@
 
 QT_BEGIN_NAMESPACE
 class QJsonObject;
+class QWidget;
 QT_END_NAMESPACE
 
 namespace Utils
@@ -15,6 +16,11 @@ QByteArray loadTtextFromFile(const QString& path);
 void saveTextToFile(const QString& path, const QByteArray text);
 
 QString bytesIntoHumanReadable(long bytes);
+
+void moveToDesktopCenter(QWidget* w);
+void showTextInfoWindow(const QString& text, int w = 0, int h = 0);
+
+void infoDlg(const QString& text);
 }
 
 #endif // UTILS_H

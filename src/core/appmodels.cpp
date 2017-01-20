@@ -60,6 +60,9 @@ void PlatformFeatures::parseJson(const QByteArray& text)
         return AppEvents::error(qApp->tr("Unable to parse platform features json data: %1").arg(error.errorString()));
 
     _json = doc.object();
+
+    auto os = _json["os"].toObject();
+    _osName = os["name"].toString();
 }
 
 void PlatformFeatures::loadFromFile(const QString& path)
@@ -69,7 +72,7 @@ void PlatformFeatures::loadFromFile(const QString& path)
         parseJson(text);
 }
 
-void PlatformFeatures::saveToFile(const QString& path)
+void PlatformFeatures::saveToFile(const QString& path) const
 {
     Utils::saveTextToFile(path, QJsonDocument(_json).toJson());
 }
@@ -93,6 +96,11 @@ bool RecognitionScenario::parseJson(const QJsonObject& json)
     _title = meta["title"].toString();
 
     return true;
+}
+
+QString RecognitionScenario::str() const
+{
+    return Utils::jsonObjectToString(_json);
 }
 
 //-----------------------------------------------------------------------------
@@ -129,7 +137,7 @@ void RecognitionScenarios::loadFromFile(const QString& path)
         parseJson(text);
 }
 
-void RecognitionScenarios::saveToFile(const QString& path)
+void RecognitionScenarios::saveToFile(const QString& path) const
 {
     QJsonArray array;
     for (const RecognitionScenario& item: _items)
@@ -148,7 +156,7 @@ QString RecognitionScenarios::str() const
     for (const RecognitionScenario& item: _items)
     {
         report << "-----------------------------";
-        report << Utils::jsonObjectToString(item.json());
+        report << item.str();
     }
     return report.join("\n");
 }

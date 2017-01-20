@@ -2,6 +2,9 @@
     <qresource prefix="/icon">
         <file alias="main">../images/icon.png</file>
     </qresource>
+    <qresource prefix="/tools">
+        <file alias="info">../images/info.svg</file>
+    </qresource>
     <qresource prefix="/sample">
         <file alias="1">../images/sample1.jpg</file>
         <file alias="2">../images/sample2.jpg</file>
