@@ -4,6 +4,7 @@
 #include <QString>
 
 QT_BEGIN_NAMESPACE
+class QFile;
 class QJsonObject;
 class QWidget;
 QT_END_NAMESPACE
@@ -14,6 +15,7 @@ QString jsonObjectToString(const QJsonObject& obj);
 
 QByteArray loadTtextFromFile(const QString& path);
 void saveTextToFile(const QString& path, const QByteArray text);
+QString calcFileMD5(QFile* file);
 
 QString bytesIntoHumanReadable(long bytes);
 

@@ -5,6 +5,8 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QDebug>
+#include <QDir>
 #include <QJsonDocument>
 #include <QJsonArray>
 
@@ -83,6 +85,43 @@ QString PlatformFeatures::str() const
 }
 
 //-----------------------------------------------------------------------------
+
+bool RecognitionScenarioFileItem::parseJson(const QJsonObject& json)
+{
+    _name = json["filename"].toString();
+    _path = json["path"].toString();
+    _md5 = json["md5"].toString();
+    _url = json["url"].toString();
+    return true;
+}
+
+QString RecognitionScenarioFileItem::fullPath() const
+{
+    return AppConfig::scenariosDataDir() + _path + QDir::separator() + _name;
+}
+
+bool RecognitionScenarioFileItem::isLoaded() const
+{
+    QFile f(fullPath());
+    qDebug() << "Check MD5 for" << f.fileName() << _md5;
+    if (!f.exists())
+    {
+        qDebug() << "File not found";
+        return false;
+    }
+    auto md5 = Utils::calcFileMD5(&f);
+    qDebug() << md5;
+    if (md5.compare(_md5, Qt::CaseInsensitive) != 0)
+    {
+        qDebug() << "FAIL";
+        return false;
+    }
+    qDebug() << "OK";
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
 bool RecognitionScenario::parseJson(const QJsonObject& json)
 {
     _json = json;
@@ -95,12 +134,28 @@ bool RecognitionScenario::parseJson(const QJsonObject& json)
     auto meta = json["meta"].toObject();
     _title = meta["title"].toString();
 
+    QJsonArray files = meta["files"].toArray();
+    for (auto file = files.constBegin(); file != files.constEnd(); file++)
+    {
+        RecognitionScenarioFileItem fileItem;
+        if (fileItem.parseJson((*file).toObject()))
+            _files.append(fileItem);
+    }
+
     return true;
 }
 
 QString RecognitionScenario::str() const
 {
     return Utils::jsonObjectToString(_json);
+}
+
+bool RecognitionScenario::allFilesAreLoaded() const
+{
+    for (const RecognitionScenarioFileItem& file: _files)
+        if (!file.isLoaded())
+            return false;
+    return true;
 }
 
 //-----------------------------------------------------------------------------

@@ -3,16 +3,19 @@
 #include "utils.h"
 #include "../ori/OriWidgets.h"
 
-#include <QLabel>
 #include <QBoxLayout>
+#include <QDebug>
+#include <QFrame>
+#include <QLabel>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QToolBar>
 #include <QToolButton>
 
-#define _B(text, icon, slot) Ori::Gui::iconToolButton(text, icon, 24, this, SLOT(slot()))
-
 ScenarioItemWidget::ScenarioItemWidget(const RecognitionScenario* scenario, QWidget *parent) : QWidget(parent)
 {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
     _scenario = scenario;
 
     auto labelTitle = new QLabel(scenario->title());
@@ -23,33 +26,33 @@ ScenarioItemWidget::ScenarioItemWidget(const RecognitionScenario* scenario, QWid
 
     auto labelSize = new QLabel(scenario->fileSizeMB());
 
+    auto actionDeleteFiles = Ori::Gui::action(tr("Delete scenario files"), this, SLOT(deleteScenarioFiles()), ":/tools/delete");
+    auto actionDloadFiles = Ori::Gui::action(tr("Download scenario files"), this, SLOT(downloadsScenarioFiles()), ":/tools/download");
+    auto actionShowInfo = Ori::Gui::action(tr("Show scenario info"), this, SLOT(showScenarioInfo()), ":/tools/info");
+
     setLayout(Ori::Gui::layoutH(
     {
-        Ori::Gui::toolbar(
-        {
-            _B(tr("Use this scenario"), ":/tools/ok_dimmed", useThisScenario),
-            _B(tr("It is active scenario"), ":/tools/ok", showCurrentScenario),
-        }),
+        new QRadioButton,
+        Ori::Gui::spacing(16),
         Ori::Gui::layoutV({ labelTitle, labelSize }),
         0,
         Ori::Gui::spacing(64),
-        Ori::Gui::toolbar(
-        {
-            _B(tr("Delete scenario files"), ":/tools/delete", deleteScenarioFiles),
-            _B(tr("Download scenario files"), ":/tools/download", downloadsScenarioFiles),
-            _B(tr("Show scenario info"), ":/tools/info", showScenarioInfo),
-        })
+        Ori::Gui::toolbar({ actionDeleteFiles, actionDloadFiles, actionShowInfo })
     }));
+
+    bool filesLoaded = scenario->allFilesAreLoaded();
+    actionDeleteFiles->setVisible(filesLoaded);
+    actionDloadFiles->setVisible(!filesLoaded);
 }
 
 void ScenarioItemWidget::deleteScenarioFiles()
 {
-    Utils::infoDlg("deleteScenarioFiles");
+    Utils::infoDlg("TODO deleteScenarioFiles");
 }
 
 void ScenarioItemWidget::downloadsScenarioFiles()
 {
-    Utils::infoDlg("downloadsScenarioFiles");
+    Utils::infoDlg("TODO downloadsScenarioFiles");
 }
 
 void ScenarioItemWidget::showScenarioInfo()
@@ -59,12 +62,12 @@ void ScenarioItemWidget::showScenarioInfo()
 
 void ScenarioItemWidget::useThisScenario()
 {
-    Utils::infoDlg("useThisScenario");
+    Utils::infoDlg("TODO useThisScenario");
 }
 
 void ScenarioItemWidget::showCurrentScenario()
 {
-    Utils::infoDlg("showCurrentScenario");
+    Utils::infoDlg("TODO showCurrentScenario");
 }
 
 
@@ -73,7 +76,13 @@ ScenariosListWidget::ScenariosListWidget(const RecognitionScenarios& scenarios, 
 {
     auto layout = new QVBoxLayout;
     for (const RecognitionScenario& scenario: scenarios.items())
+    {
         layout->addWidget(new ScenarioItemWidget(&scenario));
+
+        auto divider = new QFrame;
+        divider->setFrameShape(QFrame::HLine);
+        layout->addWidget(divider);
+    }
 
     auto content = new QWidget;
     content->setLayout(layout);

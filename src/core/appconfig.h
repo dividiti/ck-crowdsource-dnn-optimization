@@ -19,6 +19,7 @@ public:
 
     static QString platformFeaturesCacheFile();
     static QString scenariosCacheFile();
+    static QString scenariosDataDir();
 
 private:
     static QString configFileName();

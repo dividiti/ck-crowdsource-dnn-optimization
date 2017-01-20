@@ -8,6 +8,7 @@
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QDir>
 #include <QMessageBox>
 #include <QStatusBar>
 

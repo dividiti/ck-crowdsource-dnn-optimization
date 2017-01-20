@@ -2,7 +2,11 @@
 #include "appevents.h"
 #include "remotedataaccess.h"
 #include "scenariosprovider.h"
+#include "utils.h"
 
+#include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkReply>
@@ -55,3 +59,4 @@ void ScenariosProvider::setCurrent(const RecognitionScenarios& scenarios)
 
     scenarios.saveToFile(AppConfig::scenariosCacheFile());
 }
+

@@ -49,6 +49,26 @@ private:
 
 //-----------------------------------------------------------------------------
 
+class RecognitionScenarioFileItem
+{
+public:
+    bool parseJson(const QJsonObject& json);
+
+    QString path() const { return _path; }
+    QString name() const { return _name; }
+    QString md5() const { return _md5; }
+    QString url() const { return _url; }
+
+    QString fullPath() const;
+
+    bool isLoaded() const;
+
+private:
+    QString _path, _name, _md5, _url;
+};
+
+//-----------------------------------------------------------------------------
+
 class RecognitionScenario
 {
 public:
@@ -62,9 +82,13 @@ public:
     QString fileSizeMB() const { return _fileSizeMB; }
     QString title() const { return _title; }
 
+    const QList<RecognitionScenarioFileItem> files() const { return _files; }
+    bool allFilesAreLoaded() const;
+
 private:
     long _fileSizeBytes = 0;
     QString _fileSizeMB, _title;
+    QList<RecognitionScenarioFileItem> _files;
     QJsonObject _json;
 };
 

@@ -13,6 +13,9 @@ class ScenarioItemWidget : public QWidget
 public:
     explicit ScenarioItemWidget(const RecognitionScenario *scenario, QWidget *parent = 0);
 
+signals:
+    void checked();
+
 private slots:
     void deleteScenarioFiles();
     void downloadsScenarioFiles();

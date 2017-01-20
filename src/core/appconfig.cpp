@@ -54,3 +54,8 @@ QString AppConfig::scenariosCacheFile()
 {
     return qApp->applicationDirPath() + QDir::separator() + "recognitionScenarios.json";
 }
+
+QString AppConfig::scenariosDataDir()
+{
+    return qApp->applicationDirPath() + QDir::separator();
+}

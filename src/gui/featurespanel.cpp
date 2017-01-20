@@ -134,6 +134,7 @@ void FeaturesPanel::selectScenario()
 
     auto w = new ScenariosListWidget(scenarios);
     Utils::moveToDesktopCenter(w);
+    w->resize(500, 500);
     w->show();
 }
 
