@@ -40,7 +40,8 @@ SOURCES += \
     src/core/utils.cpp \
     src/core/appevents.cpp \
     src/core/appmodels.cpp \
-    src/core/platformfeaturesprovider.cpp
+    src/core/platformfeaturesprovider.cpp \
+    src/core/scenariosprovider.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -56,7 +57,8 @@ HEADERS += \
     src/core/utils.h \
     src/core/appevents.h \
     src/core/appmodels.h \
-    src/core/platformfeaturesprovider.h
+    src/core/platformfeaturesprovider.h \
+    src/core/scenariosprovider.h
 
 RESOURCES += \
     src/resources.qrc

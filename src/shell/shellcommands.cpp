@@ -1,6 +1,7 @@
 #include "appconfig.h"
 #include "platformfeaturesprovider.h"
 #include "remotedataaccess.h"
+#include "scenariosprovider.h"
 #include "shellcommands.h"
 
 #include <QApplication>
@@ -83,9 +84,10 @@ void ShellCommands::command_loadScenariosForCachedFeatures()
 
     QEventLoop waiter;
     RemoteDataAccess network;
-    connect(&network, &RemoteDataAccess::scenariosReceived, this, &ShellCommands::scenariosReceived);
+    ScenariosProvider provider(&network);
+    connect(&provider, &ScenariosProvider::scenariosReceived, this, &ShellCommands::scenariosReceived);
     connect(&network, &RemoteDataAccess::requestFinished, &waiter, &QEventLoop::quit);
-    network.queryScenarios(AppConfig::sharedRepoUrl(), features);
+    provider.queryScenarios(AppConfig::sharedRepoUrl(), features);
     waiter.exec();
 }
 

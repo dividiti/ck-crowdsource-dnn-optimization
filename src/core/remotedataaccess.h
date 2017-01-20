@@ -18,16 +18,15 @@ public:
     explicit RemoteDataAccess(QObject *parent = 0);
 
     void querySharedRepoInfo(const QString& url);
-    void queryScenarios(const QString &url, const PlatformFeatures& features);
+
+    QNetworkReply* post(const QString& url, const QByteArray& data);
 
 signals:
     void requestFinished();
     void sharedRepoInfoReceived(SharedRepoInfo info);
-    void scenariosReceived(RecognitionScenarios scenarios);
 
 private slots:
     void querySharedRepoInfo_finished();
-    void queryRecognitionScenarios_finished();
     void queryAny_finished(QNetworkReply *reply);
 
 private:

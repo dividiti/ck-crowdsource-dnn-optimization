@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QFile>
 #include <QJsonDocument>
+#include <QJsonArray>
 
 #define KEY_SCENARIOS "scenarios"
 #define KEY_RETURN "return"
@@ -58,7 +59,7 @@ void PlatformFeatures::parseJson(const QByteArray& text)
     if (doc.isNull())
         return AppEvents::error(qApp->tr("Unable to parse platform features json data: %1").arg(error.errorString()));
 
-    json = doc.object();
+    _json = doc.object();
 }
 
 void PlatformFeatures::loadFromFile(const QString& path)
@@ -70,12 +71,28 @@ void PlatformFeatures::loadFromFile(const QString& path)
 
 void PlatformFeatures::saveToFile(const QString& path)
 {
-    Utils::saveTextToFile(path, QJsonDocument(json).toJson());
+    Utils::saveTextToFile(path, QJsonDocument(_json).toJson());
 }
 
 QString PlatformFeatures::str() const
 {
-    return Utils::jsonObjectToString(json);
+    return Utils::jsonObjectToString(_json);
+}
+
+//-----------------------------------------------------------------------------
+bool RecognitionScenario::parseJson(const QJsonObject& json)
+{
+    _json = json;
+
+    // TODO: default value will be used if some key not found, should we check if key exists?
+
+    _fileSizeBytes = long(json["total_file_size"].toDouble());
+    _fileSizeMB = Utils::bytesIntoHumanReadable(_fileSizeBytes);
+
+    auto meta = json["meta"].toObject();
+    _title = meta["title"].toString();
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -98,7 +115,11 @@ void RecognitionScenarios::parseJson(const QByteArray& text)
 
     auto array = jsonRoot[KEY_SCENARIOS].toArray();
     for (auto item = array.constBegin(); item != array.constEnd(); item++)
-        jsons << (*item).toObject();
+    {
+        RecognitionScenario scenario;
+        if (scenario.parseJson((*item).toObject()))
+            _items << scenario;
+    }
 }
 
 void RecognitionScenarios::loadFromFile(const QString& path)
@@ -111,8 +132,8 @@ void RecognitionScenarios::loadFromFile(const QString& path)
 void RecognitionScenarios::saveToFile(const QString& path)
 {
     QJsonArray array;
-    for (auto item: jsons)
-        array.append(item);
+    for (const RecognitionScenario& item: _items)
+        array.append(item.json());
 
     QJsonObject json;
     json[KEY_SCENARIOS] = array;
@@ -123,11 +144,11 @@ void RecognitionScenarios::saveToFile(const QString& path)
 QString RecognitionScenarios::str() const
 {
     QStringList report;
-    report << "Count: " << QString::number(jsons.size());
-    for (auto json: jsons)
+    report << QString("Count: %1").arg(_items.size());
+    for (const RecognitionScenario& item: _items)
     {
         report << "-----------------------------";
-        report << Utils::jsonObjectToString(json);
+        report << Utils::jsonObjectToString(item.json());
     }
     return report.join("\n");
 }

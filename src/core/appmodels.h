@@ -3,7 +3,6 @@
 
 #include <QString>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QList>
 
 class SharedRepoInfo
@@ -32,21 +31,35 @@ private:
 class PlatformFeatures
 {
 public:
-    QJsonObject json;
-
-    bool isEmpty() const { return json.isEmpty(); }
-    QString str() const;
-
     void parseJson(const QByteArray& text);
+    const QJsonObject& json() const { return _json; }
+
+    bool isEmpty() const { return _json.isEmpty(); }
+    QString str() const;
 
     void loadFromFile(const QString& path);
     void saveToFile(const QString& path);
+
+private:
+    QJsonObject _json;
 };
 
 //-----------------------------------------------------------------------------
 
 class RecognitionScenario
 {
+public:
+    bool parseJson(const QJsonObject& json);
+    const QJsonObject& json() const { return _json; }
+
+    long fileSizeBytes() const { return _fileSizeBytes; }
+    QString fileSizeMB() const { return _fileSizeMB; }
+    QString title() const { return _title; }
+
+private:
+    long _fileSizeBytes = 0;
+    QString _fileSizeMB, _title;
+    QJsonObject _json;
 };
 
 //-----------------------------------------------------------------------------
@@ -54,15 +67,16 @@ class RecognitionScenario
 class RecognitionScenarios
 {
 public:
-    QList<QJsonObject> jsons;
-
-    bool isEmpty() const { return jsons.isEmpty(); }
+    bool isEmpty() const { return _items.isEmpty(); }
     QString str() const;
 
     void parseJson(const QByteArray& text);
 
     void loadFromFile(const QString& path);
     void saveToFile(const QString& path);
+
+private:
+    QList<RecognitionScenario> _items;
 };
 
 

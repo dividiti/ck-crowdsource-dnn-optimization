@@ -35,11 +35,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setCentralWidget(content);
     setInitialWindowGeometry(this);
 
+    _scenariosProvider = new ScenariosProvider(&_network, this);
+
     connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
     connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
     connect(&_network, &RemoteDataAccess::sharedRepoInfoReceived, this, &MainWindow::sharedRepoInfoReceived);
-    connect(&_network, &RemoteDataAccess::scenariosReceived, this, &MainWindow::scenariosReceived);
+    connect(_scenariosProvider, &ScenariosProvider::scenariosReceived, this, &MainWindow::scenariosReceived);
     connect(&_platformFeaturesProvider, &PlatformFeaturesProvider::platformFeaturesReceived, this, &MainWindow::platformFeaturesReceived);
     connect(&_network, &RemoteDataAccess::requestFinished, statusBar(), &QStatusBar::clearMessage);
 
@@ -54,23 +56,6 @@ void MainWindow::initialize()
 {
     qDebug() << "initialize";
 
-/*    RecognitionScenarios scenarios;
-    scenarios.loadFromFile(AppConfig::scenariosCacheFile());
-    if (!scenarios.isEmpty())
-        return scenariosReceived(scenarios);
-
-    PlatformFeatures features;
-    features.loadFromFile(AppConfig::platformFeaturesCacheFile());
-    if (!features.isEmpty())
-        return platformFeaturesReceived(features);
-
-    SharedRepoInfo repo;
-    repo.loadFromConfig();
-    if (!repo.isEmpty())
-        return sharedRepoInfoReceived(repo);
-
-    _network.querySharedRepoInfo(AppConfig::sharedResourcesUrl());*/
-
     SharedRepoInfo repo;
     repo.loadFromConfig();
     if (repo.isEmpty())
@@ -84,7 +69,7 @@ void MainWindow::initialize()
     RecognitionScenarios scenarios;
     scenarios.loadFromFile(AppConfig::scenariosCacheFile());
     if (scenarios.isEmpty())
-        return _network.queryScenarios(AppConfig::sharedRepoUrl(), features);
+        return _scenariosProvider->queryScenarios(AppConfig::sharedRepoUrl(), features);
 }
 
 void MainWindow::sharedRepoInfoReceived(SharedRepoInfo info)
@@ -100,7 +85,7 @@ void MainWindow::platformFeaturesReceived(PlatformFeatures features)
     qDebug() << "platformFeaturesAqcuired";
     features.saveToFile(AppConfig::platformFeaturesCacheFile());
 
-    _network.queryScenarios(AppConfig::sharedRepoUrl(), features);
+    _scenariosProvider->queryScenarios(AppConfig::sharedRepoUrl(), features);
 }
 
 void MainWindow::scenariosReceived(RecognitionScenarios scenarios)

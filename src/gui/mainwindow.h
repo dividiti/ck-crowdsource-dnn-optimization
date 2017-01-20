@@ -6,6 +6,7 @@
 #include "appmodels.h"
 #include "remotedataaccess.h"
 #include "platformfeaturesprovider.h"
+#include "scenariosprovider.h"
 
 class ExperimentPanel;
 
@@ -21,6 +22,7 @@ private:
     QList<ExperimentPanel*> _experimentPanels;
     RemoteDataAccess _network;
     PlatformFeaturesProvider _platformFeaturesProvider;
+    ScenariosProvider* _scenariosProvider;
 
     void initialize();
     void loadIntoGui(const RecognitionScenarios& scenarios);

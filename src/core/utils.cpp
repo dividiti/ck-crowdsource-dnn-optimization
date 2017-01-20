@@ -80,4 +80,29 @@ void saveTextToFile(const QString& path, const QByteArray text)
         return AppEvents::error(qApp->tr("Fail writing into file %1: %2").arg(path).arg(file.errorString()));
 }
 
+QString bytesIntoHumanReadable(long bytes)
+{
+    const double kilobyte = 1000;
+    const double megabyte = kilobyte * 1000;
+    const double gigabyte = megabyte * 1000;
+    const double terabyte = gigabyte * 1000;
+
+    if ((bytes >= 0) && (bytes < kilobyte))
+        return qApp->tr("%1 B").arg(bytes);
+
+    if ((bytes >= kilobyte) && (bytes < megabyte))
+        return qApp->tr("%1 KB").arg(qRound(bytes / kilobyte));
+
+    if ((bytes >= megabyte) && (bytes < gigabyte))
+        return qApp->tr("%1 MB").arg(qRound(bytes / megabyte));
+
+    if ((bytes >= gigabyte) && (bytes < terabyte))
+        return qApp->tr("%1 GB").arg(qRound(bytes / gigabyte));
+
+    if (bytes >= terabyte)
+        return qApp->tr("%1 TB").arg(qRound(bytes / terabyte));
+
+    return qApp->tr("%1 Bytes").arg(bytes);
+}
+
 } // namespace Utils
