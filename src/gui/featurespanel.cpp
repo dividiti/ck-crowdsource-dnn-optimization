@@ -3,6 +3,7 @@
 #include "featurespanel.h"
 #include "infolabel.h"
 #include "platformfeaturesprovider.h"
+#include "scenarioslistwidget.h"
 #include "scenariosprovider.h"
 #include "utils.h"
 #include "../ori/OriWidgets.h"
@@ -89,7 +90,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
             Ori::Gui::layoutH(
             {
                 makeToolIcon(tr("Scenario info"), ":/tools/info", SLOT(showScenarioInfo())),
-                makeToolIcon(tr("Select scenario"), ":/tools/info", SLOT(selectScenario())),
+                makeToolIcon(tr("Select scenario"), ":/tools/ok", SLOT(selectScenario())),
                 0
             })
         }),
@@ -130,6 +131,10 @@ void FeaturesPanel::selectScenario()
     const RecognitionScenarios& scenarios = _context->scenariosProvider->currentList();
     if (scenarios.isEmpty())
         return Utils::infoDlg(tr("Recognition scenarios is not loaded yet"));
+
+    auto w = new ScenariosListWidget(scenarios);
+    Utils::moveToDesktopCenter(w);
+    w->show();
 }
 
 void FeaturesPanel::updateExperimentConditions()

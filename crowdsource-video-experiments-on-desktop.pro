@@ -44,7 +44,8 @@ SOURCES += \
     src/core/scenariosprovider.cpp \
     src/ori/OriWidgets.cpp \
     src/ori/OriLabels.cpp \
-    src/core/experimentcontext.cpp
+    src/core/experimentcontext.cpp \
+    src/gui/scenarioslistwidget.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -64,7 +65,8 @@ HEADERS += \
     src/core/scenariosprovider.h \
     src/ori/OriWidgets.h \
     src/ori/OriLabels.h \
-    src/core/experimentcontext.h
+    src/core/experimentcontext.h \
+    src/gui/scenarioslistwidget.h
 
 RESOURCES += \
     src/resources.qrc

@@ -73,6 +73,8 @@ private:
 class RecognitionScenarios
 {
 public:
+    const QList<RecognitionScenario>& items() const { return _items; }
+
     bool isEmpty() const { return _items.isEmpty(); }
     QString str() const;
 
