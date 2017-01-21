@@ -5,56 +5,11 @@
 #include <QCryptographicHash>
 #include <QDesktopWidget>
 #include <QFile>
-#include <QJsonObject>
 #include <QMessageBox>
-#include <QStringList>
 #include <QTextBrowser>
 
 namespace Utils
 {
-
-QString jsonValueToString(const QJsonValue& value)
-{
-    if (value.isBool())
-        return value.toBool()? "true": "false";
-    if (value.isDouble())
-        return QString::number(value.toDouble());
-    if (value.isString())
-        return value.toString();
-    if (value.isNull())
-        return "(null)";
-    if (value.isUndefined())
-        return "(undefined)";
-    if (value.isArray())
-        return "(array)";
-    return QString();
-}
-
-void jsonObjectToList(const QJsonObject& obj, QStringList& report, int level)
-{
-    QString intend;
-    intend.fill(' ', level*4);
-
-    for (auto item = obj.constBegin(); item != obj.constEnd(); item++)
-    {
-        auto key = item.key();
-        auto value = item.value();
-        if (value.isObject())
-        {
-            report << QString("%1%2: ").arg(intend, key);
-            jsonObjectToList(value.toObject(), report, level+1);
-        }
-        else
-            report << QString("%1%2: %3").arg(intend, key, jsonValueToString(value));
-    }
-}
-
-QString jsonObjectToString(const QJsonObject& obj)
-{
-    QStringList report;
-    jsonObjectToList(obj, report, 0);
-    return report.join("\n");
-}
 
 QByteArray loadTtextFromFile(const QString& path)
 {
@@ -127,19 +82,22 @@ void moveToDesktopCenter(QWidget* w)
     w->move(desktop.center() - w->rect().center());
 }
 
-void showTextInfoWindow(const QString& text, int w, int h)
+void showTextInfoWindow(const QString& text, bool html, int w, int h)
 {
     // TODO: rememeber all opened windows and close them when main window is closed
     auto window = new QTextBrowser;
     window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setPlainText(text);
+    if (html)
+        window->setHtml(text);
+    else
+        window->setPlainText(text);
     auto f = window->font();
     f.setPointSize(11);
     window->setFont(f);
     if (w > 0 && h > 0)
         window->resize(w, h);
-    window->show();
     moveToDesktopCenter(window);
+    window->show();
 }
 
 void infoDlg(const QString& text)

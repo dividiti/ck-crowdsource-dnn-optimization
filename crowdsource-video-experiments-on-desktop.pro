@@ -45,7 +45,8 @@ SOURCES += \
     src/ori/OriWidgets.cpp \
     src/ori/OriLabels.cpp \
     src/core/experimentcontext.cpp \
-    src/gui/scenarioslistwidget.cpp
+    src/gui/scenarioslistwidget.cpp \
+    src/core/jsonformat.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -66,7 +67,8 @@ HEADERS += \
     src/ori/OriWidgets.h \
     src/ori/OriLabels.h \
     src/core/experimentcontext.h \
-    src/gui/scenarioslistwidget.h
+    src/gui/scenarioslistwidget.h \
+    src/core/jsonformat.h
 
 RESOURCES += \
     src/resources.qrc

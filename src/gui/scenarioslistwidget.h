@@ -1,10 +1,14 @@
 #ifndef SCENARIOSWIDGET_H
 #define SCENARIOSWIDGET_H
 
-#include <QScrollArea>
+#include <QWidget>
 
 class RecognitionScenario;
 class RecognitionScenarios;
+
+QT_BEGIN_NAMESPACE
+class QRadioButton;
+QT_END_NAMESPACE
 
 class ScenarioItemWidget : public QWidget
 {
@@ -13,8 +17,11 @@ class ScenarioItemWidget : public QWidget
 public:
     explicit ScenarioItemWidget(const RecognitionScenario *scenario, QWidget *parent = 0);
 
+    void setSelected(bool on);
+    bool selected() const;
+
 signals:
-    void checked();
+    void selectionFlagClicked();
 
 private slots:
     void deleteScenarioFiles();
@@ -25,15 +32,25 @@ private slots:
 
 private:
     const RecognitionScenario* _scenario;
+    QRadioButton* _selectionFlag;
 };
 
 
-class ScenariosListWidget : public QScrollArea
+class ScenariosListWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ScenariosListWidget(const RecognitionScenarios &scenarios, QWidget *parent = 0);
+    explicit ScenariosListWidget(const RecognitionScenarios &scenarios, int currentScenario, QWidget *parent = 0);
+
+signals:
+    void currentScenarioSelected(int index);
+
+private slots:
+    void scenarioSelected();
+
+private:
+    QList<ScenarioItemWidget*> _scenarioWidgets;
 };
 
 #endif // SCENARIOSWIDGET_H

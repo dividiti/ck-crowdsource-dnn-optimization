@@ -13,8 +13,7 @@ int main(int argc, char *argv[])
     if (cmds.process(app))
         return 0;
 
-    MainWindow w;
-    w.show();
+    (new MainWindow)->show();
 
     return app.exec();
 }

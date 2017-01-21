@@ -35,7 +35,9 @@ public:
     const QJsonObject& json() const { return _json; }
 
     bool isEmpty() const { return _json.isEmpty(); }
+
     QString str() const;
+    QString html() const;
 
     void loadFromFile(const QString& path);
     void saveToFile(const QString& path) const;
@@ -76,7 +78,9 @@ public:
     const QJsonObject& json() const { return _json; }
 
     bool isEmpty() const { return _json.isEmpty(); }
+
     QString str() const;
+    QString html() const;
 
     long fileSizeBytes() const { return _fileSizeBytes; }
     QString fileSizeMB() const { return _fileSizeMB; }

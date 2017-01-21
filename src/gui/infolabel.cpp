@@ -11,6 +11,9 @@ InfoLabel::InfoLabel(QWidget *parent) : QWidget(parent)
     _title->setFont(f);
 
     _info = new QLabel;
+    f = _info->font();
+    f.setPointSize(f.pointSize()+1);
+    _info->setFont(f);
 
     setLayout(new QVBoxLayout);
     layout()->setMargin(0);

@@ -10,16 +10,16 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="16"
-   height="16"
+   width="1000"
+   height="1000"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.48.1 "
+   inkscape:version="0.91 r13725"
    version="1.0"
    inkscape:export-filename="L:\projects\rezonator2\img\test_fail_16.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
-   sodipodi:docname="error.svg"
+   sodipodi:docname="info.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    style="display:inline">
   <defs
@@ -114,16 +114,16 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="29.34375"
-     inkscape:cx="10.747124"
-     inkscape:cy="4.4025982"
+     inkscape:zoom="0.4140625"
+     inkscape:cx="626.46101"
+     inkscape:cy="613.72844"
      inkscape:document-units="px"
      inkscape:current-layer="svg2"
-     showgrid="true"
+     showgrid="false"
      inkscape:window-width="1916"
      inkscape:window-height="1062"
-     inkscape:window-x="-4"
-     inkscape:window-y="-4"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:snap-global="false"
      inkscape:window-maximized="0">
     <inkscape:grid
@@ -146,31 +146,23 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
-  <path
-     sodipodi:type="arc"
-     style="fill:#51bedf;fill-opacity:1;fill-rule:nonzero;stroke:none;display:inline"
+  <circle
+     style="display:inline;fill:#0e3f4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
      id="path3157"
-     sodipodi:cx="8.5"
-     sodipodi:cy="10"
-     sodipodi:rx="4.5"
-     sodipodi:ry="4"
-     d="m 13,10 a 4.5,4 0 1 1 -9,0 4.5,4 0 1 1 9,0 z"
-     transform="matrix(1.7777778,0,0,2,-7.1111112,-12)" />
+     cx="500"
+     cy="500"
+     r="500" />
   <rect
-     style="fill:#ffffff;fill-opacity:1;stroke:none"
+     style="fill:#c5d5db;fill-opacity:1;stroke:none"
      id="rect3067"
-     width="4"
-     height="7.2928653"
-     x="6"
-     y="6.6964855" />
-  <path
-     transform="matrix(0.44444444,0,0,0.5,4.2222222,-1.0660277)"
-     d="m 13,10 a 4.5,4 0 1 1 -9,0 4.5,4 0 1 1 9,0 z"
-     sodipodi:ry="4"
-     sodipodi:rx="4.5"
-     sodipodi:cy="10"
-     sodipodi:cx="8.5"
+     width="155.66037"
+     height="368.53992"
+     x="422.1698"
+     y="418.52951" />
+  <circle
      id="path3069"
-     style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;display:inline"
-     sodipodi:type="arc" />
+     style="display:inline;fill:#c5d5db;fill-opacity:1;fill-rule:nonzero;stroke:none"
+     cx="500"
+     cy="245.87631"
+     r="82.547173" />
 </svg>

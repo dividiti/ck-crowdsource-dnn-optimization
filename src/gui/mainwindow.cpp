@@ -25,6 +25,7 @@ void setInitialWindowGeometry(QWidget* w)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setWindowIcon(QIcon(":/icon/main"));
+    setAttribute(Qt::WA_DeleteOnClose);
 
     auto experimentsWidget = new QWidget;
     experimentsWidget->setLayout(new QVBoxLayout);

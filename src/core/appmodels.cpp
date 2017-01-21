@@ -1,6 +1,7 @@
 #include "appconfig.h"
 #include "appevents.h"
 #include "appmodels.h"
+#include "jsonformat.h"
 #include "utils.h"
 
 #include <QApplication>
@@ -81,7 +82,12 @@ void PlatformFeatures::saveToFile(const QString& path) const
 
 QString PlatformFeatures::str() const
 {
-    return Utils::jsonObjectToString(_json);
+    return JsonFormat(JsonFormat::Text).format(_json);
+}
+
+QString PlatformFeatures::html() const
+{
+    return JsonFormat(JsonFormat::Html).format(_json);
 }
 
 //-----------------------------------------------------------------------------
@@ -102,21 +108,17 @@ QString RecognitionScenarioFileItem::fullPath() const
 
 bool RecognitionScenarioFileItem::isLoaded() const
 {
+    // TODO: cache file loading status
     QFile f(fullPath());
-    qDebug() << "Check MD5 for" << f.fileName() << _md5;
     if (!f.exists())
-    {
-        qDebug() << "File not found";
         return false;
-    }
     auto md5 = Utils::calcFileMD5(&f);
-    qDebug() << md5;
     if (md5.compare(_md5, Qt::CaseInsensitive) != 0)
     {
-        qDebug() << "FAIL";
+        qDebug() << "Check MD5" << f.fileName() << md5 << _md5 << "FAIL";
         return false;
     }
-    qDebug() << "OK";
+    qDebug() << "Check MD5" << f.fileName() << md5 << _md5 << "OK";
     return true;
 }
 
@@ -147,7 +149,12 @@ bool RecognitionScenario::parseJson(const QJsonObject& json)
 
 QString RecognitionScenario::str() const
 {
-    return Utils::jsonObjectToString(_json);
+    return JsonFormat(JsonFormat::Text).format(_json);
+}
+
+QString RecognitionScenario::html() const
+{
+    return JsonFormat(JsonFormat::Html).format(_json);
 }
 
 bool RecognitionScenario::allFilesAreLoaded() const

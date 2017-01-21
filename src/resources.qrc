@@ -4,10 +4,8 @@
     </qresource>
     <qresource prefix="/tools">
         <file alias="info">../images/info.svg</file>
-        <file alias="ok">../images/ok.svg</file>
-        <file alias="ok_dimmed">../images/ok_dimmed.svg</file>
-        <file alias="delete">../images/delete.png</file>
-        <file alias="download">../images/download.png</file>
+        <file alias="delete">../images/trash_bin.svg</file>
+        <file alias="download">../images/download.svg</file>
     </qresource>
     <qresource prefix="/sample">
         <file alias="1">../images/sample1.jpg</file>
