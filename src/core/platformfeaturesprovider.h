@@ -13,9 +13,10 @@ public:
     explicit PlatformFeaturesProvider(QObject *parent = 0) : QObject(parent) {}
 
     PlatformFeatures loadFromCache();
+    void saveToCache(const PlatformFeatures& features) const;
 
     const PlatformFeatures& current() const { return _current; }
-    void setCurrent(const PlatformFeatures& features);
+    void setCurrent(const PlatformFeatures& features) { _current = features; }
 
     void queryPlatformFeatures(const QString &sharedRepoUrl);
 

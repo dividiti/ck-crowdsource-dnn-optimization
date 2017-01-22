@@ -1,6 +1,5 @@
 #include "appconfig.h"
 #include "platformfeaturesprovider.h"
-#include "remotedataaccess.h"
 #include "scenariosprovider.h"
 #include "shellcommands.h"
 
@@ -26,6 +25,10 @@ bool ShellCommands::process(const QApplication &app)
     QCommandLineOption option_loadScenariosForCachedFeatures("3", "Load recognition scenarios for cached platform features.");
     cmdLine.addOption(option_loadScenariosForCachedFeatures);
 
+    QCommandLineOption option_saveScenariosForCachedFeatures("4", QString("Save recognition scenarios to cache. Use with option %1.")
+        .arg(option_loadScenariosForCachedFeatures.names().first()));
+    cmdLine.addOption(option_saveScenariosForCachedFeatures);
+
     cmdLine.process(app);
 
     if (cmdLine.isSet(option_querySharedResourcesInfo))
@@ -40,6 +43,7 @@ bool ShellCommands::process(const QApplication &app)
     }
     if (cmdLine.isSet(option_loadScenariosForCachedFeatures))
     {
+        _saveLoadedScenariosToCache = cmdLine.isSet(option_saveScenariosForCachedFeatures);
         command_loadScenariosForCachedFeatures();
         return true;
     }
@@ -77,21 +81,34 @@ void ShellCommands::command_showCachedPlatformFeatures()
 
 void ShellCommands::command_loadScenariosForCachedFeatures()
 {
+    auto url = AppConfig::sharedRepoUrl();
+    if (url.isEmpty())
+    {
+        cout() << "Shared repository url not found in application config";
+        return;
+    }
     PlatformFeatures features;
     features.loadFromFile(AppConfig::platformFeaturesCacheFile());
     if (features.isEmpty())
+    {
+        cout() << "Platform features cache file not found, or it's empty or invalid";
         return;
-
+    }
     QEventLoop waiter;
-    RemoteDataAccess network;
-    ScenariosProvider provider(&network);
-    connect(&provider, &ScenariosProvider::scenariosReceived, this, &ShellCommands::scenariosReceived);
-    connect(&network, &RemoteDataAccess::requestFinished, &waiter, &QEventLoop::quit);
-    provider.queryScenarios(AppConfig::sharedRepoUrl(), features);
+    _scenariosProvider = new ScenariosProvider(&_network, this);
+    connect(_scenariosProvider, &ScenariosProvider::scenariosReceived, this, &ShellCommands::scenariosReceived);
+    connect(&_network, &RemoteDataAccess::requestFinished, &waiter, &QEventLoop::quit);
+    _scenariosProvider->queryScenarios(url, features);
     waiter.exec();
 }
 
 void ShellCommands::scenariosReceived(RecognitionScenarios scenarios)
 {
-    cout() << scenarios.str() << endl;
+    if (_saveLoadedScenariosToCache && _scenariosProvider)
+    {
+        cout() << "Save into" << AppConfig::scenariosCacheFile() << endl;
+        _scenariosProvider->saveToCahe(scenarios);
+    }
+    else
+        cout() << scenarios.str() << endl;
 }

@@ -114,6 +114,10 @@ ScenariosListWidget::ScenariosListWidget(const RecognitionScenarios& scenarios, 
     {
         scroller,
     }));
+
+    adjustSize();
+    // take some more width than autosized, for vertical scroolbar
+    resize(width()*1.1, height());
 }
 
 void ScenariosListWidget::scenarioSelected()

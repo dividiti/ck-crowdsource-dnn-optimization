@@ -1,4 +1,4 @@
 bin
-redist
+redist*
 *.user
 *.autosave

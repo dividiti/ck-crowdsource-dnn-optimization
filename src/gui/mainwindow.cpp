@@ -18,7 +18,7 @@ void setInitialWindowGeometry(QWidget* w)
 {
     auto desktop = QApplication::desktop()->availableGeometry(w);
     w->adjustSize();
-    // take some more space on the screen then auto-sized
+    // take some more space on the screen than auto-sized
     w->resize(desktop.width()*0.75, w->height()*1.1);
 }
 
@@ -75,10 +75,12 @@ void MainWindow::initialize()
     auto features = _platformFeaturesProvider.loadFromCache();
     if (features.isEmpty())
         return _platformFeaturesProvider.queryPlatformFeatures(AppConfig::sharedRepoUrl());
+    _platformFeaturesProvider.setCurrent(features);
 
     auto scenarios = _scenariosProvider->loadFromCache();
     if (scenarios.isEmpty())
         return _scenariosProvider->queryScenarios(AppConfig::sharedRepoUrl(), features);
+    _scenariosProvider->setCurrentList(scenarios);
 
     updateExperimentConditions();
 }
@@ -94,6 +96,7 @@ void MainWindow::sharedRepoInfoReceived(SharedRepoInfo info)
 void MainWindow::platformFeaturesReceived(PlatformFeatures features)
 {
     qDebug() << "platformFeaturesAqcuired";
+    _platformFeaturesProvider.saveToCache(features);
     _platformFeaturesProvider.setCurrent(features);
     _scenariosProvider->queryScenarios(AppConfig::sharedRepoUrl(), features);
 }
@@ -101,7 +104,8 @@ void MainWindow::platformFeaturesReceived(PlatformFeatures features)
 void MainWindow::scenariosReceived(RecognitionScenarios scenarios)
 {
     qDebug() << "recognitionScenariosAqcuired";
-    _scenariosProvider->setCurrent(scenarios);
+    _scenariosProvider->saveToCahe(scenarios);
+    _scenariosProvider->setCurrentList(scenarios);
     updateExperimentConditions();
 }
 

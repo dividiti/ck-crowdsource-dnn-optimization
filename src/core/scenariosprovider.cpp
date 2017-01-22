@@ -46,17 +46,12 @@ RecognitionScenarios ScenariosProvider::loadFromCache()
 {
     RecognitionScenarios scenarios;
     scenarios.loadFromFile(AppConfig::scenariosCacheFile());
-
-    if (!scenarios.isEmpty())
-        _current = scenarios;
-
     return scenarios;
 }
 
-void ScenariosProvider::setCurrent(const RecognitionScenarios& scenarios)
+void ScenariosProvider::saveToCahe(const RecognitionScenarios& scenarios) const
 {
-    _current = scenarios;
-
     scenarios.saveToFile(AppConfig::scenariosCacheFile());
 }
+
 

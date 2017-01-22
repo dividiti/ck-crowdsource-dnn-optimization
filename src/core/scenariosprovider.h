@@ -17,9 +17,10 @@ public:
     void queryScenarios(const QString &url, const PlatformFeatures& features);
 
     RecognitionScenarios loadFromCache();
+    void saveToCahe(const RecognitionScenarios& scenarios) const;
 
     const RecognitionScenarios& currentList() const { return _current; }
-    void setCurrent(const RecognitionScenarios& scenarios);
+    void setCurrentList(const RecognitionScenarios& scenarios) { _current = scenarios; }
 
 signals:
     void scenariosReceived(RecognitionScenarios scenarios);

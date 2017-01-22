@@ -4,11 +4,14 @@
 #include <QObject>
 
 #include "appmodels.h"
+#include "remotedataaccess.h"
 
 QT_BEGIN_NAMESPACE
 class QApplication;
 class QTextStream;
 QT_END_NAMESPACE
+
+class ScenariosProvider;
 
 class ShellCommands : public QObject
 {
@@ -30,6 +33,10 @@ private slots:
 
 private:
     QTextStream& cout();
+
+    RemoteDataAccess _network;
+    ScenariosProvider *_scenariosProvider = nullptr;
+    bool _saveLoadedScenariosToCache = false;
 };
 
 #endif // SHELLCOMMANDS_H
