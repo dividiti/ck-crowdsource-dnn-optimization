@@ -83,6 +83,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
                 0
             })
         }),
+        Utils::makeDivider(),
         Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
         {
             _infoScenario,
@@ -93,6 +94,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
                 0
             })
         }),
+        Utils::makeDivider(),
         _infoBatchSize,
         0,
         buttonStart

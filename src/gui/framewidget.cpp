@@ -5,12 +5,14 @@
 #include <QLabel>
 #include <QPainter>
 
+#define FRAME_CONTENT_H 102
+
 QPixmap getSampleImage(const QPixmap& frame)
 {
     int index = qrand()%10 + 1;
     auto sample = QPixmap(QString(":/sample/%1").arg(index));
 
-    int h = 128;
+    int h = FRAME_CONTENT_H;
     int w = h * sample.width() / sample.height();
 
     QPixmap image(frame.width(), frame.height());

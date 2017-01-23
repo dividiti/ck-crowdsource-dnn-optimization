@@ -61,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 MainWindow::~MainWindow()
 {
     for (auto e: _experiments) delete e;
+
+    Utils::closeAllInfoWindows();
 }
 
 void MainWindow::initialize()

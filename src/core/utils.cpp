@@ -6,6 +6,8 @@
 #include <QDesktopWidget>
 #include <QFile>
 #include <QMessageBox>
+#include <QPalette>
+#include <QPointer>
 #include <QTextBrowser>
 
 namespace Utils
@@ -82,9 +84,13 @@ void moveToDesktopCenter(QWidget* w)
     w->move(desktop.center() - w->rect().center());
 }
 
+namespace UtilsInfoWidows {
+    // rememeber all opened windows and close them when main window is closed
+    QList<QPointer<QWidget>> windows;
+}
+
 void showTextInfoWindow(const QString& text, bool html, int w, int h)
 {
-    // TODO: rememeber all opened windows and close them when main window is closed
     auto window = new QTextBrowser;
     window->setAttribute(Qt::WA_DeleteOnClose);
     if (html)
@@ -98,11 +104,31 @@ void showTextInfoWindow(const QString& text, bool html, int w, int h)
         window->resize(w, h);
     moveToDesktopCenter(window);
     window->show();
+    UtilsInfoWidows::windows.append(window);
+}
+
+void closeAllInfoWindows()
+{
+    for (auto w: UtilsInfoWidows::windows)
+        if (w) delete w;
+    UtilsInfoWidows::windows.clear();
 }
 
 void infoDlg(const QString& text)
 {
     QMessageBox::information(qApp->activeWindow(), qApp->activeWindow()->windowTitle(), text);
 }
+
+QWidget* makeDivider()
+{
+    auto divider = new QFrame;
+    divider->setFrameShape(QFrame::HLine);
+    divider->setStyleSheet(QString("border-top-width: 1px;"
+                                   "border-top-style: solid;"
+                                   "border-top-color: %1;")
+                           .arg(divider->palette().color(QPalette::Dark).name()));
+    return divider;
+}
+
 
 } // namespace Utils

@@ -36,7 +36,6 @@ ScenarioItemWidget::ScenarioItemWidget(const RecognitionScenario* scenario, QWid
         Ori::Gui::spacing(16),
         Ori::Gui::layoutV({ labelTitle, labelSize }),
         0,
-        Ori::Gui::spacing(64),
         Ori::Gui::toolbar({ actionDeleteFiles, actionDloadFiles, actionShowInfo })
     }));
 
@@ -98,9 +97,7 @@ ScenariosListWidget::ScenariosListWidget(const RecognitionScenarios& scenarios, 
         scenariosLayout->addWidget(scenarioWidget);
         _scenarioWidgets.append(scenarioWidget);
 
-        auto divider = new QFrame;
-        divider->setFrameShape(QFrame::HLine);
-        scenariosLayout->addWidget(divider);
+        scenariosLayout->addWidget(Utils::makeDivider());
     }
 
     auto scenariosList = new QWidget;
@@ -116,8 +113,8 @@ ScenariosListWidget::ScenariosListWidget(const RecognitionScenarios& scenarios, 
     }));
 
     adjustSize();
-    // take some more width than autosized, for vertical scroolbar
-    resize(width()*1.1, height());
+    // take some more width than autosized, for scroolbars
+    resize(width()*1.5, height()*1.5);
 }
 
 void ScenariosListWidget::scenarioSelected()

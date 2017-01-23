@@ -21,8 +21,11 @@ void moveToDesktopCenter(QWidget* w);
 void showTextInfoWindow(const QString& text, bool html, int w, int h);
 inline void showTextInfoWindow(const QString& text, int w = 0, int h = 0) { showTextInfoWindow(text, false, w, h); }
 inline void showHtmlInfoWindow(const QString& text, int w = 0, int h = 0) { showTextInfoWindow(text, true, w, h); }
+void closeAllInfoWindows();
 
 void infoDlg(const QString& text);
+
+QWidget* makeDivider();
 }
 
 #endif // UTILS_H
