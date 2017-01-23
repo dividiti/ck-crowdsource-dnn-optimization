@@ -9,6 +9,7 @@ namespace ConfigKeys
 {
     const QString remoteServer("remote_server_url");
     const QString email("email");
+    const QString checkScenarioFilesMd5("check_scenario_files_md5");
 
 } // namespace ConfigKeys
 
@@ -58,4 +59,9 @@ QString AppConfig::scenariosCacheFile()
 QString AppConfig::scenariosDataDir()
 {
     return qApp->applicationDirPath() + QDir::separator() + "openscience";
+}
+
+bool AppConfig::checkScenarioFilesMd5()
+{
+    return config().value(ConfigKeys::checkScenarioFilesMd5, true).toBool();
 }

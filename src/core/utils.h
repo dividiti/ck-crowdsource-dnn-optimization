@@ -13,7 +13,6 @@ namespace Utils
 {
 QByteArray loadTtextFromFile(const QString& path);
 void saveTextToFile(const QString& path, const QByteArray text);
-QString calcFileMD5(QFile* file);
 
 QString bytesIntoHumanReadable(long bytes);
 

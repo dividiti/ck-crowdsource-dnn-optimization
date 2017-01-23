@@ -54,7 +54,7 @@ ScenarioItemWidget::ScenarioItemWidget(ExperimentContext *context, int scenarioI
     connect(_context->scenariosProvider, &ScenariosProvider::scenarioFileDownloaded, this, &ScenarioItemWidget::fileDownloaded);
     connect(_context->scenariosProvider, &ScenariosProvider::filesDownloadComplete, this, &ScenarioItemWidget::filesDownloadComplete);
 
-    updateFilesStatus();
+    displayFilesStatus();
 }
 
 void ScenarioItemWidget::deleteScenarioFiles()
@@ -62,14 +62,14 @@ void ScenarioItemWidget::deleteScenarioFiles()
     if (Utils::confirmDlg(tr("Confirm deletion")))
     {
         _context->scenariosProvider->deleteScenarioFiles(_scenarioIndex);
-        updateFilesStatus();
+        displayFilesStatus();
     }
 }
 
 void ScenarioItemWidget::downloadsScenarioFiles()
 {
     _context->scenariosProvider->downloadScenarioFiles(_scenarioIndex);
-    updateFilesStatus();
+    displayFilesStatus();
 }
 
 void ScenarioItemWidget::showScenarioInfo()
@@ -91,20 +91,17 @@ void ScenarioItemWidget::fileDownloaded(int scenarioIndex, int loadedFilesCount)
 {
     if (scenarioIndex != _scenarioIndex) return;
 
-    if (!_downloading) updateFilesStatus();
+    if (!_downloading) displayFilesStatus();
 
     _downloadingProgress->setValue(loadedFilesCount);
 }
 
-void ScenarioItemWidget::filesDownloadComplete(int scenarioIndex, const QString& errors)
+void ScenarioItemWidget::filesDownloadComplete(int scenarioIndex)
 {
     if (scenarioIndex != _scenarioIndex) return;
 
     QTimer::singleShot(500, this, SLOT(hideDownloadProgress()));
-    updateFilesStatus();
-
-    if (!errors.isEmpty())
-        Utils::errorDlg(errors);
+    displayFilesStatus();
 }
 
 void ScenarioItemWidget::hideDownloadProgress()
@@ -112,7 +109,7 @@ void ScenarioItemWidget::hideDownloadProgress()
     _downloadingProgress->setVisible(false);
 }
 
-void ScenarioItemWidget::updateFilesStatus()
+void ScenarioItemWidget::displayFilesStatus()
 {
     auto filesStatus = _context->scenariosProvider->scenarioDownloadStatus(_scenarioIndex);
     if (!filesStatus)

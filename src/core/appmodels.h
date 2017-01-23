@@ -64,7 +64,8 @@ public:
     QString fullPath() const;
     QString fullFileName() const;
 
-    bool isLoaded() const;
+    bool isExists() const;
+    bool checkMD5() const;
 
 private:
     QString _path, _name, _md5, _url;

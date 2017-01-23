@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QCryptographicHash>
+#include <QDebug>
 #include <QDesktopWidget>
 #include <QFile>
 #include <QMessageBox>
@@ -40,18 +41,6 @@ void saveTextToFile(const QString& path, const QByteArray text)
     if (file.write(text) == -1)
         return AppEvents::error(qApp->tr("Fail writing into file %1: %2").arg(path).arg(file.errorString()));
 }
-
-QString calcFileMD5(QFile* file)
-{
-    QCryptographicHash hash(QCryptographicHash::Md5);
-    if (!hash.addData(file))
-    {
-        AppEvents::error(qApp->tr("Unknown error when calculating MD5 sum for file %1").arg(file->fileName()));
-        return QString();
-    }
-    return QString::fromLocal8Bit(hash.result());
-}
-
 
 QString bytesIntoHumanReadable(long bytes)
 {

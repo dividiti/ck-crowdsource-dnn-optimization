@@ -21,6 +21,8 @@ public:
     static QString scenariosCacheFile();
     static QString scenariosDataDir();
 
+    static bool checkScenarioFilesMd5();
+
 private:
     static QString configFileName();
     static QSettings& config();

@@ -5,9 +5,10 @@
 #include "utils.h"
 
 #include <QApplication>
-#include <QFile>
+#include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
 
@@ -114,25 +115,35 @@ QString RecognitionScenarioFileItem::fullFileName() const
     return fullPath() + QDir::separator() + _name;
 }
 
-bool RecognitionScenarioFileItem::isLoaded() const
+bool RecognitionScenarioFileItem::isExists() const
+{
+    QFile f(fullFileName());
+    return f.exists();
+}
+
+bool RecognitionScenarioFileItem::checkMD5() const
 {
     // TODO: cache file loading status
     QFile f(fullFileName());
-    if (!f.exists())
-        return false;
     if (!f.open(QIODevice::ReadOnly))
     {
-        AppEvents::error(qApp->tr("Unable to open file %1 to calculate MD5: %2")
-                         .arg(f.fileName()).arg(f.errorString()));
+        qCritical() << "Check MD5: unable to open file" << f.fileName() << f.errorString();
         return false;
     }
-    auto md5 = Utils::calcFileMD5(&f);
+
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    if (!hash.addData(&f))
+    {
+        qCritical() << "Unknown error when calculating MD5 sum for file" << f.fileName();
+        return false;
+    }
+
+    auto md5 = QString::fromLatin1(hash.result().toHex());
     if (md5.compare(_md5, Qt::CaseInsensitive) != 0)
     {
-        qDebug() << "Check MD5" << f.fileName() << md5 << _md5 << "FAIL";
+        qDebug() << "Check MD5: failed for" << f.fileName() << "calculated:" << md5 << "stored:" << _md5;
         return false;
     }
-    qDebug() << "Check MD5" << f.fileName() << md5 << _md5 << "OK";
     return true;
 }
 
@@ -175,8 +186,12 @@ QString RecognitionScenario::html() const
 bool RecognitionScenario::allFilesAreLoaded() const
 {
     for (const RecognitionScenarioFileItem& file: _files)
-        if (!file.isLoaded())
+    {
+        if (!file.isExists())
             return false;
+        if (AppConfig::checkScenarioFilesMd5() && !file.checkMD5())
+            return false;
+    }
     return true;
 }
 

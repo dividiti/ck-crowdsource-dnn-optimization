@@ -29,7 +29,7 @@ private slots:
     void downloadsScenarioFiles();
     void showScenarioInfo();
     void fileDownloaded(int scenarioIndex, int loadedFilesCount);
-    void filesDownloadComplete(int scenarioIndex, const QString &errors);
+    void filesDownloadComplete(int scenarioIndex);
     void hideDownloadProgress();
 
 private:
@@ -40,7 +40,7 @@ private:
     QProgressBar* _downloadingProgress;
     QAction *_actionDeleteFiles, *_actionDloadFiles;
 
-    void updateFilesStatus();
+    void displayFilesStatus();
 };
 
 

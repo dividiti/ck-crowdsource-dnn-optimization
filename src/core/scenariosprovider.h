@@ -66,7 +66,7 @@ public:
 signals:
     void scenariosReceived(RecognitionScenarios scenarios);
     void scenarioFileDownloaded(int scenarioIndex, int loadedFilesCount);
-    void filesDownloadComplete(int scenarioIndex, const QString& errors);
+    void filesDownloadComplete(int scenarioIndex);
 
 private slots:
     void queryRecognitionScenarios_finished();

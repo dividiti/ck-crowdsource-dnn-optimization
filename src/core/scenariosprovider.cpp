@@ -116,7 +116,12 @@ void ScenariosProvider::queryDownloadScenarioFile_finished()
         return processDownloadProgress(reply, download, tr("Unable to create target file: %1").arg(file.errorString()));
 
     if (file.write(reply->readAll()) == -1)
-        return processDownloadProgress(reply, download, tr("Fail writing file: %2").arg(file.errorString()));
+        return processDownloadProgress(reply, download, tr("Fail writing file: %1").arg(file.errorString()));
+
+    file.close();
+
+    if (AppConfig::checkScenarioFilesMd5() && !download.file.checkMD5())
+        return processDownloadProgress(reply, download, tr("MD5 verification failed"));
 
     processDownloadProgress(reply, download, QString());
 }
@@ -149,8 +154,9 @@ void ScenariosProvider::processDownloadProgress(QNetworkReply* reply, const File
         {
             status->_status = ScenarioDownloadStatus::NoFiles;
             qDebug() << "Downloading FAILED for scenario" << download.scenarioIndex;
+            AppEvents::error(tr("Download failed:\n\n%1").arg(status->error())); // TODO: show scenarion title here
         }
-        emit filesDownloadComplete(download.scenarioIndex, status->error());
+        emit filesDownloadComplete(download.scenarioIndex);
     }
 }
 
@@ -176,15 +182,18 @@ void ScenariosProvider::prepareDownloadStatuses()
     for (int i = 0; i < _current.items().size(); i++)
     {
         const RecognitionScenario& scenario = _current.items().at(i);
+        qDebug() << "Preparing scenario" << i << scenario.title();
         auto status = new ScenarioDownloadStatus;
         status->_totalFiles = scenario.files().size();
         if (scenario.allFilesAreLoaded())
         {
+            qDebug() << "All files loaded";
             status->_status = ScenarioDownloadStatus::AllLoaded;
             status->_loadedFiles = scenario.files().size();
         }
         else
         {
+            qDebug() << "Files not loaded";
             status->_status = ScenarioDownloadStatus::NoFiles;
             status->_loadedFiles = 0;
         }
