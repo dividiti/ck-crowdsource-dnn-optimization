@@ -6,6 +6,7 @@
 class ExperimentContext;
 
 QT_BEGIN_NAMESPACE
+class QAction;
 class QProgressBar;
 class QRadioButton;
 QT_END_NAMESPACE
@@ -27,16 +28,19 @@ private slots:
     void deleteScenarioFiles();
     void downloadsScenarioFiles();
     void showScenarioInfo();
-    void useThisScenario();
-    void showCurrentScenario();
-    void fileDownloaded(int scenarioIndex, int fileIndex, bool success);
+    void fileDownloaded(int scenarioIndex, int loadedFilesCount);
+    void filesDownloadComplete(int scenarioIndex, const QString &errors);
     void hideDownloadProgress();
 
 private:
     ExperimentContext* _context;
     int _scenarioIndex;
+    bool _downloading = false;
     QRadioButton* _selectionFlag;
     QProgressBar* _downloadingProgress;
+    QAction *_actionDeleteFiles, *_actionDloadFiles;
+
+    void updateFilesStatus();
 };
 
 

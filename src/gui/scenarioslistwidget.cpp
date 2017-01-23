@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QFrame>
 #include <QLabel>
+#include <QMessageBox>
 #include <QProgressBar>
 #include <QRadioButton>
 #include <QScrollArea>
@@ -34,13 +35,12 @@ ScenarioItemWidget::ScenarioItemWidget(ExperimentContext *context, int scenarioI
     _selectionFlag->setChecked(scenarioIndex == context->currentScenarioIndex());
     connect(_selectionFlag, SIGNAL(clicked(bool)), this, SIGNAL(selectionFlagClicked()));
 
-    auto actionDeleteFiles = Ori::Gui::action(tr("Delete scenario files"), this, SLOT(deleteScenarioFiles()), ":/tools/delete");
-    auto actionDloadFiles = Ori::Gui::action(tr("Download scenario files"), this, SLOT(downloadsScenarioFiles()), ":/tools/download");
+    _actionDeleteFiles = Ori::Gui::action(tr("Delete scenario files"), this, SLOT(deleteScenarioFiles()), ":/tools/delete");
+    _actionDloadFiles = Ori::Gui::action(tr("Download scenario files"), this, SLOT(downloadsScenarioFiles()), ":/tools/download");
     auto actionShowInfo = Ori::Gui::action(tr("Show scenario info"), this, SLOT(showScenarioInfo()), ":/tools/info");
+    // TODO: stop downloading action?
 
     _downloadingProgress = new QProgressBar;
-    _downloadingProgress->setMaximum(scenario.files().size());
-    _downloadingProgress->setVisible(false);
 
     setLayout(Ori::Gui::layoutH(
     {
@@ -48,40 +48,33 @@ ScenarioItemWidget::ScenarioItemWidget(ExperimentContext *context, int scenarioI
         Ori::Gui::spacing(16),
         Ori::Gui::layoutV({ labelTitle, labelSize, _downloadingProgress }),
         0,
-        Ori::Gui::toolbar({ actionDeleteFiles, actionDloadFiles, actionShowInfo })
+        Ori::Gui::toolbar({ _actionDeleteFiles, _actionDloadFiles, actionShowInfo })
     }));
 
-    bool filesLoaded = scenario.allFilesAreLoaded();
-    actionDeleteFiles->setVisible(filesLoaded);
-    actionDloadFiles->setVisible(!filesLoaded);
+    connect(_context->scenariosProvider, &ScenariosProvider::scenarioFileDownloaded, this, &ScenarioItemWidget::fileDownloaded);
+    connect(_context->scenariosProvider, &ScenariosProvider::filesDownloadComplete, this, &ScenarioItemWidget::filesDownloadComplete);
+
+    updateFilesStatus();
 }
 
 void ScenarioItemWidget::deleteScenarioFiles()
 {
-    Utils::infoDlg("TODO deleteScenarioFiles");
+    if (Utils::confirmDlg(tr("Confirm deletion")))
+    {
+        _context->scenariosProvider->deleteScenarioFiles(_scenarioIndex);
+        updateFilesStatus();
+    }
 }
 
 void ScenarioItemWidget::downloadsScenarioFiles()
 {
-    connect(_context->scenariosProvider, &ScenariosProvider::scenarioFileDownloaded, this, &ScenarioItemWidget::fileDownloaded);
-    _downloadingProgress->setVisible(true);
-    _downloadingProgress->setValue(0);
     _context->scenariosProvider->downloadScenarioFiles(_scenarioIndex);
+    updateFilesStatus();
 }
 
 void ScenarioItemWidget::showScenarioInfo()
 {
     Utils::showHtmlInfoWindow(_context->currentScenarios().at(_scenarioIndex).html(), 600, 800);
-}
-
-void ScenarioItemWidget::useThisScenario()
-{
-    Utils::infoDlg("TODO useThisScenario");
-}
-
-void ScenarioItemWidget::showCurrentScenario()
-{
-    Utils::infoDlg("TODO showCurrentScenario");
 }
 
 void ScenarioItemWidget::setSelected(bool on)
@@ -94,21 +87,67 @@ bool ScenarioItemWidget::selected() const
     return _selectionFlag->isChecked();
 }
 
-void ScenarioItemWidget::fileDownloaded(int scenarioIndex, int fileIndex, bool success)
+void ScenarioItemWidget::fileDownloaded(int scenarioIndex, int loadedFilesCount)
 {
     if (scenarioIndex != _scenarioIndex) return;
-    _downloadingProgress->setValue(_downloadingProgress->value()+1);
-    qDebug() << _downloadingProgress->value();
-    if (_downloadingProgress->value() >= _downloadingProgress->maximum())
-    {
-        QTimer::singleShot(500, this, SLOT(hideDownloadProgress()));
-        disconnect(_context->scenariosProvider, &ScenariosProvider::scenarioFileDownloaded, this, &ScenarioItemWidget::fileDownloaded);
-    }
+
+    if (!_downloading) updateFilesStatus();
+
+    _downloadingProgress->setValue(loadedFilesCount);
+}
+
+void ScenarioItemWidget::filesDownloadComplete(int scenarioIndex, const QString& errors)
+{
+    if (scenarioIndex != _scenarioIndex) return;
+
+    QTimer::singleShot(500, this, SLOT(hideDownloadProgress()));
+    updateFilesStatus();
+
+    if (!errors.isEmpty())
+        Utils::errorDlg(errors);
 }
 
 void ScenarioItemWidget::hideDownloadProgress()
 {
     _downloadingProgress->setVisible(false);
+}
+
+void ScenarioItemWidget::updateFilesStatus()
+{
+    auto filesStatus = _context->scenariosProvider->scenarioDownloadStatus(_scenarioIndex);
+    if (!filesStatus)
+    {
+        _actionDeleteFiles->setVisible(false);
+        _actionDloadFiles->setVisible(false);
+        _downloadingProgress->setVisible(false);
+        return;
+    }
+
+    switch (filesStatus->status())
+    {
+    case ScenarioDownloadStatus::AllLoaded:
+        _downloading = false;
+        _actionDeleteFiles->setVisible(true);
+        _actionDloadFiles->setVisible(false);
+        _downloadingProgress->setVisible(false);
+        break;
+
+    case ScenarioDownloadStatus::NoFiles:
+        _downloading = false;
+        _actionDeleteFiles->setVisible(false);
+        _actionDloadFiles->setVisible(true);
+        _downloadingProgress->setVisible(false);
+        break;
+
+    case ScenarioDownloadStatus::IsLoading:
+        _downloading = true;
+        _actionDeleteFiles->setVisible(false);
+        _actionDloadFiles->setVisible(false);
+        _downloadingProgress->setMaximum(filesStatus->totalFiles());
+        _downloadingProgress->setValue(filesStatus->loadedFiles());
+        _downloadingProgress->setVisible(true);
+        break;
+    }
 }
 
 //-----------------------------------------------------------------------------

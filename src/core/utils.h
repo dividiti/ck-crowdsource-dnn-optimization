@@ -25,6 +25,8 @@ inline void showHtmlInfoWindow(const QString& text, int w = 0, int h = 0) { show
 void closeAllInfoWindows();
 
 void infoDlg(const QString& text);
+bool confirmDlg(const QString& text);
+void errorDlg(const QString& text);
 
 QWidget* makeDivider();
 }

@@ -20,15 +20,27 @@ public:
     int fileIndex;
     RecognitionScenarioFileItem file;
 
-    QString errorTitle() const;
+    QString title() const;
 };
 
-class ScenarioDownloadProgress
+class ScenarioDownloadStatus
 {
 public:
-    int totalFiles;
-    int loadedFiles = 0;
-    QStringList errors;
+    enum Status { NoFiles, AllLoaded, IsLoading };
+
+    Status status() const { return _status; }
+    int totalFiles() const { return _totalFiles; }
+    int loadedFiles() const { return _loadedFiles; }
+    QString error() const { return _errors.join("\n"); }
+    bool ok() const { return _errors.isEmpty(); }
+
+private:
+    int _totalFiles;
+    int _loadedFiles;
+    QStringList _errors;
+    Status _status;
+
+    friend class ScenariosProvider;
 };
 
 class ScenariosProvider : public QObject
@@ -37,6 +49,7 @@ class ScenariosProvider : public QObject
 
 public:
     explicit ScenariosProvider(RemoteDataAccess *network, QObject *parent = 0);
+    ~ScenariosProvider();
 
     void queryScenarios(const QString &url, const PlatformFeatures& features);
 
@@ -44,13 +57,16 @@ public:
     void saveToCahe(const RecognitionScenarios& scenarios) const;
 
     const RecognitionScenarios& currentList() const { return _current; }
-    void setCurrentList(const RecognitionScenarios& scenarios) { _current = scenarios; }
+    void setCurrentList(const RecognitionScenarios& scenarios);
 
+    ScenarioDownloadStatus* scenarioDownloadStatus(int scenarioIndex);
     void downloadScenarioFiles(int scenarioIndex);
+    void deleteScenarioFiles(int scenarioIndex);
 
 signals:
     void scenariosReceived(RecognitionScenarios scenarios);
-    void scenarioFileDownloaded(int scenarioIndex, int fileIndex, bool success);
+    void scenarioFileDownloaded(int scenarioIndex, int loadedFilesCount);
+    void filesDownloadComplete(int scenarioIndex, const QString& errors);
 
 private slots:
     void queryRecognitionScenarios_finished();
@@ -60,7 +76,12 @@ private:
     RemoteDataAccess* _network;
     RecognitionScenarios _current;
     QMap<QNetworkReply*, FileDownloadWork> _fileDownloads;
-    QMap<int, ScenarioDownloadProgress> _scenarioDownloads;
+    QMap<int, ScenarioDownloadStatus*> _scenarioDownloads;
+
+    void clearDownloadStatuses();
+    void prepareDownloadStatuses();
+
+    void processDownloadProgress(QNetworkReply *reply, const FileDownloadWork &download, QString error);
 };
 
 #endif // SCENARIOSPROVIDER_H

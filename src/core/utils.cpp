@@ -119,6 +119,17 @@ void infoDlg(const QString& text)
     QMessageBox::information(qApp->activeWindow(), qApp->activeWindow()->windowTitle(), text);
 }
 
+bool confirmDlg(const QString& text)
+{
+    return QMessageBox::question(qApp->activeWindow(), qApp->activeWindow()->windowTitle(), text,
+                                 QMessageBox::Ok, QMessageBox::Cancel) == QMessageBox::Ok;
+}
+
+void errorDlg(const QString& text)
+{
+    QMessageBox::critical(qApp->activeWindow(), qApp->activeWindow()->windowTitle(), text);
+}
+
 QWidget* makeDivider()
 {
     auto divider = new QFrame;
