@@ -140,7 +140,7 @@ void FeaturesPanel::selectScenario()
 
     if (!_scenariosWindow)
     {
-        _scenariosWindow = new ScenariosListWidget(scenarios, _context->currentScenarioIndex());
+        _scenariosWindow = new ScenariosListWidget(_context);
         connect(_scenariosWindow.data(), SIGNAL(currentScenarioSelected(int)), this, SLOT(currentScenarioSelected(int)));
         Utils::moveToDesktopCenter(_scenariosWindow);
         _scenariosWindow->show();

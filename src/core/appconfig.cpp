@@ -57,5 +57,5 @@ QString AppConfig::scenariosCacheFile()
 
 QString AppConfig::scenariosDataDir()
 {
-    return qApp->applicationDirPath() + QDir::separator();
+    return qApp->applicationDirPath() + QDir::separator() + "openscience";
 }

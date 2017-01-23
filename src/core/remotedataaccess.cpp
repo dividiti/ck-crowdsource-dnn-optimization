@@ -23,14 +23,19 @@ QNetworkReply* RemoteDataAccess::post(const QString& url, const QByteArray& data
     return _network->post(request, data);
 }
 
+QNetworkReply* RemoteDataAccess::get(const QString& url)
+{
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::UserAgentHeader, HTTP_USER_AGENT);
+
+    return _network->get(request);
+}
+
 void RemoteDataAccess::querySharedRepoInfo(const QString& url)
 {
     AppEvents::info(tr("Query shared repository info from %1").arg(url));
 
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, HTTP_USER_AGENT);
-
-    auto reply = _network->get(request);
+    auto reply = get(url);
     connect(reply, SIGNAL(finished()), this, SLOT(querySharedRepoInfo_finished()));
 }
 

@@ -20,6 +20,7 @@ public:
     void querySharedRepoInfo(const QString& url);
 
     QNetworkReply* post(const QString& url, const QByteArray& data);
+    QNetworkReply* get(const QString& url);
 
 signals:
     void requestFinished();

@@ -103,15 +103,26 @@ bool RecognitionScenarioFileItem::parseJson(const QJsonObject& json)
 
 QString RecognitionScenarioFileItem::fullPath() const
 {
-    return AppConfig::scenariosDataDir() + _path + QDir::separator() + _name;
+    return AppConfig::scenariosDataDir() + QDir::separator() + _path;
+}
+
+QString RecognitionScenarioFileItem::fullFileName() const
+{
+    return fullPath() + QDir::separator() + _name;
 }
 
 bool RecognitionScenarioFileItem::isLoaded() const
 {
     // TODO: cache file loading status
-    QFile f(fullPath());
+    QFile f(fullFileName());
     if (!f.exists())
         return false;
+    if (!f.open(QIODevice::ReadOnly))
+    {
+        AppEvents::error(qApp->tr("Unable to open file %1 to calculate MD5: %2")
+                         .arg(f.fileName()).arg(f.errorString()));
+        return false;
+    }
     auto md5 = Utils::calcFileMD5(&f);
     if (md5.compare(_md5, Qt::CaseInsensitive) != 0)
     {

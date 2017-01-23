@@ -62,6 +62,7 @@ public:
     QString url() const { return _url; }
 
     QString fullPath() const;
+    QString fullFileName() const;
 
     bool isLoaded() const;
 

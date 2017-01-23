@@ -34,7 +34,7 @@ QByteArray loadTtextFromFile(const QString& path)
 void saveTextToFile(const QString& path, const QByteArray text)
 {
     QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return AppEvents::error(qApp->tr("Unable to create file %1: %2").arg(path).arg(file.errorString()));
 
     if (file.write(text) == -1)
@@ -49,7 +49,7 @@ QString calcFileMD5(QFile* file)
         AppEvents::error(qApp->tr("Unknown error when calculating MD5 sum for file %1").arg(file->fileName()));
         return QString();
     }
-    return QString::fromUtf8(hash.result());
+    return QString::fromLocal8Bit(hash.result());
 }
 
 

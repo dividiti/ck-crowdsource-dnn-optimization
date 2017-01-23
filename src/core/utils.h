@@ -5,6 +5,7 @@
 
 QT_BEGIN_NAMESPACE
 class QFile;
+class QIODevice;
 class QWidget;
 QT_END_NAMESPACE
 

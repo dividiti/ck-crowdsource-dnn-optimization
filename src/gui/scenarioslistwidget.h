@@ -3,10 +3,10 @@
 
 #include <QWidget>
 
-class RecognitionScenario;
-class RecognitionScenarios;
+class ExperimentContext;
 
 QT_BEGIN_NAMESPACE
+class QProgressBar;
 class QRadioButton;
 QT_END_NAMESPACE
 
@@ -15,7 +15,7 @@ class ScenarioItemWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScenarioItemWidget(const RecognitionScenario *scenario, QWidget *parent = 0);
+    explicit ScenarioItemWidget(ExperimentContext* context, int scenarioIndex, QWidget *parent = 0);
 
     void setSelected(bool on);
     bool selected() const;
@@ -29,10 +29,14 @@ private slots:
     void showScenarioInfo();
     void useThisScenario();
     void showCurrentScenario();
+    void fileDownloaded(int scenarioIndex, int fileIndex, bool success);
+    void hideDownloadProgress();
 
 private:
-    const RecognitionScenario* _scenario;
+    ExperimentContext* _context;
+    int _scenarioIndex;
     QRadioButton* _selectionFlag;
+    QProgressBar* _downloadingProgress;
 };
 
 
@@ -41,7 +45,7 @@ class ScenariosListWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScenariosListWidget(const RecognitionScenarios &scenarios, int currentScenario, QWidget *parent = 0);
+    explicit ScenariosListWidget(ExperimentContext* context, QWidget *parent = 0);
 
 signals:
     void currentScenarioSelected(int index);

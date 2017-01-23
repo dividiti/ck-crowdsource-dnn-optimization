@@ -3,6 +3,8 @@
 
 #include "appmodels.h"
 
+#include <QList>
+
 class PlatformFeaturesProvider;
 class ScenariosProvider;
 
@@ -12,15 +14,17 @@ public:
     PlatformFeaturesProvider* platformFeaturesProvider;
     ScenariosProvider* scenariosProvider;
 
+    bool checkScenarioIndex(int index) const;
+
     bool currentScenarioExists() const;
     int currentScenarioIndex() const { return _currentScenarioIndex; }
     void setCurrentScenarioIndex(int index);
     const RecognitionScenario& currentScenario() const;
 
+    const QList<RecognitionScenario>& currentScenarios() const;
+
 private:
     int _currentScenarioIndex = -1;
-
-    bool checkScenarioIndex(int index) const;
 };
 
 #endif // EXPERIMENTCONTEXT_H
