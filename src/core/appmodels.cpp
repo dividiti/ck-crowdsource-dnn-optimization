@@ -64,8 +64,11 @@ void PlatformFeatures::parseJson(const QByteArray& text)
 
     _json = doc.object();
 
-    auto os = _json["os"].toObject();
-    _osName = os["name"].toString();
+    if (_json.contains("os"))
+    {
+        auto os = _json["os"].toObject();
+        _osName = os["name"].toString();
+    }
 }
 
 void PlatformFeatures::loadFromFile(const QString& path)
@@ -138,23 +141,24 @@ bool RecognitionScenarioFileItem::isLoaded() const
 bool RecognitionScenario::parseJson(const QJsonObject& json)
 {
     _json = json;
-
-    // TODO: default value will be used if some key not found, should we check if key exists?
-
-    _fileSizeBytes = long(json["total_file_size"].toDouble());
-    _fileSizeMB = Utils::bytesIntoHumanReadable(_fileSizeBytes);
-
-    auto meta = json["meta"].toObject();
-    _title = meta["title"].toString();
-
-    QJsonArray files = meta["files"].toArray();
-    for (auto file = files.constBegin(); file != files.constEnd(); file++)
+    if (json.contains("total_file_size"))
     {
-        RecognitionScenarioFileItem fileItem;
-        if (fileItem.parseJson((*file).toObject()))
-            _files.append(fileItem);
+        _fileSizeBytes = long(json["total_file_size"].toDouble());
+        _fileSizeMB = Utils::bytesIntoHumanReadable(_fileSizeBytes);
     }
+    if (json.contains("meta"))
+    {
+        auto meta = json["meta"].toObject();
+        _title = meta["title"].toString();
 
+        QJsonArray files = meta["files"].toArray();
+        for (auto file = files.constBegin(); file != files.constEnd(); file++)
+        {
+            RecognitionScenarioFileItem fileItem;
+            if (fileItem.parseJson((*file).toObject()))
+                _files.append(fileItem);
+        }
+    }
     return true;
 }
 

@@ -84,14 +84,14 @@ void ShellCommands::command_loadScenariosForCachedFeatures()
     auto url = AppConfig::sharedRepoUrl();
     if (url.isEmpty())
     {
-        cout() << "Shared repository url not found in application config";
+        cout() << "Shared repository url not found in application config" << endl;
         return;
     }
     PlatformFeatures features;
     features.loadFromFile(AppConfig::platformFeaturesCacheFile());
     if (features.isEmpty())
     {
-        cout() << "Platform features cache file not found, or it's empty or invalid";
+        cout() << "Platform features cache file not found, or it's empty or invalid" << endl;
         return;
     }
     QEventLoop waiter;
