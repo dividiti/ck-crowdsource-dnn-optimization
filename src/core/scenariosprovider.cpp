@@ -103,7 +103,9 @@ void ScenariosProvider::queryDownloadScenarioFile_finished()
     auto reply = qobject_cast<QNetworkReply*>(sender());
     if (!reply || !_fileDownloads.contains(reply)) return;
 
-    const FileDownloadWork& download = _fileDownloads[reply];
+    // NB: take copy not reference! because of _fileDownloads rearranges its
+    // content when another QNetworkReply is finished and its entry is removed
+    FileDownloadWork download = _fileDownloads[reply];
 
     if (!QDir().mkpath(download.file.fullPath()))
         return processDownloadProgress(reply, download, tr("Unable to create target directory"));
@@ -141,8 +143,6 @@ void ScenariosProvider::processDownloadProgress(QNetworkReply* reply, const File
 
     emit scenarioFileDownloaded(download.scenarioIndex, status->_loadedFiles);
 
-    _fileDownloads.remove(reply);
-
     if (status->_loadedFiles == status->_totalFiles)
     {
         if (status->ok())
@@ -158,11 +158,42 @@ void ScenariosProvider::processDownloadProgress(QNetworkReply* reply, const File
         }
         emit filesDownloadComplete(download.scenarioIndex);
     }
+
+    _fileDownloads.remove(reply);
 }
 
 void ScenariosProvider::deleteScenarioFiles(int scenarioIndex)
 {
-    // TODO
+    if (scenarioIndex < 0 || scenarioIndex >= _current.items().size())
+        return AppEvents::error(tr("Unable to delete files for scenario: invalid scenario index %1").arg(scenarioIndex));
+
+    const RecognitionScenario& scenario = _current.items().at(scenarioIndex);
+
+    QStringList report;
+    // remove files
+    for (const RecognitionScenarioFileItem& file: scenario.files())
+    {
+        qDebug() << "Deleting file" << file.fullFileName();
+        QFile f(file.fullFileName());
+        if (!f.remove())
+        {
+            qDebug() << "Unable to delete" << f.errorString();
+            report << tr("Unable to delete file %1: %2").arg(f.fileName(), f.errorString());
+        }
+    }
+    // try remove dirs if they are empty
+    QDir dataRoot(AppConfig::scenariosDataDir());
+    for (const RecognitionScenarioFileItem& file: scenario.files())
+    {
+        qDebug() << "Deleting dir" << file.fullPath();
+        dataRoot.rmpath(file.path());
+    }
+
+    if (!report.isEmpty())
+        AppEvents::error(tr("There are errors while deleting scenario files:\n\n%1").arg(report.join("\n")));
+
+    auto status = _scenarioDownloads[scenarioIndex];
+    if (status) prepareDownloadStatus(scenario, status);
 }
 
 ScenarioDownloadStatus* ScenariosProvider::scenarioDownloadStatus(int scenarioIndex)
@@ -181,22 +212,26 @@ void ScenariosProvider::prepareDownloadStatuses()
 {
     for (int i = 0; i < _current.items().size(); i++)
     {
-        const RecognitionScenario& scenario = _current.items().at(i);
-        qDebug() << "Preparing scenario" << i << scenario.title();
         auto status = new ScenarioDownloadStatus;
-        status->_totalFiles = scenario.files().size();
-        if (scenario.allFilesAreLoaded())
-        {
-            qDebug() << "All files loaded";
-            status->_status = ScenarioDownloadStatus::AllLoaded;
-            status->_loadedFiles = scenario.files().size();
-        }
-        else
-        {
-            qDebug() << "Files not loaded";
-            status->_status = ScenarioDownloadStatus::NoFiles;
-            status->_loadedFiles = 0;
-        }
+        prepareDownloadStatus(_current.items().at(i), status);
         _scenarioDownloads.insert(i, status);
+    }
+}
+
+void ScenariosProvider::prepareDownloadStatus(const RecognitionScenario& scenario, ScenarioDownloadStatus* status)
+{
+    qDebug() << "Preparing scenario" << scenario.title();
+    status->_totalFiles = scenario.files().size();
+    if (scenario.allFilesAreLoaded())
+    {
+        qDebug() << "All files loaded";
+        status->_status = ScenarioDownloadStatus::AllLoaded;
+        status->_loadedFiles = scenario.files().size();
+    }
+    else
+    {
+        qDebug() << "Files not loaded";
+        status->_status = ScenarioDownloadStatus::NoFiles;
+        status->_loadedFiles = 0;
     }
 }

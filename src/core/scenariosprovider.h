@@ -80,6 +80,7 @@ private:
 
     void clearDownloadStatuses();
     void prepareDownloadStatuses();
+    void prepareDownloadStatus(const RecognitionScenario& scenario, ScenarioDownloadStatus* status);
 
     void processDownloadProgress(QNetworkReply *reply, const FileDownloadWork &download, QString error);
 };
