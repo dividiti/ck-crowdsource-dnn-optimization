@@ -1,17 +1,34 @@
 #ifndef FRAMESPANEL_H
 #define FRAMESPANEL_H
 
-#include <QScrollArea>
+#include <QWidget>
+#include <QList>
 
-class FramesPanel : public QScrollArea
+class ExperimentContext;
+class FrameWidget;
+class ScenarioRunner;
+
+class FramesPanel : public QWidget
 {
     Q_OBJECT
+
 public:
-    explicit FramesPanel(QWidget *parent = 0);
+    explicit FramesPanel(ExperimentContext* context, QWidget *parent = 0);
 
-signals:
+private slots:
+    void experimentStarted();
+    void experimentStopped();
+    //void scenarioFinished(const QString &error);
 
-public slots:
+private:
+    ExperimentContext* _context;
+    ScenarioRunner* _runner;
+    QList<FrameWidget*> _frames;
+    QStringList _images;
+    bool _stopFlag = false;
+
+    void makeFrames();
+    void prepareImagesBank();
 };
 
 #endif // FRAMESPANEL_H

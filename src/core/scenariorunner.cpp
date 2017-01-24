@@ -36,7 +36,8 @@ void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
         _arguments[_imageFileArgIndex] = imageFile;
     _process->setArguments(_arguments);
 
-    qDebug() << "Execute command";
+    if (verboseDebugPrint)
+        qDebug() << "Start command";
     _process->start();
 
     if (waitForFinish)
@@ -131,13 +132,15 @@ void ScenarioRunner::stateChanged(QProcess::ProcessState newState)
 
 void ScenarioRunner::errorOccurred(QProcess::ProcessError error)
 {
-    qDebug() << "ScenarioRunner::errorOccurred()" << error << _process->errorString();
+    if (verboseDebugPrint)
+        qDebug() << "ScenarioRunner::errorOccurred()" << error << _process->errorString();
     emit scenarioFinished(_process->errorString());
 }
 
 void ScenarioRunner::finished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    qDebug() << "ScenarioRunner::finished()" << exitCode << exitStatus;
+    if (verboseDebugPrint)
+        qDebug() << "ScenarioRunner::finished()" << exitCode << exitStatus;
 
     if (exitStatus == QProcess::CrashExit)
         emit scenarioFinished(_process->errorString());

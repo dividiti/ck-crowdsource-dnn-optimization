@@ -18,6 +18,8 @@ public:
     QString readStdout() const;
     QString readStderr() const;
 
+    bool verboseDebugPrint = false;
+
 signals:
     void scenarioFinished(const QString &error);
 

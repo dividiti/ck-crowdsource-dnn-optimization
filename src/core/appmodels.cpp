@@ -128,7 +128,10 @@ QString RecognitionScenarioFileItem::fullFileName() const
 bool RecognitionScenarioFileItem::isExists() const
 {
     QFile f(fullFileName());
-    return f.exists();
+    bool ok = f.exists();
+    if (!ok)
+        qDebug() << "Not found" << fullFileName();
+    return ok;
 }
 
 bool RecognitionScenarioFileItem::checkMD5() const
@@ -197,6 +200,7 @@ QString RecognitionScenario::html() const
 
 bool RecognitionScenario::allFilesAreLoaded() const
 {
+    qDebug() << "Check files" << _title;
     for (const RecognitionScenarioFileItem& file: _files)
     {
         if (!file.isExists())

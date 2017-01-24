@@ -10,7 +10,7 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
 {
     auto layout = new QHBoxLayout;
     layout->setSpacing(12);
-    layout->addWidget(new FramesPanel);
+    layout->addWidget(new FramesPanel(context));
     layout->addWidget(_featuresPanel = new FeaturesPanel(context));
     layout->addWidget(new ResultsPanel);
 

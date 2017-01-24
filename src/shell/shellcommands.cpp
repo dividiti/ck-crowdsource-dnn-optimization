@@ -139,6 +139,7 @@ void ShellCommands::command_runCachedScenario(const QString &scenarioNumber, con
         return;
     }
     ScenarioRunner runner;
+    runner.verboseDebugPrint = true;
     connect(&runner, &ScenarioRunner::scenarioFinished, [&](const QString& error)
     {
         cout() << (error.isEmpty()? "OK": "FAIL: ") << error << endl;

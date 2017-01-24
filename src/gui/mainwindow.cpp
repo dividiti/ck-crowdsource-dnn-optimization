@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     for (int i = 0; i < EXPERIMENT_COUNT; i++)
     {
         auto e = new Experiment;
+        e->context.experimentIndex = i; // TODO: make read-only somehow
         e->context.platformFeaturesProvider = &_platformFeaturesProvider;
         e->context.scenariosProvider = _scenariosProvider;
         e->panel = new ExperimentPanel(&e->context);
@@ -125,5 +126,8 @@ void MainWindow::onInfo(const QString& msg)
 void MainWindow::updateExperimentConditions()
 {
     for (auto e: _experiments)
-       e->panel->updateExperimentConditions();
+    {
+        e->context.loadFromConfig();
+        e->panel->updateExperimentConditions();
+    }
 }

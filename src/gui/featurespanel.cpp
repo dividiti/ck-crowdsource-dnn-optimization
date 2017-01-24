@@ -10,6 +10,7 @@
 
 #include <QBoxLayout>
 #include <QDebug>
+#include <QInputDialog>
 #include <QLabel>
 #include <QPushButton>
 
@@ -19,85 +20,43 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
 
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    auto buttonStart = new QPushButton(tr("Start"));
-    buttonStart->setEnabled(false);
+    _buttonStart = new QPushButton(tr("Start"));
+    _buttonStop = new QPushButton(tr("Stop"));
+    _buttonStop->setVisible(false);
+    connect(_buttonStart, SIGNAL(pressed()), this, SLOT(startExperiment()));
+    connect(_buttonStop, SIGNAL(pressed()), this, SLOT(stopExperiment()));
 
     _infoPlatform = new InfoLabel(tr("Platform:"));
     _infoScenario = new InfoLabel(tr("Scenario:"));
     _infoBatchSize = new InfoLabel(tr("Batch size:"));
 
-/*
-    auto buttonPlatform = new Ori::Widgets::ClickableLabel;
-    buttonPlatform->setPixmap(QPixmap(":/tools/info"));
-    connect(buttonPlatform, SIGNAL(clicked()), this, SLOT(showPlatformInfo()));
+    auto linkShowPlatformInfo = makeLink(tr("Info"), tr("Platform info"), SLOT(showPlatformInfo()));
+    auto linkShowScenarioInfo = makeLink(tr("Info"), tr("Show scenario info"), SLOT(showScenarioInfo()));
+    _linkSelectScenario = makeLink(tr("Select"), tr("Select another scenario"), SLOT(selectScenario()));
+    _linkSetBatchSize = makeLink(tr("Change"), tr("Change batch size"), SLOT(setBatchSize()));
 
-    auto buttonScenario1 = new Ori::Widgets::ClickableLabel;
-    buttonScenario1->setPixmap(QPixmap(":/tools/info"));
-    connect(buttonScenario1, SIGNAL(clicked()), this, SLOT(showScenarioInfo()));
-
-    auto buttonScenario2 = new Ori::Widgets::ClickableLabel;
-    buttonScenario2->setPixmap(QPixmap(":/tools/info"));
-    connect(buttonScenario2, SIGNAL(clicked()), this, SLOT(selectScenario()));
-
-    auto layoutPlatformButton = new QHBoxLayout;
-    layoutPlatformButton->setMargin(0);
-    layoutPlatformButton->setSpacing(0);
-    layoutPlatformButton->addWidget(buttonPlatform);
-    layoutPlatformButton->addStretch();
-
-    auto layoutPlatform = new QVBoxLayout;
-    layoutPlatform->setMargin(0);
-    layoutPlatform->setSpacing(0);
-    layoutPlatform->addWidget(infoPlatform);
-    layoutPlatform->addLayout(layoutPlatformButton);
-
-    auto layoutScenarioButton = new QHBoxLayout;
-    layoutScenarioButton->setMargin(0);
-    layoutScenarioButton->setSpacing(0);
-    layoutScenarioButton->addWidget(buttonScenario1);
-    layoutScenarioButton->addWidget(buttonScenario2);
-    layoutScenarioButton->addStretch();
-
-    auto layoutScenario = new QVBoxLayout;
-    layoutScenario->setMargin(0);
-    layoutScenario->setSpacing(0);
-    layoutScenario->addWidget(infoScenario);
-    layoutScenario->addLayout(layoutScenarioButton);
-
-    auto layout = new QVBoxLayout;
-    layout->addLayout(layoutPlatform);
-    layout->addLayout(layoutScenario);
-    layout->addWidget(infoBatchSize);
-    layout->addStretch();
-    layout->addWidget(buttonStart);
-    setLayout(layout);
-*/
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
     {
         Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
         {
             _infoPlatform,
-            Ori::Gui::layoutH(
-            {
-                makeLink(tr("Info"), tr("Platform info"), SLOT(showPlatformInfo())),
-                0
-            })
+            Ori::Gui::layoutH({ linkShowPlatformInfo, 0 })
         }),
         Utils::makeDivider(),
         Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
         {
             _infoScenario,
-            Ori::Gui::layoutH(
-            {
-                makeLink(tr("Info"), tr("Show scenario info"), SLOT(showScenarioInfo())),
-                makeLink(tr("Select"), tr("Select another scenario"), SLOT(selectScenario())),
-                0
-            })
+            Ori::Gui::layoutH({ linkShowScenarioInfo, _linkSelectScenario, 0 })
         }),
         Utils::makeDivider(),
-        _infoBatchSize,
+        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
+        {
+            _infoBatchSize,
+            Ori::Gui::layoutH({ _linkSetBatchSize, 0 })
+        }),
         0,
-        buttonStart
+        _buttonStart,
+        _buttonStop
     }));
 }
 
@@ -160,7 +119,7 @@ void FeaturesPanel::updateExperimentConditions()
         ? _context->currentScenario().title().replace(": ", "\n")
         : NA);
 
-    _infoBatchSize->setInfo(NA);
+    _infoBatchSize->setInfo(QString::number(_context->batchSize()));
 }
 
 void FeaturesPanel::currentScenarioSelected(int index)
@@ -171,4 +130,35 @@ void FeaturesPanel::currentScenarioSelected(int index)
         _context->setCurrentScenarioIndex(index);
         updateExperimentConditions();
     }
+}
+
+void FeaturesPanel::setBatchSize()
+{
+    int batchSize = QInputDialog::getInt(this, tr("Batch Size"), tr("Set batch size:"),
+        _context->batchSize(), _context->minBatchSize(), _context->maxBatchSize());
+    if (batchSize != _context->batchSize())
+    {
+        _context->setBatchSize(batchSize);
+        updateExperimentConditions();
+    }
+}
+
+void FeaturesPanel::enableControls(bool on)
+{
+    _buttonStart->setVisible(on);
+    _buttonStop->setVisible(!on);
+    _linkSelectScenario->setVisible(on);
+    _linkSetBatchSize->setVisible(on);
+}
+
+void FeaturesPanel::startExperiment()
+{
+    enableControls(false);
+    _context->startExperiment();
+}
+
+void FeaturesPanel::stopExperiment()
+{
+    enableControls(true);
+    _context->stopExperiment();
 }

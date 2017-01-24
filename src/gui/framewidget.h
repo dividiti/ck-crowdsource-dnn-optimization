@@ -3,15 +3,27 @@
 
 #include <QWidget>
 
+QT_BEGIN_NAMESPACE
+class QLabel;
+class QPixmap;
+QT_END_NAMESPACE
+
 class FrameWidget : public QWidget
 {
     Q_OBJECT
+
 public:
     explicit FrameWidget(QWidget *parent = 0);
 
-signals:
+    void loadImage(const QString& path);
+    void showInfo(const QString& info);
 
-public slots:
+private:
+    QLabel *_imageView, *_textInfo;
+
+    const QPixmap& frame() const;
+    QPixmap getSampleImage();
+    QPixmap getFramedImage(const QPixmap& source);
 };
 
 #endif // FRAMEWIDGET_H

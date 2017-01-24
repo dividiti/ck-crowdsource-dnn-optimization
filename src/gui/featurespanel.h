@@ -21,14 +21,20 @@ private slots:
     void showPlatformInfo();
     void showScenarioInfo();
     void selectScenario();
+    void setBatchSize();
+    void startExperiment();
+    void stopExperiment();
     void currentScenarioSelected(int index);
 
 private:
     ExperimentContext* _context;
     QPointer<ScenariosListWidget> _scenariosWindow;
     InfoLabel *_infoPlatform, *_infoScenario, *_infoBatchSize;
+    QWidget *_buttonStart, *_buttonStop;
+    QWidget *_linkSelectScenario, *_linkSetBatchSize;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
+    void enableControls(bool on);
 };
 
 #endif // FEATURESPANEL_H
