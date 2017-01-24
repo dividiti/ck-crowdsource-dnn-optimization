@@ -18,7 +18,7 @@ class ShellCommands : public QObject
     Q_OBJECT
 
 public:
-    explicit ShellCommands(QObject *parent = 0) : QObject(parent) {}
+    explicit ShellCommands(QObject *parent = 0);
 
     bool process(const QApplication& app);
 
@@ -26,6 +26,7 @@ private:
     void command_querySharedRepoInfo();
     void command_showCachedPlatformFeatures();
     void command_loadScenariosForCachedFeatures();
+    void command_runCachedScenario(const QString& scenarionNumber);
 
 private slots:
     void sharedRepoInfoReceived(SharedRepoInfo info);
@@ -35,7 +36,7 @@ private:
     QTextStream& cout();
 
     RemoteDataAccess _network;
-    ScenariosProvider *_scenariosProvider = nullptr;
+    ScenariosProvider *_scenariosProvider;
     bool _saveLoadedScenariosToCache = false;
 };
 

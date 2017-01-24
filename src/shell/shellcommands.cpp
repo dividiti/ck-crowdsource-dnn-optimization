@@ -1,11 +1,17 @@
 #include "appconfig.h"
 #include "platformfeaturesprovider.h"
 #include "scenariosprovider.h"
+#include "scenariorunner.h"
 #include "shellcommands.h"
 
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QTextStream>
+
+ShellCommands::ShellCommands(QObject *parent) : QObject(parent)
+{
+    _scenariosProvider = new ScenariosProvider(&_network, this);
+}
 
 bool ShellCommands::process(const QApplication &app)
 {
@@ -29,26 +35,26 @@ bool ShellCommands::process(const QApplication &app)
         .arg(option_loadScenariosForCachedFeatures.names().first()));
     cmdLine.addOption(option_saveScenariosForCachedFeatures);
 
+    QCommandLineOption option_runCachedScenario("5", "Load cached scenarion.", "scenario index");
+    cmdLine.addOption(option_runCachedScenario);
+
     cmdLine.process(app);
 
     if (cmdLine.isSet(option_querySharedResourcesInfo))
-    {
         command_querySharedRepoInfo();
-        return true;
-    }
-    if (cmdLine.isSet(option_loadCachedPlatformFeatures))
-    {
+    else if (cmdLine.isSet(option_loadCachedPlatformFeatures))
         command_showCachedPlatformFeatures();
-        return true;
-    }
-    if (cmdLine.isSet(option_loadScenariosForCachedFeatures))
+    else if (cmdLine.isSet(option_loadScenariosForCachedFeatures))
     {
         _saveLoadedScenariosToCache = cmdLine.isSet(option_saveScenariosForCachedFeatures);
         command_loadScenariosForCachedFeatures();
-        return true;
     }
+    else if (cmdLine.isSet(option_runCachedScenario))
+        command_runCachedScenario(cmdLine.value(option_runCachedScenario));
+    else
+        return false;
 
-    return false;
+    return true;
 }
 
 QTextStream& ShellCommands::cout()
@@ -95,7 +101,6 @@ void ShellCommands::command_loadScenariosForCachedFeatures()
         return;
     }
     QEventLoop waiter;
-    _scenariosProvider = new ScenariosProvider(&_network, this);
     connect(_scenariosProvider, &ScenariosProvider::scenariosReceived, this, &ShellCommands::scenariosReceived);
     connect(&_network, &RemoteDataAccess::requestFinished, &waiter, &QEventLoop::quit);
     _scenariosProvider->queryScenarios(url, features);
@@ -111,4 +116,30 @@ void ShellCommands::scenariosReceived(RecognitionScenarios scenarios)
     }
     else
         cout() << scenarios.str() << endl;
+}
+
+void ShellCommands::command_runCachedScenario(const QString& scenarionNumber)
+{
+    RecognitionScenarios scenarios;
+    scenarios.loadFromFile(AppConfig::scenariosCacheFile());
+    if (scenarios.isEmpty())
+    {
+        cout() << "Cached recognition scenarios not found or they are empty" << endl;
+        return;
+    }
+    bool ok;
+    int scenarioIndex = scenarionNumber.toInt(&ok);
+    if (!ok || scenarioIndex < 0 || scenarioIndex >= scenarios.items().size())
+    {
+        cout() << scenarionNumber << " is not valid scenario index" << endl;
+        return;
+    }
+    ScenarioRunner runner;
+    connect(&runner, &ScenarioRunner::scenarioFinished, [&](const QString& error)
+    {
+        cout() << (error.isEmpty()? "OK": "FAIL: ") << error << endl;
+        cout() << "STDOUT:" << endl << runner.readStdout() << endl;
+        cout() << "STDERR:" << endl << runner.readStderr() << endl;
+    });
+    runner.run(scenarios.items().at(scenarioIndex), true);
 }

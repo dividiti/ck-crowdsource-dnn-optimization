@@ -16,6 +16,13 @@
 #define KEY_RETURN "return"
 #define KEY_ERROR "error"
 
+bool ckJsonBool(const QJsonObject& obj, const QString& key)
+{
+    return obj[key].toString() == "yes";
+}
+
+//-----------------------------------------------------------------------------
+
 void SharedRepoInfo::parseJson(const QByteArray& text)
 {
     static QString repoKey("default");
@@ -102,6 +109,9 @@ bool RecognitionScenarioFileItem::parseJson(const QJsonObject& json)
     _path = json["path"].toString();
     _md5 = json["md5"].toString();
     _url = json["url"].toString();
+    _isDefaultImage = ckJsonBool(json, "default_image");
+    _isExecutable = ckJsonBool(json, "executable");
+    _isLibrary = ckJsonBool(json, "library");
     return true;
 }
 
@@ -157,10 +167,12 @@ bool RecognitionScenario::parseJson(const QJsonObject& json)
         _fileSizeBytes = long(json["total_file_size"].toDouble());
         _fileSizeMB = Utils::bytesIntoHumanReadable(_fileSizeBytes);
     }
+
     if (json.contains("meta"))
     {
         auto meta = json["meta"].toObject();
         _title = meta["title"].toString();
+        _cmd = meta["cmd"].toString();
 
         QJsonArray files = meta["files"].toArray();
         for (auto file = files.constBegin(); file != files.constEnd(); file++)

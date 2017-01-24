@@ -60,6 +60,9 @@ public:
     QString name() const { return _name; }
     QString md5() const { return _md5; }
     QString url() const { return _url; }
+    bool isLibrary() const { return _isLibrary; }
+    bool isExecutable() const { return _isExecutable; }
+    bool isDefaultImage() const { return _isDefaultImage; }
 
     QString fullPath() const;
     QString fullFileName() const;
@@ -69,6 +72,7 @@ public:
 
 private:
     QString _path, _name, _md5, _url;
+    bool _isLibrary, _isExecutable, _isDefaultImage;
 };
 
 //-----------------------------------------------------------------------------
@@ -87,13 +91,14 @@ public:
     long fileSizeBytes() const { return _fileSizeBytes; }
     QString fileSizeMB() const { return _fileSizeMB; }
     QString title() const { return _title; }
+    QString cmd() const { return _cmd; }
 
     const QList<RecognitionScenarioFileItem> files() const { return _files; }
     bool allFilesAreLoaded() const;
 
 private:
     long _fileSizeBytes = 0;
-    QString _fileSizeMB, _title;
+    QString _fileSizeMB, _title, _cmd;
     QList<RecognitionScenarioFileItem> _files;
     QJsonObject _json;
 };
