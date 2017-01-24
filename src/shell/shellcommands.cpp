@@ -35,8 +35,12 @@ bool ShellCommands::process(const QApplication &app)
         .arg(option_loadScenariosForCachedFeatures.names().first()));
     cmdLine.addOption(option_saveScenariosForCachedFeatures);
 
-    QCommandLineOption option_runCachedScenario("5", "Load cached scenarion.", "scenario index");
+    QCommandLineOption option_runCachedScenario("5", "Run downloaded scenario with default or specified image.", "scenario index");
     cmdLine.addOption(option_runCachedScenario);
+
+    QCommandLineOption option_useImageFile("i", QString("Image file to process by scenario. Use with option %1.")
+        .arg(option_runCachedScenario.names().first()), "path");
+    cmdLine.addOption(option_useImageFile);
 
     cmdLine.process(app);
 
@@ -50,7 +54,7 @@ bool ShellCommands::process(const QApplication &app)
         command_loadScenariosForCachedFeatures();
     }
     else if (cmdLine.isSet(option_runCachedScenario))
-        command_runCachedScenario(cmdLine.value(option_runCachedScenario));
+        command_runCachedScenario(cmdLine.value(option_runCachedScenario), cmdLine.values(option_useImageFile));
     else
         return false;
 
@@ -118,7 +122,7 @@ void ShellCommands::scenariosReceived(RecognitionScenarios scenarios)
         cout() << scenarios.str() << endl;
 }
 
-void ShellCommands::command_runCachedScenario(const QString& scenarionNumber)
+void ShellCommands::command_runCachedScenario(const QString &scenarioNumber, const QStringList &imageFiles)
 {
     RecognitionScenarios scenarios;
     scenarios.loadFromFile(AppConfig::scenariosCacheFile());
@@ -128,10 +132,10 @@ void ShellCommands::command_runCachedScenario(const QString& scenarionNumber)
         return;
     }
     bool ok;
-    int scenarioIndex = scenarionNumber.toInt(&ok);
+    int scenarioIndex = scenarioNumber.toInt(&ok);
     if (!ok || scenarioIndex < 0 || scenarioIndex >= scenarios.items().size())
     {
-        cout() << scenarionNumber << " is not valid scenario index" << endl;
+        cout() << scenarioNumber << " is not valid scenario index" << endl;
         return;
     }
     ScenarioRunner runner;
@@ -141,5 +145,19 @@ void ShellCommands::command_runCachedScenario(const QString& scenarionNumber)
         cout() << "STDOUT:" << endl << runner.readStdout() << endl;
         cout() << "STDERR:" << endl << runner.readStderr() << endl;
     });
-    runner.run(scenarios.items().at(scenarioIndex), true);
+    auto scenario = scenarios.items().at(scenarioIndex) ;
+    runner.prepare(scenario);
+
+    if (imageFiles.isEmpty())
+    {
+        for (auto file: scenario.files())
+            if (file.isDefaultImage())
+            {
+                runner.run(file.fullFileName(), true);
+                break;
+            }
+    }
+    else
+        for (auto imageFile: imageFiles)
+            runner.run(imageFile, true);
 }

@@ -12,7 +12,8 @@ class ScenarioRunner : public QObject
 public:
     explicit ScenarioRunner(QObject *parent = 0);
 
-    void run(const RecognitionScenario& scenario, bool waitForFinish = false);
+    void prepare(const RecognitionScenario& scenario);
+    void run(const QString& imageFile, bool waitForFinish = false);
 
     QString readStdout() const;
     QString readStderr() const;
@@ -38,10 +39,12 @@ private:
     };
 
     QProcess* _process;
+    QStringList _arguments;
+    int _imageFileArgIndex;
 
     ScenarioPaths processFiles(const RecognitionScenario& scenario) const;
     QString prepareProgram(const QStringList &args) const;
-    QStringList prepareArguments(const QStringList &args, const QString &defaultImage) const;
+    void prepareArguments(const QStringList &args);
     QProcessEnvironment prepareInvironment(const QStringList &libs) const;
 };
 

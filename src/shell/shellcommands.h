@@ -26,7 +26,7 @@ private:
     void command_querySharedRepoInfo();
     void command_showCachedPlatformFeatures();
     void command_loadScenariosForCachedFeatures();
-    void command_runCachedScenario(const QString& scenarionNumber);
+    void command_runCachedScenario(const QString& scenarioNumber, const QStringList& imageFiles);
 
 private slots:
     void sharedRepoInfoReceived(SharedRepoInfo info);

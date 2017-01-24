@@ -7,18 +7,17 @@
 ScenarioRunner::ScenarioRunner(QObject *parent) : QObject(parent)
 {
     _process = new QProcess(this);
-    connect(_process, &QProcess::started, this, &ScenarioRunner::started);
-    connect(_process, &QProcess::stateChanged, this, &ScenarioRunner::stateChanged);
+    //connect(_process, &QProcess::started, this, &ScenarioRunner::started);
+    //connect(_process, &QProcess::stateChanged, this, &ScenarioRunner::stateChanged);
     connect(_process, &QProcess::errorOccurred, this, &ScenarioRunner::errorOccurred);
     connect(_process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
-    connect(_process, &QProcess::readyReadStandardError, this, &ScenarioRunner::readyReadStandardError);
-    connect(_process, &QProcess::readyReadStandardOutput, this, &ScenarioRunner::readyReadStandardOutput);
+    //connect(_process, &QProcess::readyReadStandardError, this, &ScenarioRunner::readyReadStandardError);
+    //connect(_process, &QProcess::readyReadStandardOutput, this, &ScenarioRunner::readyReadStandardOutput);
 }
 
-void ScenarioRunner::run(const RecognitionScenario& scenario, bool waitForFinish)
+void ScenarioRunner::prepare(const RecognitionScenario& scenario)
 {
-    qDebug() << "Run scenario" << scenario.title();
-    qDebug() << "Prepare command" << scenario.cmd();
+    qDebug() << "Prepare scenario" << scenario.title() << scenario.cmd();
 
     // TODO: split more careful regarding to quoted arguments containing spaces
     QStringList args = scenario.cmd().split(' ', QString::SkipEmptyParts);
@@ -27,8 +26,15 @@ void ScenarioRunner::run(const RecognitionScenario& scenario, bool waitForFinish
 
     _process->setWorkingDirectory(paths.exe);
     _process->setProgram(prepareProgram(args));
-    _process->setArguments(prepareArguments(args, paths.defaultImage));
     _process->setProcessEnvironment(prepareInvironment(paths.libs));
+    prepareArguments(args);
+}
+
+void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
+{
+    if (_imageFileArgIndex >= 0)
+        _arguments[_imageFileArgIndex] = imageFile;
+    _process->setArguments(_arguments);
 
     qDebug() << "Execute command";
     _process->start();
@@ -49,12 +55,13 @@ ScenarioRunner::ScenarioPaths ScenarioRunner::processFiles(const RecognitionScen
         }
         if (file.isExecutable())
         {
-            paths.libs << file.fullPath();
-            qDebug() << "LIB" << file.fullPath();
+            auto path = file.fullPath();
+            paths.libs << path;
+            qDebug() << "LIB" << path;
             if (!file.isLibrary())
             {
-                paths.exe = file.fullPath();
-                qDebug() << "EXE" << file.fullPath();
+                paths.exe = path;
+                qDebug() << "EXE" << path;
             }
         }
     }
@@ -73,22 +80,28 @@ QString ScenarioRunner::prepareProgram(const QStringList &args) const
     return cmd;
 }
 
-QStringList ScenarioRunner::prepareArguments(const QStringList &rawArgs, const QString& defaultImage) const
+void ScenarioRunner::prepareArguments(const QStringList &args)
 {
     const QString localPathEntry("$#local_path#$/openscience");
     const QString imageEntry("$#image#$");
 
-    QStringList programArgs;
-    for (int i = 1; i < rawArgs.size(); i++)
+    const QString scenarioDataDir = AppConfig::scenariosDataDir();
+
+    _arguments.clear();
+    _imageFileArgIndex = -1;
+    for (int i = 1; i < args.size(); i++)
     {
-        QString rawArg = rawArgs.at(i);
-        auto arg = rawArg
-                .replace(localPathEntry, AppConfig::scenariosDataDir())
-                .replace(imageEntry, defaultImage);
-        programArgs << arg;
-        qDebug() << "ARG" << arg;
+        QString arg = args.at(i);
+        if (arg.contains(imageEntry))
+        {
+            _imageFileArgIndex = i-1;
+            _arguments << QString();
+        }
+        else
+            _arguments << arg.replace(localPathEntry, scenarioDataDir);
     }
-    return programArgs;
+    for (const QString& arg: _arguments)
+        qDebug() << "ARG" << (arg.isEmpty()? QString("<path to image here>"): arg);
 }
 
 QProcessEnvironment ScenarioRunner::prepareInvironment(const QStringList& libs) const
