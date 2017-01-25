@@ -60,7 +60,14 @@ void FramesPanel::experimentStarted()
             auto imageFile = _images.at(imageIndex);
             _frames.at(i)->loadImage(imageFile);
             _runner->run(imageFile, true);
-            _frames.at(i)->showInfo(_runner->readStdout());
+            if (!_runner->ok())
+            {
+                AppEvents::error(_runner->error());
+                _stopFlag = true;
+                break;
+            }
+            else
+                _frames.at(i)->showInfo(_runner->stdout());
 
             imageIndex++;
             if (imageIndex == imagesCount)

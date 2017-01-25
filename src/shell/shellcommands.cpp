@@ -144,8 +144,8 @@ void ShellCommands::command_runCachedScenario(const QString &scenarioNumber, con
     connect(&runner, &ScenarioRunner::scenarioFinished, [&](const QString& error)
     {
         cout() << (error.isEmpty()? "OK": "FAIL: ") << error << endl;
-        cout() << "STDOUT:" << endl << runner.readStdout() << endl;
-        cout() << "STDERR:" << endl << runner.readStderr() << endl;
+        cout() << "STDOUT:" << endl << runner.stdout() << endl;
+        cout() << "STDERR:" << endl << runner.stderr() << endl;
     });
     if (imageFiles.isEmpty())
     {

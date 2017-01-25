@@ -39,10 +39,13 @@ public:
 
     void run(const QString& imageFile, bool waitForFinish = false);
 
-    QString readStdout() const;
-    QString readStderr() const;
+    QString stdout() const { return _stdout; }
+    QString stderr() const { return _stderr; }
 
     bool verboseDebugPrint = false;
+
+    bool ok() const { return _error.isEmpty(); }
+    QString error() const { return _error; }
 
 signals:
     void scenarioFinished(const QString &error);
@@ -55,6 +58,7 @@ private:
     QProcess* _process;
     QStringList _arguments;
     int _imageFileArgIndex;
+    QString _error, _stderr, _stdout;
 };
 
 #endif // SCENARIORUNNER_H

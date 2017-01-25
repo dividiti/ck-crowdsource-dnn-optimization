@@ -76,7 +76,7 @@ void ScenarioRunParams::prepareInvironment()
     if (!_paths.isEmpty())
     {
 #ifdef Q_OS_LINUX
-        _env.insert("LD_LIBRARY_PATH", _paths.join(":") + ":$LD_LIBRARY_PATH");
+       // _env.insert("LD_LIBRARY_PATH", _paths.join(":") + ":$LD_LIBRARY_PATH");
 #endif
 #ifdef Q_OS_MAC
         // TODO: MacOS
@@ -104,6 +104,10 @@ ScenarioRunner::ScenarioRunner(const ScenarioRunParams &params, QObject *parent)
 
 void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
 {
+    _error.clear();
+    _stdout.clear();
+    _stderr.clear();
+
     if (_imageFileArgIndex >= 0)
         _arguments[_imageFileArgIndex] = imageFile;
     _process->setArguments(_arguments);
@@ -118,8 +122,7 @@ void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
 
 void ScenarioRunner::errorOccurred(QProcess::ProcessError error)
 {
-    if (verboseDebugPrint)
-        qDebug() << "ScenarioRunner::errorOccurred()" << error << _process->errorString();
+    qDebug() << "ScenarioRunner::errorOccurred()" << error << _process->errorString();
 
     emit scenarioFinished(_process->errorString());
 }
@@ -129,18 +132,13 @@ void ScenarioRunner::finished(int exitCode, QProcess::ExitStatus exitStatus)
     if (verboseDebugPrint)
         qDebug() << "ScenarioRunner::finished()" << exitCode << exitStatus;
 
+    _stdout = QString::fromUtf8(_process->readAllStandardOutput());
+    _stderr = QString::fromUtf8(_process->readAllStandardError());
+
     if (exitStatus == QProcess::CrashExit)
-        emit scenarioFinished(_process->errorString());
-    else
-        emit scenarioFinished(QString());
-}
+        _error = _process->errorString();
+    else if (exitCode != 0 || !_stderr.isEmpty())
+        _error = _stderr;
 
-QString ScenarioRunner::readStdout() const
-{
-    return QString::fromUtf8(_process->readAllStandardOutput());
-}
-
-QString ScenarioRunner::readStderr() const
-{
-    return QString::fromUtf8(_process->readAllStandardError());
+    emit scenarioFinished(_error);
 }
