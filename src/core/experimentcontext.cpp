@@ -53,7 +53,7 @@ void ExperimentContext::startExperiment()
 void ExperimentContext::stopExperiment()
 {
     _isExperimentStarted = false;
-    emit experimentStopped();
+    emit experimentStopping();
 }
 
 void ExperimentContext::loadFromConfig()

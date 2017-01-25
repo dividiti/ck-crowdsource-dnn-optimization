@@ -9,6 +9,7 @@
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDir>
+#include <QTimer>
 
 ImagesBank::ImagesBank()
 {
@@ -116,10 +117,21 @@ FramesPanel::~FramesPanel()
 void FramesPanel::experimentStarted()
 {
     if (!_context->currentScenarioExists())
-        return AppEvents::error(tr("No scenario selected"));
+    {
+        AppEvents::error(tr("No scenario selected"));
+        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+        return;
+    }
 
     auto scenario = _context->currentScenario();
     qDebug() << "Start experiment for scenario" << scenario.title();
+
+    if (!scenario.allFilesAreLoaded())
+    {
+        AppEvents::error(tr("Not all files of scenario were loaded"));
+        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+        return;
+    }
 
     if (!prepareImages()) return;
 

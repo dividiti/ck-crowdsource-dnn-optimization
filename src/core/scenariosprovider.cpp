@@ -173,6 +173,8 @@ void ScenariosProvider::deleteScenarioFiles(int scenarioIndex)
     // remove files
     for (const RecognitionScenarioFileItem& file: scenario.files())
     {
+        if (!file.isExecutable()) return;
+
         qDebug() << "Deleting file" << file.fullFileName();
         QFile f(file.fullFileName());
         if (!f.remove())

@@ -154,7 +154,8 @@ ScenariosListWidget::ScenariosListWidget(ExperimentContext* context, QWidget *pa
     setAttribute(Qt::WA_DeleteOnClose);
 
     auto scenariosLayout = new QVBoxLayout;
-    for (int i = 0; i < context->currentScenarios().size(); i++)
+    int scenariosCount = context->currentScenarios().size();
+    for (int i = 0; i < scenariosCount; i++)
     {
         auto scenarioWidget = new ScenarioItemWidget(context, i);
         connect(scenarioWidget, SIGNAL(selectionFlagClicked()), this, SLOT(scenarioSelected()));
@@ -162,7 +163,9 @@ ScenariosListWidget::ScenariosListWidget(ExperimentContext* context, QWidget *pa
         _scenarioWidgets.append(scenarioWidget);
 
         scenariosLayout->addWidget(scenarioWidget);
-        scenariosLayout->addWidget(Utils::makeDivider());
+
+        if (i < scenariosCount-1)
+            scenariosLayout->addWidget(Utils::makeDivider());
     }
 
     auto scenariosList = new QWidget;

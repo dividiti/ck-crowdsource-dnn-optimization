@@ -39,7 +39,7 @@ public:
 
 signals:
     void experimentStarted();
-    void experimentStopped();
+    void experimentStopping();
     void experimentFinished();
     void experimentResultReady();
 
