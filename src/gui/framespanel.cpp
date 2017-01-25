@@ -58,13 +58,17 @@ void BatchItem::runInternal()
 
 void BatchItem::scenarioFinished(const QString &error)
 {
-    if (!error.isEmpty())
-        return AppEvents::error(error);
-
-    _frame->loadImage(_images->imageFile(_imageIndex));
-    _frame->showInfo(parseOutput(_runner->stdout()));
-
-    emit finished(_runner->readProbe());
+    if (error.isEmpty())
+    {
+        _frame->loadImage(_images->imageFile(_imageIndex));
+        _frame->showInfo(parseOutput(_runner->stdout()));
+        emit finished(_runner->readProbe());
+    }
+    else
+    {
+        _stopFlag = true;
+        AppEvents::error(error);
+    }
 
     if (_stopFlag)
     {
@@ -98,7 +102,7 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QWidget(
 {
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
-    connect(_context, SIGNAL(experimentStopped()), this, SLOT(experimentStopped()));
+    connect(_context, SIGNAL(experimentStopping()), this, SLOT(experimentStopping()));
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -144,7 +148,7 @@ void FramesPanel::experimentStarted()
     for (auto item: _batchItems) item->run();
 }
 
-void FramesPanel::experimentStopped()
+void FramesPanel::experimentStopping()
 {
     qDebug() << "Stopping batch processing";
     for (auto item: _batchItems) item->stop();

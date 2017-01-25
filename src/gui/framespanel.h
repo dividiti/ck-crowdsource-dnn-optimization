@@ -67,7 +67,7 @@ public:
 
 private slots:
     void experimentStarted();
-    void experimentStopped();
+    void experimentStopping();
     void batchStopped();
 
 private:
