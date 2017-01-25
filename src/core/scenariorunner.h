@@ -6,13 +6,37 @@
 
 #include "appmodels.h"
 
+class ScenarioRunParams
+{
+public:
+    ScenarioRunParams(const RecognitionScenario& scenario);
+
+    QString program() const { return _program; }
+    QString workdir() const { return _workdir; }
+    const QStringList& arguments() const { return _arguments; }
+    int imageFileArgIndex() const { return _imageFileArgIndex; }
+    const QProcessEnvironment& environment() const { return _env; }
+
+private:
+    QProcessEnvironment _env;
+    QStringList _paths, _arguments;
+    QString _workdir, _program;
+    int _imageFileArgIndex = -1;
+
+    void processFiles(const RecognitionScenario& scenario);
+    void prepareProgram(const QStringList &args);
+    void prepareArguments(const QStringList &args);
+    void prepareInvironment();
+};
+
+//-----------------------------------------------------------------------------
+
 class ScenarioRunner : public QObject
 {
     Q_OBJECT
 public:
-    explicit ScenarioRunner(QObject *parent = 0);
+    explicit ScenarioRunner(const ScenarioRunParams &params, QObject *parent = 0);
 
-    void prepare(const RecognitionScenario& scenario);
     void run(const QString& imageFile, bool waitForFinish = false);
 
     QString readStdout() const;
@@ -24,30 +48,13 @@ signals:
     void scenarioFinished(const QString &error);
 
 private slots:
-    void stateChanged(QProcess::ProcessState newState);
     void errorOccurred(QProcess::ProcessError error);
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
-    void readyReadStandardError();
-    void readyReadStandardOutput();
-    void started();
 
 private:
-    class ScenarioPaths
-    {
-    public:
-        QStringList libs;
-        QString exe;
-        QString defaultImage;
-    };
-
     QProcess* _process;
     QStringList _arguments;
     int _imageFileArgIndex;
-
-    ScenarioPaths processFiles(const RecognitionScenario& scenario) const;
-    QString prepareProgram(const QStringList &args) const;
-    void prepareArguments(const QStringList &args);
-    QProcessEnvironment prepareInvironment(const QStringList &libs) const;
 };
 
 #endif // SCENARIORUNNER_H

@@ -47,8 +47,7 @@ void FramesPanel::experimentStarted()
 
     _stopFlag = false;
 
-    _runner = new ScenarioRunner(this);
-    _runner->prepare(scenario);
+    _runner = new ScenarioRunner(ScenarioRunParams(scenario));
 
     qDebug() << "Start batch processing";
 

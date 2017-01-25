@@ -4,30 +4,102 @@
 #include <QDebug>
 #include <QStringList>
 
-ScenarioRunner::ScenarioRunner(QObject *parent) : QObject(parent)
-{
-    _process = new QProcess(this);
-    //connect(_process, &QProcess::started, this, &ScenarioRunner::started);
-    //connect(_process, &QProcess::stateChanged, this, &ScenarioRunner::stateChanged);
-    connect(_process, &QProcess::errorOccurred, this, &ScenarioRunner::errorOccurred);
-    connect(_process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
-    //connect(_process, &QProcess::readyReadStandardError, this, &ScenarioRunner::readyReadStandardError);
-    //connect(_process, &QProcess::readyReadStandardOutput, this, &ScenarioRunner::readyReadStandardOutput);
-}
-
-void ScenarioRunner::prepare(const RecognitionScenario& scenario)
+ScenarioRunParams::ScenarioRunParams(const RecognitionScenario& scenario)
 {
     qDebug() << "Prepare scenario" << scenario.title() << scenario.cmd();
 
     // TODO: split more careful regarding to quoted arguments containing spaces
     QStringList args = scenario.cmd().split(' ', QString::SkipEmptyParts);
 
-    auto paths = processFiles(scenario);
-
-    _process->setWorkingDirectory(paths.exe);
-    _process->setProgram(prepareProgram(args));
-    _process->setProcessEnvironment(prepareInvironment(paths.libs));
+    processFiles(scenario);
+    prepareProgram(args);
     prepareArguments(args);
+    prepareInvironment();
+}
+
+void ScenarioRunParams::processFiles(const RecognitionScenario& scenario)
+{
+    for (const RecognitionScenarioFileItem& file: scenario.files())
+    {
+        if (file.isExecutable())
+        {
+            auto path = file.fullPath();
+            _paths << path;
+            qDebug() << "LIB" << path;
+
+            if (!file.isLibrary())
+            {
+                _workdir = path;
+                qDebug() << "EXE" << path;
+            }
+        }
+    }
+}
+
+void ScenarioRunParams::prepareProgram(const QStringList &args)
+{
+    if (args.isEmpty())
+    {
+        qCritical() << "Program name not found";
+        return;
+    }
+    _program = args.first();
+    qDebug() << "CMD" << _program;
+}
+
+void ScenarioRunParams::prepareArguments(const QStringList &args)
+{
+    static QString localPathEntry("$#local_path#$/openscience");
+    static QString imageEntry("$#image#$");
+
+    const QString scenarioDataDir = AppConfig::scenariosDataDir();
+
+    for (int i = 1; i < args.size(); i++)
+    {
+        QString arg = args.at(i);
+        if (arg.contains(imageEntry))
+        {
+            _imageFileArgIndex = i-1;
+            _arguments << QString();
+        }
+        else
+            _arguments << arg.replace(localPathEntry, scenarioDataDir);
+    }
+    for (const QString& arg: _arguments)
+        qDebug() << "ARG" << (arg.isEmpty()? QString("<image path here>"): arg);
+}
+
+void ScenarioRunParams::prepareInvironment()
+{
+    _env.insert("CT_REPEAT_MAIN", "1");
+
+    if (!_paths.isEmpty())
+    {
+#ifdef Q_OS_LINUX
+        _env.insert("LD_LIBRARY_PATH", _paths.join(":") + ":$LD_LIBRARY_PATH");
+#endif
+#ifdef Q_OS_MAC
+        // TODO: MacOS
+#endif
+#ifdef Q_OS_WIN
+        // TODO: Windows
+#endif
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+ScenarioRunner::ScenarioRunner(const ScenarioRunParams &params, QObject *parent) : QObject(parent)
+{
+    _process = new QProcess(this);
+    _process->setWorkingDirectory(params.workdir());
+    _process->setProgram(params.program());
+    _process->setProcessEnvironment(params.environment());
+    connect(_process, &QProcess::errorOccurred, this, &ScenarioRunner::errorOccurred);
+    connect(_process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
+
+    _arguments = params.arguments();
+    _imageFileArgIndex = params.imageFileArgIndex();
 }
 
 void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
@@ -44,96 +116,11 @@ void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
         _process->waitForFinished();
 }
 
-ScenarioRunner::ScenarioPaths ScenarioRunner::processFiles(const RecognitionScenario& scenario) const
-{
-    ScenarioPaths paths;
-    for (const RecognitionScenarioFileItem& file: scenario.files())
-    {
-        if (file.isDefaultImage())
-        {
-            paths.defaultImage = file.fullFileName();
-            qDebug() << "IMG" << file.fullFileName();
-        }
-        if (file.isExecutable())
-        {
-            auto path = file.fullPath();
-            paths.libs << path;
-            qDebug() << "LIB" << path;
-            if (!file.isLibrary())
-            {
-                paths.exe = path;
-                qDebug() << "EXE" << path;
-            }
-        }
-    }
-    return paths;
-}
-
-QString ScenarioRunner::prepareProgram(const QStringList &args) const
-{
-    if (args.isEmpty())
-    {
-        qCritical() << "Program name not found";
-        return QString();
-    }
-    auto cmd = args.first();
-    qDebug() << "CMD" << cmd;
-    return cmd;
-}
-
-void ScenarioRunner::prepareArguments(const QStringList &args)
-{
-    const QString localPathEntry("$#local_path#$/openscience");
-    const QString imageEntry("$#image#$");
-
-    const QString scenarioDataDir = AppConfig::scenariosDataDir();
-
-    _arguments.clear();
-    _imageFileArgIndex = -1;
-    for (int i = 1; i < args.size(); i++)
-    {
-        QString arg = args.at(i);
-        if (arg.contains(imageEntry))
-        {
-            _imageFileArgIndex = i-1;
-            _arguments << QString();
-        }
-        else
-            _arguments << arg.replace(localPathEntry, scenarioDataDir);
-    }
-    for (const QString& arg: _arguments)
-        qDebug() << "ARG" << (arg.isEmpty()? QString("<path to image here>"): arg);
-}
-
-QProcessEnvironment ScenarioRunner::prepareInvironment(const QStringList& libs) const
-{
-    QProcessEnvironment env;
-    env.insert("CT_REPEAT_MAIN", "1");
-
-    if (!libs.isEmpty())
-    {
-#ifdef Q_OS_LINUX
-        env.insert("LD_LIBRARY_PATH", libs.join(":") + ":$LD_LIBRARY_PATH");
-#endif
-#ifdef Q_OS_MAC
-        // TODO: MacOS
-#endif
-#ifdef Q_OS_WIN
-        // TODO: Windows
-#endif
-    }
-    return env;
-}
-
-void ScenarioRunner::stateChanged(QProcess::ProcessState newState)
-{
-    qDebug() << "ScenarioRunner::stateChanged()" << newState;
-}
-
 void ScenarioRunner::errorOccurred(QProcess::ProcessError error)
 {
     if (verboseDebugPrint)
         qDebug() << "ScenarioRunner::errorOccurred()" << error << _process->errorString();
+
     emit scenarioFinished(_process->errorString());
 }
 
@@ -146,21 +133,6 @@ void ScenarioRunner::finished(int exitCode, QProcess::ExitStatus exitStatus)
         emit scenarioFinished(_process->errorString());
     else
         emit scenarioFinished(QString());
-}
-
-void ScenarioRunner::readyReadStandardError()
-{
-    qDebug() << "ScenarioRunner::readyReadStandardError()";
-}
-
-void ScenarioRunner::readyReadStandardOutput()
-{
-    qDebug() << "ScenarioRunner::readyReadStandardOutput()";
-}
-
-void ScenarioRunner::started()
-{
-    qDebug() << "ScenarioRunner::started()";
 }
 
 QString ScenarioRunner::readStdout() const

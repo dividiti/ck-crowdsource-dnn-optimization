@@ -138,7 +138,8 @@ void ShellCommands::command_runCachedScenario(const QString &scenarioNumber, con
         cout() << scenarioNumber << " is not valid scenario index" << endl;
         return;
     }
-    ScenarioRunner runner;
+    auto scenario = scenarios.items().at(scenarioIndex);
+    ScenarioRunner runner(ScenarioRunParams(scenario), 0);
     runner.verboseDebugPrint = true;
     connect(&runner, &ScenarioRunner::scenarioFinished, [&](const QString& error)
     {
@@ -146,9 +147,6 @@ void ShellCommands::command_runCachedScenario(const QString &scenarioNumber, con
         cout() << "STDOUT:" << endl << runner.readStdout() << endl;
         cout() << "STDERR:" << endl << runner.readStderr() << endl;
     });
-    auto scenario = scenarios.items().at(scenarioIndex) ;
-    runner.prepare(scenario);
-
     if (imageFiles.isEmpty())
     {
         for (auto file: scenario.files())
