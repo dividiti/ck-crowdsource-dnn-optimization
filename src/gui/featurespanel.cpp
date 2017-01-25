@@ -17,6 +17,7 @@
 FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWidget(parent)
 {
     _context = context;
+    connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
 
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
@@ -146,6 +147,8 @@ void FeaturesPanel::setBatchSize()
 void FeaturesPanel::enableControls(bool on)
 {
     _buttonStart->setVisible(on);
+    _buttonStart->setEnabled(on);
+    _buttonStop->setEnabled(!on);
     _buttonStop->setVisible(!on);
     _linkSelectScenario->setVisible(on);
     _linkSetBatchSize->setVisible(on);
@@ -159,6 +162,11 @@ void FeaturesPanel::startExperiment()
 
 void FeaturesPanel::stopExperiment()
 {
-    enableControls(true);
+    _buttonStop->setEnabled(false);
     _context->stopExperiment();
+}
+
+void FeaturesPanel::experimentFinished()
+{
+    enableControls(true);
 }

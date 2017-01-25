@@ -10,6 +10,79 @@
 #include <QDebug>
 #include <QDir>
 
+ImagesBank::ImagesBank()
+{
+    auto imagesDir = AppConfig::imagesDir();
+    qDebug() << "Images directory:" << imagesDir;
+
+    auto imagesFilter = AppConfig::imagesFilter();
+    qDebug() << "Images filter:" << imagesFilter.join(";");
+
+    QDir dir(imagesDir);
+    for (const QString& entry: dir.entryList(imagesFilter, QDir::Files))
+        _images << imagesDir + QDir::separator() + entry;
+
+    qDebug() << "Images found:" << _images.size();
+}
+
+//-----------------------------------------------------------------------------
+
+BatchItem::BatchItem(int index, const ScenarioRunParams& params, ImagesBank *images) : QObject(0)
+{
+    _index = index;
+    _images = images;
+    _imageIndex = 0; // TODO: offset
+    _frame = new FrameWidget;
+    _runner = new ScenarioRunner(params);
+    connect(_runner, &ScenarioRunner::scenarioFinished, this, &BatchItem::scenarioFinished);
+}
+
+BatchItem::~BatchItem()
+{
+    delete _frame;
+    delete _runner;
+}
+
+void BatchItem::run()
+{
+    _isFnished = false;
+    runInternal();
+}
+
+void BatchItem::runInternal()
+{
+    auto image = _images->imageFile(_imageIndex);
+    _runner->run(image);
+    _frame->loadImage(image);
+}
+
+void BatchItem::scenarioFinished(const QString &error)
+{
+    if (!error.isEmpty())
+        return AppEvents::error(error);
+
+    // TODO: parse info
+    _frame->showInfo(_runner->stdout());
+
+    // TODO: read timers json
+    // TODO: calculate times
+
+    if (_stopFlag)
+    {
+        qDebug() << "Batch item stopped" << _index;
+        _isFnished = true;
+        emit finished();
+        return;
+    }
+
+    _imageIndex++;
+    if (_imageIndex == _images->size())
+        _imageIndex = 0;
+    run();
+}
+
+//-----------------------------------------------------------------------------
+
 FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QWidget(parent)
 {
     _context = context;
@@ -24,97 +97,79 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QWidget(
     setLayout(layout);
 }
 
+FramesPanel::~FramesPanel()
+{
+    clearBatch();
+    if (_images) delete _images;
+}
+
 void FramesPanel::experimentStarted()
 {
     if (!_context->currentScenarioExists())
-    {
-        qCritical() << "No scenario selected";
-        return;
-    }
+        return AppEvents::error(tr("No scenario selected"));
 
     auto scenario = _context->currentScenario();
     qDebug() << "Start experiment for scenario" << scenario.title();
 
-    prepareImagesBank();
-    int imagesCount = _images.size();
-    if (imagesCount < 1)
-    {
-        qCritical() << scenario.title() << "No images for processing";
-        return;
-    }
+    if (!prepareImages()) return;
 
-    makeFrames();
+    ScenarioRunParams params(scenario);
 
-    _stopFlag = false;
-
-    _runner = new ScenarioRunner(ScenarioRunParams(scenario));
+    clearBatch();
+    prepareBatch(params);
 
     qDebug() << "Start batch processing";
-
-    int imageIndex = 0;
-    int batchSize = _context->batchSize();
-    while (true)
-    {
-        for (int i = 0; i < batchSize; i++)
-        {
-            auto imageFile = _images.at(imageIndex);
-            _frames.at(i)->loadImage(imageFile);
-            _runner->run(imageFile, true);
-            if (!_runner->ok())
-            {
-                AppEvents::error(_runner->error());
-                _stopFlag = true;
-                break;
-            }
-            else
-                _frames.at(i)->showInfo(_runner->stdout());
-
-            imageIndex++;
-            if (imageIndex == imagesCount)
-                imageIndex = 0;
-
-            qApp->processEvents();
-
-            if (_stopFlag) break;
-        }
-        if (_stopFlag) break;
-    }
-
-    qDebug() << "Batch processing finished";
-    delete _runner;
+    for (auto item: _batchItems) item->run();
 }
 
 void FramesPanel::experimentStopped()
 {
-    _stopFlag = true;
-    qDebug() << "Stopping experiment...";
+    qDebug() << "Stopping batch processing";
+    for (auto item: _batchItems) item->stop();
 }
 
-void FramesPanel::makeFrames()
+void FramesPanel::clearBatch()
 {
-    for (auto f: _frames)
-        delete f;
-    _frames.clear();
+    for (auto item: _batchItems)
+        delete item;
+    _batchItems.clear();
+}
 
+void FramesPanel::prepareBatch(const ScenarioRunParams& params)
+{
+    qDebug() << "Prepare batch items";
     for (int i = 0; i < _context->batchSize(); i++)
     {
-        auto f = new FrameWidget;
-        _frames.append(f);
-        layout()->addWidget(f);
+        auto item = new BatchItem(i, params, _images);
+        connect(item, &BatchItem::finished, this, &FramesPanel::batchFinished);
+        _batchItems.append(item);
+        layout()->addWidget(item->frame());
     }
 }
 
-void FramesPanel::prepareImagesBank()
+bool FramesPanel::prepareImages()
 {
-    auto imagesDir = AppConfig::imagesDir();
-    qDebug() << "Images directory" << imagesDir;
-
-    auto imagesFilter = AppConfig::imagesFilter();
-    qDebug() << "Images filter" << imagesFilter.join(";");
-
-    _images.clear();
-    QDir dir(imagesDir);
-    for (const QString& entry: dir.entryList(imagesFilter, QDir::Files))
-        _images << imagesDir + QDir::separator() + entry;
+    qDebug() << "Prepare images";
+    if (!_images)
+        _images = new ImagesBank();
+    if (_images->size() < 1)
+    {
+        AppEvents::error(tr("No images for processing"));
+        return false;
+    }
+    return true;
 }
 
+bool FramesPanel::allItemsFinished()
+{
+    for (auto item: _batchItems)
+        if (!item->isFnished())
+            return false;
+    return true;
+}
+
+void FramesPanel::batchFinished()
+{
+    if (allItemsFinished())
+        emit _context->experimentFinished();
+}

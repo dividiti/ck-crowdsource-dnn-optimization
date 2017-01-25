@@ -42,6 +42,7 @@ public:
 signals:
     void experimentStarted();
     void experimentStopped();
+    void experimentFinished();
 
 private:
     bool _isExperimentStarted = false;
