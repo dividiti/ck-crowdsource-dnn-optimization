@@ -76,11 +76,11 @@ void ScenarioRunParams::prepareInvironment()
     if (!_paths.isEmpty())
     {
 #ifdef Q_OS_LINUX
-       // _env.insert("LD_LIBRARY_PATH", _paths.join(":") + ":$LD_LIBRARY_PATH");
+        _env.insert("LD_LIBRARY_PATH", _paths.join(":") + ":$LD_LIBRARY_PATH");
 #endif
 #ifdef Q_OS_MAC
-        // TODO: MacOS
-#endif
+        _env.insert("DYLD_FALLBACK_LIBRARY_PATH", _paths.join(":") + ":$DYLD_FALLBACK_LIBRARY_PATH");
+    #endif
 #ifdef Q_OS_WIN
         // TODO: Windows
 #endif
