@@ -12,7 +12,7 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     layout->setSpacing(12);
     layout->addWidget(new FramesPanel(context));
     layout->addWidget(_featuresPanel = new FeaturesPanel(context));
-    layout->addWidget(new ResultsPanel);
+    layout->addWidget(new ResultsPanel(context));
 
     setFrameShape(QFrame::StyledPanel);
     setLayout(layout);

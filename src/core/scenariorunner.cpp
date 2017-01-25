@@ -1,7 +1,9 @@
 #include "appconfig.h"
 #include "scenariorunner.h"
+#include "utils.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QStringList>
 
 ScenarioRunParams::ScenarioRunParams(const RecognitionScenario& scenario)
@@ -100,6 +102,7 @@ ScenarioRunner::ScenarioRunner(const ScenarioRunParams &params, QObject *parent)
 
     _arguments = params.arguments();
     _imageFileArgIndex = params.imageFileArgIndex();
+    _timersFile = params.workdir() + QDir::separator() + "tmp-ck-timer.json";
 }
 
 void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
@@ -143,3 +146,9 @@ void ScenarioRunner::finished(int exitCode, QProcess::ExitStatus exitStatus)
     emit scenarioFinished(_error);
 }
 
+ExperimentProbe ScenarioRunner::readProbe() const
+{
+    ExperimentProbe p;
+    p.parseJson(Utils::loadTtextFromFile(_timersFile));
+    return p;
+}

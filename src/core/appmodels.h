@@ -122,5 +122,31 @@ private:
     QList<RecognitionScenario> _items;
 };
 
+//-----------------------------------------------------------------------------
+
+class ExperimentProbe
+{
+public:
+    double time;
+    double memory;
+
+    void parseJson(const QByteArray& text);
+};
+
+//-----------------------------------------------------------------------------
+
+class ExperimentResult
+{
+public:
+    int imagesCount;
+    double totalTime;
+    double timePerImage;
+    double imagesPerSecond;
+    double timePerBatch;
+    double memoryPerImage;
+
+    void reset();
+    void accumulate(const ExperimentProbe& p);
+};
 
 #endif // APPMODELS_H

@@ -5,6 +5,7 @@
 #include <QList>
 
 class ExperimentContext;
+class ExperimentProbe;
 class FrameWidget;
 class ScenarioRunner;
 class ScenarioRunParams;
@@ -34,10 +35,11 @@ public:
 
     void run();
     void stop() { _stopFlag = true; }
-    bool isFnished() const { return _isFnished; }
+    bool isStopped() const { return _isStopped; }
 
 signals:
-    void finished();
+    void finished(const ExperimentProbe& probe);
+    void stopped();
 
 private slots:
     void scenarioFinished(const QString &error);
@@ -46,10 +48,8 @@ private:
     ImagesBank* _images;
     ScenarioRunner* _runner;
     FrameWidget* _frame;
-    bool _stopFlag = false;
-    bool _isFnished = false;
-    int _index;
-    int _imageIndex;
+    bool _stopFlag, _isStopped;
+    int _index, _imageIndex;
 
     void runInternal();
     QString parseOutput(const QString &text) const;
@@ -68,7 +68,7 @@ public:
 private slots:
     void experimentStarted();
     void experimentStopped();
-    void batchFinished();
+    void batchStopped();
 
 private:
     ImagesBank* _images = nullptr;
@@ -78,7 +78,7 @@ private:
     void clearBatch();
     void prepareBatch(const ScenarioRunParams &params);
     bool prepareImages();
-    bool allItemsFinished();
+    bool allItemsStopped();
 };
 
 #endif // FRAMESPANEL_H

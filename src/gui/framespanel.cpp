@@ -45,7 +45,8 @@ BatchItem::~BatchItem()
 
 void BatchItem::run()
 {
-    _isFnished = false;
+    _isStopped = false;
+    _stopFlag = false;
     runInternal();
 }
 
@@ -62,14 +63,13 @@ void BatchItem::scenarioFinished(const QString &error)
     _frame->loadImage(_images->imageFile(_imageIndex));
     _frame->showInfo(parseOutput(_runner->stdout()));
 
-    // TODO: read timers json
-    // TODO: calculate times
+    emit finished(_runner->readProbe());
 
     if (_stopFlag)
     {
         qDebug() << "Batch item stopped" << _index;
-        _isFnished = true;
-        emit finished();
+        _isStopped = true;
+        emit stopped();
         return;
     }
 
@@ -152,7 +152,8 @@ void FramesPanel::prepareBatch(const ScenarioRunParams& params)
     {
         int offset = qRound(_images->size()/double(_context->batchSize())*i);
         auto item = new BatchItem(i, offset, params, _images);
-        connect(item, &BatchItem::finished, this, &FramesPanel::batchFinished);
+        connect(item, &BatchItem::stopped, this, &FramesPanel::batchStopped);
+        connect(item, &BatchItem::finished, _context, &ExperimentContext::recognitionFinished);
         _batchItems.append(item);
         layout()->addWidget(item->frame());
     }
@@ -171,17 +172,17 @@ bool FramesPanel::prepareImages()
     return true;
 }
 
-bool FramesPanel::allItemsFinished()
+bool FramesPanel::allItemsStopped()
 {
     for (auto item: _batchItems)
-        if (!item->isFnished())
+        if (!item->isStopped())
             return false;
     return true;
 }
 
-void FramesPanel::batchFinished()
+void FramesPanel::batchStopped()
 {
-    if (allItemsFinished())
+    if (allItemsStopped())
     {
         qDebug() << "Batch processing finished";
         emit _context->experimentFinished();

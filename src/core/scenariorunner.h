@@ -47,6 +47,8 @@ public:
     bool ok() const { return _error.isEmpty(); }
     QString error() const { return _error; }
 
+    ExperimentProbe readProbe() const;
+
 signals:
     void scenarioFinished(const QString &error);
 
@@ -59,6 +61,7 @@ private:
     QStringList _arguments;
     int _imageFileArgIndex;
     QString _error, _stderr, _stdout;
+    QString _timersFile;
 };
 
 #endif // SCENARIORUNNER_H

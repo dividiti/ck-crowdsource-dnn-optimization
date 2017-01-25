@@ -3,6 +3,8 @@
 #include "platformfeaturesprovider.h"
 #include "scenariosprovider.h"
 
+#include <QDebug>
+
 bool ExperimentContext::checkScenarioIndex(int index) const
 {
     return index >= 0 && index < currentScenarios().size();
@@ -44,6 +46,7 @@ void ExperimentContext::setBatchSize(int value)
 void ExperimentContext::startExperiment()
 {
     _isExperimentStarted = true;
+    _result.reset();
     emit experimentStarted();
 }
 
@@ -58,4 +61,10 @@ void ExperimentContext::loadFromConfig()
     // TODO: values will be saved into config, despite of they just have been read
     setCurrentScenarioIndex(AppConfig::selectedScenarioIndex(experimentIndex));
     setBatchSize(AppConfig::batchSize(experimentIndex));
+}
+
+void ExperimentContext::recognitionFinished(const ExperimentProbe &p)
+{
+    _result.accumulate(p);
+    emit experimentResultReady();
 }

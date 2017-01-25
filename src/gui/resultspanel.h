@@ -3,15 +3,22 @@
 
 #include <QWidget>
 
+class ExperimentContext;
+class InfoLabel;
+
 class ResultsPanel : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ResultsPanel(QWidget *parent = 0);
+    explicit ResultsPanel(ExperimentContext* context, QWidget *parent = 0);
 
-signals:
+private slots:
+    void experimentStarted();
+    void experimentResultReady();
 
-public slots:
+private:
+    ExperimentContext* _context;
+    InfoLabel *_infoTimePerFrame, *_infoTimePerBatch, *_infoMemoryUsage;
 };
 
 #endif // RESULTSPANEL_H

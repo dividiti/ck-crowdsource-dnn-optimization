@@ -268,3 +268,36 @@ QString RecognitionScenarios::str() const
     }
     return report.join("\n");
 }
+
+//-----------------------------------------------------------------------------
+
+void ExperimentProbe::parseJson(const QByteArray& text)
+{
+    auto json = QJsonDocument::fromJson(text);
+    if (json.isEmpty())
+    {
+        qDebug() << "Unable to read timers info";
+        return;
+    }
+    time = json.object()["execution_time"].toDouble();
+}
+
+//-----------------------------------------------------------------------------
+
+void ExperimentResult::reset()
+{
+    imagesCount = 0;
+    totalTime = 0;
+    timePerImage = 0;
+    imagesPerSecond = 0;
+    timePerBatch = 0;
+    memoryPerImage = 0;
+}
+
+void ExperimentResult::accumulate(const ExperimentProbe& p)
+{
+    imagesCount++;
+    totalTime += p.time;
+    timePerImage = totalTime/imagesCount;
+    imagesPerSecond = (timePerImage > 0)? 1/timePerImage: 0;
+}
