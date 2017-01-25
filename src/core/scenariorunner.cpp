@@ -142,3 +142,4 @@ void ScenarioRunner::finished(int exitCode, QProcess::ExitStatus exitStatus)
 
     emit scenarioFinished(_error);
 }
+

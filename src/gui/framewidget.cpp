@@ -20,7 +20,10 @@ FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
     setFixedWidth(frame().width());
 
     _imageView = new QLabel;
+
     _textInfo = new QLabel;
+    _textInfo->setWordWrap(true);
+    _textInfo->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     auto layoutInfo = new QVBoxLayout;
     layoutInfo->setMargin(6);

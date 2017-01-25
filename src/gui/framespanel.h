@@ -27,7 +27,7 @@ class BatchItem : public QObject
 {
     Q_OBJECT
 public:
-    BatchItem(int index, const ScenarioRunParams& params, ImagesBank* images);
+    BatchItem(int index, int imageOffset, const ScenarioRunParams& params, ImagesBank* images);
     ~BatchItem();
 
     FrameWidget* frame() const { return _frame; }
@@ -52,6 +52,7 @@ private:
     int _imageIndex;
 
     void runInternal();
+    QString parseOutput(const QString &text) const;
 };
 
 //-----------------------------------------------------------------------------

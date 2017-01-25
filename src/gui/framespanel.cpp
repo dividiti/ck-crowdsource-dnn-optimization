@@ -27,11 +27,11 @@ ImagesBank::ImagesBank()
 
 //-----------------------------------------------------------------------------
 
-BatchItem::BatchItem(int index, const ScenarioRunParams& params, ImagesBank *images) : QObject(0)
+BatchItem::BatchItem(int index, int imageOffset, const ScenarioRunParams& params, ImagesBank *images) : QObject(0)
 {
     _index = index;
     _images = images;
-    _imageIndex = 0; // TODO: offset
+    _imageIndex = imageOffset;
     _frame = new FrameWidget;
     _runner = new ScenarioRunner(params);
     connect(_runner, &ScenarioRunner::scenarioFinished, this, &BatchItem::scenarioFinished);
@@ -51,9 +51,7 @@ void BatchItem::run()
 
 void BatchItem::runInternal()
 {
-    auto image = _images->imageFile(_imageIndex);
-    _runner->run(image);
-    _frame->loadImage(image);
+    _runner->run(_images->imageFile(_imageIndex));
 }
 
 void BatchItem::scenarioFinished(const QString &error)
@@ -61,8 +59,8 @@ void BatchItem::scenarioFinished(const QString &error)
     if (!error.isEmpty())
         return AppEvents::error(error);
 
-    // TODO: parse info
-    _frame->showInfo(_runner->stdout());
+    _frame->loadImage(_images->imageFile(_imageIndex));
+    _frame->showInfo(parseOutput(_runner->stdout()));
 
     // TODO: read timers json
     // TODO: calculate times
@@ -79,6 +77,18 @@ void BatchItem::scenarioFinished(const QString &error)
     if (_imageIndex == _images->size())
         _imageIndex = 0;
     run();
+}
+
+QString BatchItem::parseOutput(const QString& text) const
+{
+    // 0.9835 - "n03793489 mouse, computer mouse"
+    static QLatin1String predictionMarker("0.");
+
+    QStringList results;
+    for (const QStringRef& line: text.splitRef('\n', QString::SkipEmptyParts))
+        if (line.startsWith(predictionMarker))
+            results << line.toString().remove('"');
+    return results.join("\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -140,7 +150,8 @@ void FramesPanel::prepareBatch(const ScenarioRunParams& params)
     qDebug() << "Prepare batch items";
     for (int i = 0; i < _context->batchSize(); i++)
     {
-        auto item = new BatchItem(i, params, _images);
+        int offset = qRound(_images->size()/double(_context->batchSize())*i);
+        auto item = new BatchItem(i, offset, params, _images);
         connect(item, &BatchItem::finished, this, &FramesPanel::batchFinished);
         _batchItems.append(item);
         layout()->addWidget(item->frame());
@@ -171,5 +182,8 @@ bool FramesPanel::allItemsFinished()
 void FramesPanel::batchFinished()
 {
     if (allItemsFinished())
+    {
+        qDebug() << "Batch processing finished";
         emit _context->experimentFinished();
+    }
 }
