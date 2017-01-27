@@ -27,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setWindowIcon(QIcon(":/icon/main"));
     setAttribute(Qt::WA_DeleteOnClose);
 
+    connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
+    connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
+
     auto experimentsWidget = new QWidget;
     experimentsWidget->setLayout(new QVBoxLayout);
 
@@ -47,9 +50,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setCentralWidget(experimentsWidget);
     setInitialWindowGeometry(this);
     Utils::moveToDesktopCenter(this);
-
-    connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
-    connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
 //    connect(&_network, &RemoteDataAccess::sharedRepoInfoReceived, this, &MainWindow::sharedRepoInfoReceived);
 //    connect(_scenariosProvider, &ScenariosProvider::scenariosReceived, this, &MainWindow::scenariosReceived);

@@ -13,13 +13,23 @@ ScenarioRunParams::ScenarioRunParams(const RecognitionScenario& scenario)
     // TODO: split more careful regarding to quoted arguments containing spaces
     //QStringList args = scenario.cmd().split(' ', QString::SkipEmptyParts);
 
+#ifdef Q_OS_WIN32
+    _program = "python";
+#else
     _workdir = AppConfig::ckBinPath();
     _program = AppConfig::ckExeName();
-    _arguments = QStringList() << "run"
-                               << "program:caffe-classification"
-                               << "--cmd_key=use_external_image"
-                               << "--deps.caffemodel="+scenario.uid()
-                               << QString();
+#endif
+    _arguments = QStringList()
+        #ifdef Q_OS_WIN32
+            << "-W"
+            << "ignore::DeprecationWarning"
+            << AppConfig::ckBinPath()+"\\..\\ck\\kernel.py"
+        #endif
+            << "run"
+            << "program:caffe-classification"
+            << "--cmd_key=use_external_image"
+            << "--deps.caffemodel="+scenario.uid()
+            << QString();
     _imageFileArgIndex = _arguments.size()-1;
     _arguments.append(AppConfig::ckArgs());
 

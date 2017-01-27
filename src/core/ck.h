@@ -16,6 +16,7 @@ public:
 private:
     QProcess _ck;
     QString _ckPath;
+    QStringList _args;
 
     QStringList ck(const QStringList &args);
     QString makePath(const QStringList &parts) const;
