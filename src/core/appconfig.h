@@ -29,6 +29,7 @@ public:
     static QString ckPath();
     static QString ckBinPath();
     static QString ckExeName();
+    static QStringList ckArgs();
 
 private:
     static QString configFileName();

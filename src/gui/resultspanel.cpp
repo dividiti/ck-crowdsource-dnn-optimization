@@ -23,10 +23,10 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QWidge
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
     {
         _infoTimePerFrame,
-        Utils::makeDivider(),
+        /*Utils::makeDivider(),
         _infoTimePerBatch,
         Utils::makeDivider(),
-        _infoMemoryUsage,
+        _infoMemoryUsage,*/
         0,
         buttonPublish,
     }));

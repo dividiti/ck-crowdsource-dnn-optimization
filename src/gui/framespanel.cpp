@@ -102,16 +102,25 @@ void BatchItem::scenarioFinished(const QString &error)
 
     if (_stopFlag)
     {
-        qDebug() << "Batch item stopped" << _index;
-        _isStopped = true;
-        emit stopped();
+        stopInternal();
         return;
     }
 
     _imageIndex++;
     if (_imageIndex == _images->size())
         _imageIndex = 0;
-    run();
+    if (nextBatch)
+        QTimer::singleShot(1000, nextBatch, &BatchItem::runInternal);
+}
+
+void BatchItem::stopInternal()
+{
+    qDebug() << "Batch item stopped" << _index;
+    _isStopped = true;
+    emit stopped();
+
+    if (nextBatch && !nextBatch->_isStopped)
+        QTimer::singleShot(10, nextBatch, &BatchItem::stopInternal);
 }
 
 //-----------------------------------------------------------------------------
@@ -163,7 +172,8 @@ void FramesPanel::experimentStarted()
     prepareBatch(params);
 
     qDebug() << "Start batch processing";
-    for (auto item: _batchItems) item->run();
+    //for (auto item: _batchItems) item->run();
+    _batchItems.at(0)->run();
 }
 
 void FramesPanel::experimentStopping()
@@ -191,6 +201,9 @@ void FramesPanel::prepareBatch(const ScenarioRunParams& params)
         _batchItems.append(item);
         layout()->addWidget(item->frame());
     }
+    for (int i = 0; i < _context->batchSize()-1; i++)
+        _batchItems.at(i)->nextBatch = _batchItems.at(i+1);
+    _batchItems.at(_context->batchSize()-1)->nextBatch = _batchItems.at(0);
 }
 
 bool FramesPanel::prepareImages()

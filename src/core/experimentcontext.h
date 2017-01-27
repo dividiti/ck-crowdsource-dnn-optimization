@@ -15,7 +15,7 @@ class ExperimentContext : public QObject
 
 public:
     int experimentIndex = -1;
-    PlatformFeaturesProvider* platformFeaturesProvider;
+    //PlatformFeaturesProvider* platformFeaturesProvider;
     ScenariosProvider* scenariosProvider;
 
     bool checkScenarioIndex(int index) const;

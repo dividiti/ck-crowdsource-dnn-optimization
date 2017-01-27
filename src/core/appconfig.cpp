@@ -134,3 +134,8 @@ QString AppConfig::experimentKey(const QString& baseKey, int experimentIndex)
 {
     return baseKey + "_" + QString::number(experimentIndex);
 }
+
+QStringList AppConfig::ckArgs()
+{
+    return config().value("ck_args").toString().split(' ', QString::SkipEmptyParts);
+}

@@ -14,14 +14,14 @@ public:
     QString program() const { return _program; }
     QString workdir() const { return _workdir; }
     const QStringList& arguments() const { return _arguments; }
-    //int imageFileArgIndex() const { return _imageFileArgIndex; }
+    int imageFileArgIndex() const { return _imageFileArgIndex; }
     //const QProcessEnvironment& environment() const { return _env; }
 
 private:
     //QProcessEnvironment _env;
     QStringList /*_paths,*/ _arguments;
     QString _workdir, _program;
-    //int _imageFileArgIndex = -1;
+    int _imageFileArgIndex = -1;
 
     //void processFiles(const RecognitionScenario& scenario);
     //void prepareProgram(const QStringList &args);
@@ -61,7 +61,7 @@ private slots:
 private:
     QProcess* _process;
     QStringList _arguments;
-    //int _imageFileArgIndex;
+    int _imageFileArgIndex;
     QString _error, _stderr, _stdout;
     //QString _timersFile;
 };

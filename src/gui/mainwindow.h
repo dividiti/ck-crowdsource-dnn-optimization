@@ -5,8 +5,8 @@
 
 #include "appmodels.h"
 #include "experimentcontext.h"
-#include "remotedataaccess.h"
-#include "platformfeaturesprovider.h"
+//#include "remotedataaccess.h"
+//#include "platformfeaturesprovider.h"
 #include "scenariosprovider.h"
 
 class ExperimentPanel;
@@ -28,8 +28,8 @@ public:
 
 private:
     QList<Experiment*> _experiments;
-    RemoteDataAccess _network;
-    PlatformFeaturesProvider _platformFeaturesProvider;
+//    RemoteDataAccess _network;
+//    PlatformFeaturesProvider _platformFeaturesProvider;
     ScenariosProvider* _scenariosProvider;
 
 
@@ -37,9 +37,9 @@ private:
     void updateExperimentConditions();
 
 private slots:
-    void sharedRepoInfoReceived(SharedRepoInfo info);
-    void platformFeaturesReceived(PlatformFeatures features);
-    void scenariosReceived(RecognitionScenarios scenarios);
+//    void sharedRepoInfoReceived(SharedRepoInfo info);
+//    void platformFeaturesReceived(PlatformFeatures features);
+//    void scenariosReceived(RecognitionScenarios scenarios);
     void onError(const QString& msg);
     void onInfo(const QString& msg);
 };

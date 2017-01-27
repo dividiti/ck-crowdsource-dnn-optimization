@@ -15,7 +15,13 @@ ScenarioRunParams::ScenarioRunParams(const RecognitionScenario& scenario)
 
     _workdir = AppConfig::ckBinPath();
     _program = AppConfig::ckExeName();
-    _arguments = QStringList() << "run" << "program:caffe-classification" << "--deps.caffemodel="+scenario.uid();
+    _arguments = QStringList() << "run"
+                               << "program:caffe-classification"
+                               << "--cmd_key=use_external_image"
+                               << "--deps.caffemodel="+scenario.uid()
+                               << QString();
+    _imageFileArgIndex = _arguments.size()-1;
+    _arguments.append(AppConfig::ckArgs());
 
     qDebug() << "DIR:" << _workdir;
     qDebug() << "CMD:" << _program << _arguments.join(' ');
@@ -110,7 +116,7 @@ ScenarioRunner::ScenarioRunner(const ScenarioRunParams &params, QObject *parent)
     connect(_process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
 
     _arguments = params.arguments();
-//    _imageFileArgIndex = params.imageFileArgIndex();
+    _imageFileArgIndex = params.imageFileArgIndex();
 //    _timersFile = params.workdir() + QDir::separator() + "tmp-ck-timer.json";
 }
 
@@ -120,8 +126,8 @@ void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
     _stdout.clear();
     _stderr.clear();
 
-//    if (_imageFileArgIndex >= 0)
-//        _arguments[_imageFileArgIndex] = imageFile;
+    if (_imageFileArgIndex >= 0)
+        _arguments[_imageFileArgIndex] = "--env.CK_CAFFE_PATH_TO_IMAGE=" + imageFile;
     _process->setArguments(_arguments);
 
     if (verboseDebugPrint)

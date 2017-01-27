@@ -1,7 +1,7 @@
 #include "appconfig.h"
 //#include "appevents.h"
 #include "ck.h"
-#include "remotedataaccess.h"
+//#include "remotedataaccess.h"
 #include "scenariosprovider.h"
 //#include "utils.h"
 
@@ -21,7 +21,7 @@
 
 //-----------------------------------------------------------------------------
 
-ScenariosProvider::ScenariosProvider(RemoteDataAccess *network, QObject *parent) : QObject(parent)//, _network(network)
+ScenariosProvider::ScenariosProvider(/*RemoteDataAccess *network,*/ QObject *parent) : QObject(parent)//, _network(network)
 {
 }
 

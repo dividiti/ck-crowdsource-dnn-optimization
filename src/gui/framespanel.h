@@ -46,11 +46,17 @@ public:
     BatchItem(int index, int imageOffset, const ScenarioRunParams& params, ImagesBank* images);
     ~BatchItem();
 
+    BatchItem* nextBatch = nullptr;
+
     FrameWidget* frame() const { return _frame; }
 
     void run();
     void stop() { _stopFlag = true; }
     bool isStopped() const { return _isStopped; }
+
+public slots:
+    void runInternal();
+    void stopInternal();
 
 signals:
     void finished(const ExperimentProbe& probe);
@@ -63,10 +69,9 @@ private:
     ImagesBank* _images;
     ScenarioRunner* _runner;
     FrameWidget* _frame;
-    bool _stopFlag, _isStopped;
+    bool _stopFlag = false;
+    bool _isStopped = false;
     int _index, _imageIndex;
-
-    void runInternal();
 };
 
 //-----------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 
 #include "appmodels.h"
 
-class RemoteDataAccess;
+//class RemoteDataAccess;
 
 /*class FileDownloadWork
 {
@@ -48,7 +48,7 @@ class ScenariosProvider : public QObject
     Q_OBJECT
 
 public:
-    explicit ScenariosProvider(RemoteDataAccess *network, QObject *parent = 0);
+    explicit ScenariosProvider(/*RemoteDataAccess *network,*/ QObject *parent = 0);
 //    ~ScenariosProvider();
 
     void queryScenarios(const QString &url, const PlatformFeatures& features);
