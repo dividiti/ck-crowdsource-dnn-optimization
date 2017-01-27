@@ -102,7 +102,7 @@ QString PlatformFeatures::html() const
 }
 
 //-----------------------------------------------------------------------------
-
+/*
 bool RecognitionScenarioFileItem::parseJson(const QJsonObject& json)
 {
     _name = json["filename"].toString();
@@ -159,10 +159,16 @@ bool RecognitionScenarioFileItem::checkMD5() const
     }
     return true;
 }
-
+*/
 //-----------------------------------------------------------------------------
 
-bool RecognitionScenario::parseJson(const QJsonObject& json)
+void RecognitionScenario::parseCK(const CkEntry& entry)
+{
+    _uid = entry.uid;
+    _title = entry.name;
+}
+
+/*bool RecognitionScenario::parseJson(const QJsonObject& json)
 {
     _json = json;
     if (json.contains("total_file_size"))
@@ -192,28 +198,39 @@ QString RecognitionScenario::str() const
 {
     return JsonFormat(JsonFormat::Text).format(_json);
 }
-
+*/
 QString RecognitionScenario::html() const
 {
-    return JsonFormat(JsonFormat::Html).format(_json);
+    //return JsonFormat(JsonFormat::Html).format(_json);
+    return QString("%1: <b>%2</b>").arg(_uid, _title);
 }
 
 bool RecognitionScenario::allFilesAreLoaded() const
 {
-    qDebug() << "Check files" << _title;
+    /*qDebug() << "Check files" << _title;
     for (const RecognitionScenarioFileItem& file: _files)
     {
         if (!file.isExists())
             return false;
         if (AppConfig::checkScenarioFilesMd5() && !file.checkMD5())
             return false;
-    }
+    }*/
     return true;
 }
 
 //-----------------------------------------------------------------------------
 
-void RecognitionScenarios::parseJson(const QByteArray& text)
+void RecognitionScenarios::loadFromCK(const QList<CkEntry>& entries)
+{
+    for (auto entry: entries)
+    {
+        RecognitionScenario scenario;
+        scenario.parseCK(entry);
+        _items << scenario;
+    }
+}
+
+/*void RecognitionScenarios::parseJson(const QByteArray& text)
 {
     QJsonParseError error;
     auto doc = QJsonDocument::fromJson(text, &error);
@@ -268,7 +285,7 @@ QString RecognitionScenarios::str() const
     }
     return report.join("\n");
 }
-
+*/
 //-----------------------------------------------------------------------------
 
 void ExperimentProbe::parseJson(const QByteArray& text)

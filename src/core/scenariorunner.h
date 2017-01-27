@@ -14,19 +14,19 @@ public:
     QString program() const { return _program; }
     QString workdir() const { return _workdir; }
     const QStringList& arguments() const { return _arguments; }
-    int imageFileArgIndex() const { return _imageFileArgIndex; }
-    const QProcessEnvironment& environment() const { return _env; }
+    //int imageFileArgIndex() const { return _imageFileArgIndex; }
+    //const QProcessEnvironment& environment() const { return _env; }
 
 private:
-    QProcessEnvironment _env;
-    QStringList _paths, _arguments;
+    //QProcessEnvironment _env;
+    QStringList /*_paths,*/ _arguments;
     QString _workdir, _program;
-    int _imageFileArgIndex = -1;
+    //int _imageFileArgIndex = -1;
 
-    void processFiles(const RecognitionScenario& scenario);
-    void prepareProgram(const QStringList &args);
-    void prepareArguments(const QStringList &args);
-    void prepareInvironment();
+    //void processFiles(const RecognitionScenario& scenario);
+    //void prepareProgram(const QStringList &args);
+    //void prepareArguments(const QStringList &args);
+    //void prepareInvironment();
 };
 
 //-----------------------------------------------------------------------------
@@ -39,8 +39,8 @@ public:
 
     void run(const QString& imageFile, bool waitForFinish = false);
 
-    QString stdout() const { return _stdout; }
-    QString stderr() const { return _stderr; }
+    QString getStdout() const { return _stdout; }
+    QString getStderr() const { return _stderr; }
 
     bool verboseDebugPrint = false;
 
@@ -55,13 +55,15 @@ signals:
 private slots:
     void errorOccurred(QProcess::ProcessError error);
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
+    void readyReadStandardError();
+    void readyReadStandardOutput();
 
 private:
     QProcess* _process;
     QStringList _arguments;
-    int _imageFileArgIndex;
+    //int _imageFileArgIndex;
     QString _error, _stderr, _stdout;
-    QString _timersFile;
+    //QString _timersFile;
 };
 
 #endif // SCENARIORUNNER_H

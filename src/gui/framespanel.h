@@ -24,6 +24,21 @@ private:
 
 //-----------------------------------------------------------------------------
 
+class StdoutResults
+{
+public:
+    StdoutResults(const QString& text);
+
+    QString predictions() const { return _predictions; }
+    double time() const { return _time; }
+
+private:
+    QString _predictions;
+    double _time = 0;
+};
+
+//-----------------------------------------------------------------------------
+
 class BatchItem : public QObject
 {
     Q_OBJECT
@@ -52,7 +67,6 @@ private:
     int _index, _imageIndex;
 
     void runInternal();
-    QString parseOutput(const QString &text) const;
 };
 
 //-----------------------------------------------------------------------------

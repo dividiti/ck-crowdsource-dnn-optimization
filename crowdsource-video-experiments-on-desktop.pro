@@ -47,7 +47,8 @@ SOURCES += \
     src/core/experimentcontext.cpp \
     src/gui/scenarioslistwidget.cpp \
     src/core/jsonformat.cpp \
-    src/core/scenariorunner.cpp
+    src/core/scenariorunner.cpp \
+    src/core/ck.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -70,7 +71,8 @@ HEADERS += \
     src/core/experimentcontext.h \
     src/gui/scenarioslistwidget.h \
     src/core/jsonformat.h \
-    src/core/scenariorunner.h
+    src/core/scenariorunner.h \
+    src/core/ck.h
 
 RESOURCES += \
     src/resources.qrc

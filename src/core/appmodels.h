@@ -5,6 +5,15 @@
 #include <QJsonObject>
 #include <QList>
 
+class CkEntry
+{
+public:
+    QString uid;
+    QString name;
+};
+
+//-----------------------------------------------------------------------------
+
 class SharedRepoInfo
 {
 public:
@@ -51,7 +60,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class RecognitionScenarioFileItem
+/*class RecognitionScenarioFileItem
 {
 public:
     bool parseJson(const QJsonObject& json);
@@ -73,34 +82,38 @@ public:
 private:
     QString _path, _name, _md5, _url;
     bool _isLibrary, _isExecutable, _isDefaultImage;
-};
+};*/
 
 //-----------------------------------------------------------------------------
 
 class RecognitionScenario
 {
 public:
-    bool parseJson(const QJsonObject& json);
-    const QJsonObject& json() const { return _json; }
+//    bool parseJson(const QJsonObject& json);
+//    const QJsonObject& json() const { return _json; }
 
-    bool isEmpty() const { return _json.isEmpty(); }
+    void parseCK(const CkEntry& entry);
 
-    QString str() const;
+//    bool isEmpty() const { return _json.isEmpty(); }
+
+//    QString str() const;
     QString html() const;
 
-    long fileSizeBytes() const { return _fileSizeBytes; }
-    QString fileSizeMB() const { return _fileSizeMB; }
+//    long fileSizeBytes() const { return _fileSizeBytes; }
+//    QString fileSizeMB() const { return _fileSizeMB; }
     QString title() const { return _title; }
-    QString cmd() const { return _cmd; }
+    QString uid() const { return _uid; }
+//    QString cmd() const { return _cmd; }
 
-    const QList<RecognitionScenarioFileItem> files() const { return _files; }
+//    const QList<RecognitionScenarioFileItem> files() const { return _files; }
     bool allFilesAreLoaded() const;
 
 private:
-    long _fileSizeBytes = 0;
-    QString _fileSizeMB, _title, _cmd;
-    QList<RecognitionScenarioFileItem> _files;
-    QJsonObject _json;
+//    long _fileSizeBytes = 0;
+//    QString _fileSizeMB, _title, _cmd;
+    QString _title, _uid;
+//    QList<RecognitionScenarioFileItem> _files;
+//    QJsonObject _json;
 };
 
 //-----------------------------------------------------------------------------
@@ -113,10 +126,12 @@ public:
     bool isEmpty() const { return _items.isEmpty(); }
     QString str() const;
 
-    void parseJson(const QByteArray& text);
+    //void parseJson(const QByteArray& text);
 
-    void loadFromFile(const QString& path);
-    void saveToFile(const QString& path) const;
+    //void loadFromFile(const QString& path);
+    //void saveToFile(const QString& path) const;
+
+    void loadFromCK(const QList<CkEntry>& entries);
 
 private:
     QList<RecognitionScenario> _items;
@@ -148,5 +163,7 @@ public:
     void reset();
     void accumulate(const ExperimentProbe& p);
 };
+
+//-----------------------------------------------------------------------------
 
 #endif // APPMODELS_H

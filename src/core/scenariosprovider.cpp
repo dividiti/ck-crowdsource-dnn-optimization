@@ -1,49 +1,50 @@
 #include "appconfig.h"
-#include "appevents.h"
+//#include "appevents.h"
+#include "ck.h"
 #include "remotedataaccess.h"
 #include "scenariosprovider.h"
-#include "utils.h"
+//#include "utils.h"
 
-#include <QApplication>
+//#include <QApplication>
 #include <QDebug>
-#include <QDir>
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QNetworkReply>
-#include <QUrl>
+//#include <QDir>
+//#include <QFile>
+//#include <QJsonDocument>
+//#include <QJsonObject>
+//#include <QNetworkReply>
+//#include <QUrl>
 
-QString FileDownloadWork::title() const
+/*QString FileDownloadWork::title() const
 {
     return qApp->tr("Downloading file '%1' from %2 into %3").arg(file.name(), file.url(), file.fullPath());
-}
+}*/
 
 //-----------------------------------------------------------------------------
 
-ScenariosProvider::ScenariosProvider(RemoteDataAccess *network, QObject *parent) : QObject(parent), _network(network)
+ScenariosProvider::ScenariosProvider(RemoteDataAccess *network, QObject *parent) : QObject(parent)//, _network(network)
 {
 }
 
-ScenariosProvider::~ScenariosProvider()
+/*ScenariosProvider::~ScenariosProvider()
 {
     clearDownloadStatuses();
-}
+}*/
 
 void ScenariosProvider::queryScenarios(const QString& url, const PlatformFeatures& features)
 {
-    AppEvents::info(tr("Query recognition scenarios from %1").arg(url));
+//    AppEvents::info(tr("Query recognition scenarios from %1").arg(url));
 
-    QJsonObject json;
-    json["action"] = "get";
-    json["module_uoa"] = "experiment.scenario.mobile"; // TODO: which module?
-    json["platform_features"] = features.json();
-    auto postData = "ck_json=" + QUrl::toPercentEncoding(QJsonDocument(json).toJson());
+//    QJsonObject json;
+//    json["action"] = "get";
+//    json["module_uoa"] = "experiment.scenario.mobile"; // TODO: which module?
+//    json["platform_features"] = features.json();
+//    auto postData = "ck_json=" + QUrl::toPercentEncoding(QJsonDocument(json).toJson());
 
-    auto reply = _network->post(url, postData);
-    connect(reply, SIGNAL(finished()), this, SLOT(queryRecognitionScenarios_finished()));
+//    auto reply = _network->post(url, postData);
+//    connect(reply, SIGNAL(finished()), this, SLOT(queryRecognitionScenarios_finished()));
 }
 
-void ScenariosProvider::queryRecognitionScenarios_finished()
+/*void ScenariosProvider::queryRecognitionScenarios_finished()
 {
     auto reply = qobject_cast<QNetworkReply*>(sender());
     if (reply->error())
@@ -53,29 +54,30 @@ void ScenariosProvider::queryRecognitionScenarios_finished()
     scenarios.parseJson(reply->readAll());
     if (!scenarios.isEmpty())
         emit scenariosReceived(scenarios);
-}
+}*/
 
 RecognitionScenarios ScenariosProvider::loadFromCache()
 {
     RecognitionScenarios scenarios;
-    scenarios.loadFromFile(AppConfig::scenariosCacheFile());
+    scenarios.loadFromCK(CK().queryCaffeModels());
+    //scenarios.loadFromFile(AppConfig::scenariosCacheFile());
     return scenarios;
 }
 
 void ScenariosProvider::saveToCahe(const RecognitionScenarios& scenarios) const
 {
-    scenarios.saveToFile(AppConfig::scenariosCacheFile());
+//    scenarios.saveToFile(AppConfig::scenariosCacheFile());
 }
 
 void ScenariosProvider::setCurrentList(const RecognitionScenarios& scenarios)
 {
     _current = scenarios;
 
-    clearDownloadStatuses();
-    prepareDownloadStatuses();
+//    clearDownloadStatuses();
+//    prepareDownloadStatuses();
 }
 
-void ScenariosProvider::downloadScenarioFiles(int scenarioIndex)
+/*void ScenariosProvider::downloadScenarioFiles(int scenarioIndex)
 {
     if (scenarioIndex < 0 || scenarioIndex >= _current.items().size())
         return AppEvents::error(tr("Unable to download files for scenario: invalid scenario index %1").arg(scenarioIndex));
@@ -160,9 +162,9 @@ void ScenariosProvider::processDownloadProgress(QNetworkReply* reply, const File
     }
 
     _fileDownloads.remove(reply);
-}
+}*/
 
-void ScenariosProvider::deleteScenarioFiles(int scenarioIndex)
+/*void ScenariosProvider::deleteScenarioFiles(int scenarioIndex)
 {
     if (scenarioIndex < 0 || scenarioIndex >= _current.items().size())
         return AppEvents::error(tr("Unable to delete files for scenario: invalid scenario index %1").arg(scenarioIndex));
@@ -196,9 +198,9 @@ void ScenariosProvider::deleteScenarioFiles(int scenarioIndex)
 
     auto status = _scenarioDownloads[scenarioIndex];
     if (status) prepareDownloadStatus(scenario, status);
-}
+}*/
 
-ScenarioDownloadStatus* ScenariosProvider::scenarioDownloadStatus(int scenarioIndex)
+/*ScenarioDownloadStatus* ScenariosProvider::scenarioDownloadStatus(int scenarioIndex)
 {
     return _scenarioDownloads.contains(scenarioIndex)? _scenarioDownloads[scenarioIndex]: nullptr;
 }
@@ -236,4 +238,4 @@ void ScenariosProvider::prepareDownloadStatus(const RecognitionScenario& scenari
         status->_status = ScenarioDownloadStatus::NoFiles;
         status->_loadedFiles = 0;
     }
-}
+}*/

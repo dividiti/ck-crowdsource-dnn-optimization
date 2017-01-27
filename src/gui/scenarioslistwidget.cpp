@@ -7,13 +7,13 @@
 
 #include <QBoxLayout>
 #include <QDebug>
-#include <QFrame>
+//#include <QFrame>
 #include <QLabel>
-#include <QMessageBox>
-#include <QProgressBar>
+//#include <QMessageBox>
+//#include <QProgressBar>
 #include <QRadioButton>
 #include <QScrollArea>
-#include <QTimer>
+//#include <QTimer>
 #include <QToolBar>
 
 ScenarioItemWidget::ScenarioItemWidget(ExperimentContext *context, int scenarioIndex, QWidget *parent) : QWidget(parent)
@@ -29,35 +29,34 @@ ScenarioItemWidget::ScenarioItemWidget(ExperimentContext *context, int scenarioI
     f.setPointSize(f.pointSize()+1);
     labelTitle->setFont(f);
 
-    auto labelSize = new QLabel(scenario.fileSizeMB());
+//    auto labelSize = new QLabel(scenario.fileSizeMB());
 
     _selectionFlag = new QRadioButton;
     _selectionFlag->setChecked(scenarioIndex == context->currentScenarioIndex());
     connect(_selectionFlag, SIGNAL(clicked(bool)), this, SIGNAL(selectionFlagClicked()));
 
-    _actionDeleteFiles = Ori::Gui::action(tr("Delete scenario files"), this, SLOT(deleteScenarioFiles()), ":/tools/delete");
-    _actionDloadFiles = Ori::Gui::action(tr("Download scenario files"), this, SLOT(downloadsScenarioFiles()), ":/tools/download");
+//    _actionDeleteFiles = Ori::Gui::action(tr("Delete scenario files"), this, SLOT(deleteScenarioFiles()), ":/tools/delete");
+//    _actionDloadFiles = Ori::Gui::action(tr("Download scenario files"), this, SLOT(downloadsScenarioFiles()), ":/tools/download");
     auto actionShowInfo = Ori::Gui::action(tr("Show scenario info"), this, SLOT(showScenarioInfo()), ":/tools/info");
-    // TODO: stop downloading action?
 
-    _downloadingProgress = new QProgressBar;
+    //_downloadingProgress = new QProgressBar;
 
     setLayout(Ori::Gui::layoutH(
     {
         _selectionFlag,
         Ori::Gui::spacing(16),
-        Ori::Gui::layoutV({ labelTitle, labelSize, _downloadingProgress }),
+        Ori::Gui::layoutV({ labelTitle/*, labelSize, _downloadingProgress*/ }),
         0,
-        Ori::Gui::toolbar({ _actionDeleteFiles, _actionDloadFiles, actionShowInfo })
+        Ori::Gui::toolbar({ /*_actionDeleteFiles, _actionDloadFiles,*/ actionShowInfo })
     }));
 
-    connect(_context->scenariosProvider, &ScenariosProvider::scenarioFileDownloaded, this, &ScenarioItemWidget::fileDownloaded);
-    connect(_context->scenariosProvider, &ScenariosProvider::filesDownloadComplete, this, &ScenarioItemWidget::filesDownloadComplete);
+    //connect(_context->scenariosProvider, &ScenariosProvider::scenarioFileDownloaded, this, &ScenarioItemWidget::fileDownloaded);
+    //connect(_context->scenariosProvider, &ScenariosProvider::filesDownloadComplete, this, &ScenarioItemWidget::filesDownloadComplete);
 
-    displayFilesStatus();
+    //displayFilesStatus();
 }
 
-void ScenarioItemWidget::deleteScenarioFiles()
+/*void ScenarioItemWidget::deleteScenarioFiles()
 {
     if (Utils::confirmDlg(tr("Confirm deletion")))
     {
@@ -70,7 +69,7 @@ void ScenarioItemWidget::downloadsScenarioFiles()
 {
     _context->scenariosProvider->downloadScenarioFiles(_scenarioIndex);
     displayFilesStatus();
-}
+}*/
 
 void ScenarioItemWidget::showScenarioInfo()
 {
@@ -87,7 +86,7 @@ bool ScenarioItemWidget::selected() const
     return _selectionFlag->isChecked();
 }
 
-void ScenarioItemWidget::fileDownloaded(int scenarioIndex, int loadedFilesCount)
+/*void ScenarioItemWidget::fileDownloaded(int scenarioIndex, int loadedFilesCount)
 {
     if (scenarioIndex != _scenarioIndex) return;
 
@@ -145,7 +144,7 @@ void ScenarioItemWidget::displayFilesStatus()
         _downloadingProgress->setVisible(true);
         break;
     }
-}
+}*/
 
 //-----------------------------------------------------------------------------
 

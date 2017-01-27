@@ -27,6 +27,33 @@ ImagesBank::ImagesBank()
 }
 
 //-----------------------------------------------------------------------------
+StdoutResults::StdoutResults(const QString& text)
+{
+    // 0.9835 - "n03793489 mouse, computer mouse"
+    static QLatin1String predictionMarker("0.");
+    // "execution_time": 0.244448,
+    static QLatin1String timeMarker("\"execution_time\":");
+
+    QStringList predictions;
+    for (const QStringRef& line: text.splitRef('\n', QString::SkipEmptyParts))
+    {
+        QStringRef s = line.trimmed();
+        if (s.startsWith(predictionMarker))
+            predictions << s.toString().remove('"');
+        else if (s.startsWith(timeMarker))
+        {
+            auto nameValue = s.split(":");
+            if (nameValue.size() > 1)
+            {
+                QStringRef value = nameValue.at(1).trimmed();
+                _time = value.left(value.size()-1).toDouble();
+            }
+        }
+    }
+    _predictions = predictions.join("\n");
+}
+
+//-----------------------------------------------------------------------------
 
 BatchItem::BatchItem(int index, int imageOffset, const ScenarioRunParams& params, ImagesBank *images) : QObject(0)
 {
@@ -61,8 +88,11 @@ void BatchItem::scenarioFinished(const QString &error)
     if (error.isEmpty())
     {
         _frame->loadImage(_images->imageFile(_imageIndex));
-        _frame->showInfo(parseOutput(_runner->stdout()));
-        emit finished(_runner->readProbe());
+        StdoutResults res(_runner->getStdout());
+        _frame->showInfo(res.predictions());
+        ExperimentProbe p;
+        p.time = res.time();
+        emit finished(p);
     }
     else
     {
@@ -82,18 +112,6 @@ void BatchItem::scenarioFinished(const QString &error)
     if (_imageIndex == _images->size())
         _imageIndex = 0;
     run();
-}
-
-QString BatchItem::parseOutput(const QString& text) const
-{
-    // 0.9835 - "n03793489 mouse, computer mouse"
-    static QLatin1String predictionMarker("0.");
-
-    QStringList results;
-    for (const QStringRef& line: text.splitRef('\n', QString::SkipEmptyParts))
-        if (line.startsWith(predictionMarker))
-            results << line.toString().remove('"');
-    return results.join("\n");
 }
 
 //-----------------------------------------------------------------------------

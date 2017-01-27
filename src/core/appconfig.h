@@ -11,31 +11,34 @@ class AppConfig
 {
 public:
     static QString sharedResourcesUrl();
-
     static QString sharedRepoUrl();
     static void setSharedRepoUrl(const QString& url);
-
-    static QString email();
-
+    //static QString email();
     static QString platformFeaturesCacheFile();
-    static QString scenariosCacheFile();
-    static QString scenariosDataDir();
+    //static QString scenariosCacheFile();
+    //static QString scenariosDataDir();
     static QString imagesDir();
     static QStringList imagesFilter();
-
-    static bool checkScenarioFilesMd5();
-
+    //static bool checkScenarioFilesMd5();
     static int selectedScenarioIndex(int experimentIndex);
     static void setSelectedScenarioIndex(int experimentIndex, int scenarioIndex);
+
     static int batchSize(int experimentIndex);
     static void setBatchSize(int experimentIndex, int batchSize);
+
+    static QString ckPath();
+    static QString ckBinPath();
+    static QString ckExeName();
 
 private:
     static QString configFileName();
     static QSettings& config();
 
     static int configValueInt(const QString& key, int defaultValue);
+    static QString configValueStr(const QString& key, const QString& defaultValue);
+
     static QString experimentKey(const QString& baseKey, int experimentIndex);
 };
+
 
 #endif // APPCONFIG_H

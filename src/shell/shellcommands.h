@@ -3,15 +3,10 @@
 
 #include <QObject>
 
-#include "appmodels.h"
-#include "remotedataaccess.h"
-
 QT_BEGIN_NAMESPACE
 class QApplication;
 class QTextStream;
 QT_END_NAMESPACE
-
-class ScenariosProvider;
 
 class ShellCommands : public QObject
 {
@@ -23,21 +18,10 @@ public:
     bool process(const QApplication& app);
 
 private:
-    void command_querySharedRepoInfo();
-    void command_showCachedPlatformFeatures();
-    void command_loadScenariosForCachedFeatures();
-    void command_runCachedScenario(const QString& scenarioNumber, const QStringList& imageFiles);
-
-private slots:
-    void sharedRepoInfoReceived(SharedRepoInfo info);
-    void scenariosReceived(RecognitionScenarios scenarios);
+    void command_caffeModels();
 
 private:
     QTextStream& cout();
-
-    RemoteDataAccess _network;
-    ScenariosProvider *_scenariosProvider;
-    bool _saveLoadedScenariosToCache = false;
 };
 
 #endif // SHELLCOMMANDS_H
