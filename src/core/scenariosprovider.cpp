@@ -13,7 +13,7 @@ RecognitionScenarios ScenariosProvider::queryModelByUid(const QString& modelUid)
 {
     RecognitionScenarios scenarios;
     qDebug() << "Find model by uid:" << modelUid;
-    auto model = CK().queryModelByUid(modelUid);
+    auto model = CK().queryEnvByUid(modelUid);
     if (!model.isEmpty())
         scenarios.append(model);
     else

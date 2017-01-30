@@ -11,8 +11,9 @@ class CK
 public:
     CK();
 
+    QList<CkEntry> queryCaffeLibs();
     QList<CkEntry> queryCaffeModels();
-    CkEntry queryModelByUid(const QString& uid);
+    CkEntry queryEnvByUid(const QString& uid);
 
 private:
     QProcess _ck;
@@ -21,6 +22,7 @@ private:
 
     QStringList ck(const QStringList &args);
     QString makePath(const QStringList &parts) const;
+    QList<CkEntry> queryEnvsByTags(const QString& tags);
 };
 
 #endif // CK_H

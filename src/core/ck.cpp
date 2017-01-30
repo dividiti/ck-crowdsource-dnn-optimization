@@ -25,31 +25,42 @@ CK::CK()
     qDebug() << "CK default args:" << _ck.arguments().join(" ");
 }
 
-QList<CkEntry> CK::queryCaffeModels()
+QList<CkEntry> CK::queryCaffeLibs()
 {
-    QList<CkEntry> models;
-    qDebug() << "Query caffe models...";
-    auto args = QStringList{ "search", "env", "--tags=caffemodel" };
-    qDebug() << "Run command:" << _ck.program() + ' ' +  args.join(" ");
-    auto results = ck(args);
-    for (auto result: results)
-        qDebug() << "Search result:" << result;
-    if (!results.isEmpty())
-    {
-        qDebug() << "Parsing results...";
-        for (auto result: results)
-        {
-            // result = "local:env:fff6cd1bb4dc78f2"
-            auto uid = result.section(':', -1);
-            auto model = queryModelByUid(uid);
-            if (!model.isEmpty())
-                models << model;
-        }
-    }
-    return models;
+    return queryEnvsByTags("lib,caffe");
 }
 
-CkEntry CK::queryModelByUid(const QString& uid)
+QList<CkEntry> CK::queryCaffeModels()
+{
+    return queryEnvsByTags("caffemodel");
+}
+
+QList<CkEntry> CK::queryEnvsByTags(const QString& tags)
+{
+    auto args = QStringList{ "search", "env", "--tags="+tags };
+    qDebug() << "Run command:" << _ck.program() + ' ' +  args.join(" ");
+    auto results = ck(args);
+    if (results.isEmpty())
+    {
+        qDebug() << "No envs found";
+        return QList<CkEntry>();
+    }
+    for (auto result: results)
+        qDebug() << "Search result:" << result;
+    QList<CkEntry> entries;
+    qDebug() << "Parsing results...";
+    for (auto result: results)
+    {
+        // result = "local:env:fff6cd1bb4dc78f2"
+        auto uid = result.section(':', -1);
+        auto entry = queryEnvByUid(uid);
+        if (!entry.isEmpty())
+            entries << entry;
+    }
+    return entries;
+}
+
+CkEntry CK::queryEnvByUid(const QString& uid)
 {
     if (uid.isEmpty())
     {
@@ -61,8 +72,9 @@ CkEntry CK::queryModelByUid(const QString& uid)
     auto name = json.object()["data_name"].toString();
     if (name.isEmpty())
         return CkEntry();
-    qDebug() << "Model env found:" << uid << name;
-    return CkEntry { uid, name };
+    CkEntry entry { uid, name };
+    qDebug() << "Env found:" << entry.str();
+    return entry;
 }
 
 QStringList CK::ck(const QStringList& args)
