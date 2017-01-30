@@ -8,10 +8,7 @@
 
 ScenarioRunParams::ScenarioRunParams(const RecognitionScenario& scenario)
 {
-    qDebug() << "Prepare scenario" << scenario.title() /*<< scenario.cmd()*/;
-
-    // TODO: split more careful regarding to quoted arguments containing spaces
-    //QStringList args = scenario.cmd().split(' ', QString::SkipEmptyParts);
+    qDebug() << "Prepare scenario" << scenario.title();
 
 #ifdef Q_OS_WIN32
     _program = "python";
@@ -34,100 +31,25 @@ ScenarioRunParams::ScenarioRunParams(const RecognitionScenario& scenario)
     _arguments.append(AppConfig::ckArgs());
 
     qDebug() << "DIR:" << _workdir;
-    qDebug() << "CMD:" << _program << _arguments.join(' ');
-
-    //processFiles(scenario);
-    //prepareProgram(args);
-    //prepareArguments(args);
-    //prepareInvironment();
+    qDebug() << "CMD:" << _program + ' ' + _arguments.join(' ');
 }
-
-/*void ScenarioRunParams::processFiles(const RecognitionScenario& scenario)
-{
-    for (const RecognitionScenarioFileItem& file: scenario.files())
-    {
-        if (file.isExecutable())
-        {
-            auto path = file.fullPath();
-            _paths << path;
-            qDebug() << "LIB" << path;
-
-            if (!file.isLibrary())
-            {
-                _workdir = path;
-                qDebug() << "EXE" << path;
-            }
-        }
-    }
-}*/
-
-/*void ScenarioRunParams::prepareProgram(const QStringList &args)
-{
-    if (args.isEmpty())
-    {
-        qCritical() << "Program name not found";
-        return;
-    }
-    _program = args.first();
-    qDebug() << "CMD" << _program;
-}*/
-
-/*void ScenarioRunParams::prepareArguments(const QStringList &args)
-{
-    static QString localPathEntry("$#local_path#$/openscience");
-    static QString imageEntry("$#image#$");
-
-    const QString scenarioDataDir = AppConfig::scenariosDataDir();
-
-    for (int i = 1; i < args.size(); i++)
-    {
-        QString arg = args.at(i);
-        if (arg.contains(imageEntry))
-        {
-            _imageFileArgIndex = i-1;
-            _arguments << QString();
-        }
-        else
-            _arguments << arg.replace(localPathEntry, scenarioDataDir);
-    }
-    for (const QString& arg: _arguments)
-        qDebug() << "ARG" << (arg.isEmpty()? QString("<image path here>"): arg);
-}*/
-
-/*void ScenarioRunParams::prepareInvironment()
-{
-    _env.insert("CT_REPEAT_MAIN", "1");
-
-    if (!_paths.isEmpty())
-    {
-#ifdef Q_OS_LINUX
-        _env.insert("LD_LIBRARY_PATH", _paths.join(":") + ":$LD_LIBRARY_PATH");
-#endif
-#ifdef Q_OS_MAC
-        _env.insert("DYLD_FALLBACK_LIBRARY_PATH", _paths.join(":") + ":$DYLD_FALLBACK_LIBRARY_PATH");
-    #endif
-#ifdef Q_OS_WIN
-        // TODO: Windows
-#endif
-    }
-}*/
 
 //-----------------------------------------------------------------------------
 
-ScenarioRunner::ScenarioRunner(const ScenarioRunParams &params, QObject *parent) : QObject(parent)
+ScenarioRunner::ScenarioRunner(const ScenarioRunParams &params, int scenarioId, QObject *parent) : QObject(parent)
 {
     _process = new QProcess(this);
     _process->setWorkingDirectory(params.workdir());
     _process->setProgram(params.program());
-    //_process->setProcessEnvironment(params.environment());
     connect(_process, &QProcess::errorOccurred, this, &ScenarioRunner::errorOccurred);
     //connect(_process, &QProcess::readyReadStandardOutput, this, &ScenarioRunner::readyReadStandardOutput);
     //connect(_process, &QProcess::readyReadStandardError, this, &ScenarioRunner::readyReadStandardError);
     connect(_process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
 
     _arguments = params.arguments();
+    _arguments << QString("--env.XOPENME_TIME_FILE=tmp-ck-timer-%1.json").arg(scenarioId);
+
     _imageFileArgIndex = params.imageFileArgIndex();
-//    _timersFile = params.workdir() + QDir::separator() + "tmp-ck-timer.json";
 }
 
 void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
@@ -142,6 +64,7 @@ void ScenarioRunner::run(const QString& imageFile, bool waitForFinish)
 
     if (verboseDebugPrint)
         qDebug() << "Start command";
+    qDebug() << "RUN:" << _process->program() + ' ' + _arguments.join(' ');
     _process->start();
 
     if (waitForFinish)
@@ -182,11 +105,4 @@ void ScenarioRunner::readyReadStandardError()
 void ScenarioRunner::readyReadStandardOutput()
 {
     qDebug() << "STDOUT"; qDebug() << _process->readAllStandardOutput();
-}
-
-ExperimentProbe ScenarioRunner::readProbe() const
-{
-    ExperimentProbe p;
-    //p.parseJson(Utils::loadTtextFromFile(_timersFile));
-    return p;
 }

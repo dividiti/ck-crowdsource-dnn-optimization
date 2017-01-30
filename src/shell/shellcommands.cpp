@@ -1,8 +1,5 @@
 #include "appconfig.h"
 #include "ck.h"
-#include "platformfeaturesprovider.h"
-#include "scenariosprovider.h"
-#include "scenariorunner.h"
 #include "shellcommands.h"
 
 #include <QApplication>

@@ -5,67 +5,16 @@
 #include <QDir>
 #include <QDebug>
 
-namespace ConfigKeys
-{
-    const QString remoteServer("remote_server_url");
-    //const QString email("email");
-    //const QString checkScenarioFilesMd5("check_scenario_files_md5");
-    //const QString selectedScenario("selected_scenario_");
-    //const QString batchSize("batchSize");
-} // namespace ConfigKeys
-
-//-----------------------------------------------------------------------------
-
 QSettings& AppConfig::config()
 {
     static QSettings cfg(configFileName(), QSettings::IniFormat);
     return cfg;
 }
 
-QString AppConfig::sharedResourcesUrl()
-{
-    return QStringLiteral("http://cTuning.org/shared-computing-resources-json/ck.json");
-}
-
-QString AppConfig::sharedRepoUrl()
-{
-    return config().value(ConfigKeys::remoteServer).toString();
-}
-
-void AppConfig::setSharedRepoUrl(const QString& url)
-{
-    config().setValue(ConfigKeys::remoteServer, url);
-}
-
-/*QString AppConfig::email()
-{
-    return config().value(ConfigKeys::email).toString();
-}*/
-
 QString AppConfig::configFileName()
 {
     return qApp->applicationDirPath() + QDir::separator() + "app.conf";
 }
-
-QString AppConfig::platformFeaturesCacheFile()
-{
-    return qApp->applicationDirPath() + QDir::separator() + "platformFeatures.json";
-}
-
-/*QString AppConfig::scenariosCacheFile()
-{
-    return qApp->applicationDirPath() + QDir::separator() + "recognitionScenarios.json";
-}
-
-QString AppConfig::scenariosDataDir()
-{
-    return qApp->applicationDirPath() + QDir::separator() + "openscience";
-}
-
-bool AppConfig::checkScenarioFilesMd5()
-{
-    return config().value(ConfigKeys::checkScenarioFilesMd5, true).toBool();
-}*/
 
 QString AppConfig::imagesDir()
 {
@@ -75,7 +24,7 @@ QString AppConfig::imagesDir()
 
 QStringList AppConfig::imagesFilter()
 {
-    return configValueStr("images_filter", "*.jpg;*.jpeg").split(";", QString::SkipEmptyParts);
+    return configValueStr("images_filter", "*.jpg,*.jpeg").split(",", QString::SkipEmptyParts);
 }
 
 int AppConfig::selectedScenarioIndex(int experimentIndex)
@@ -138,4 +87,9 @@ QString AppConfig::experimentKey(const QString& baseKey, int experimentIndex)
 QStringList AppConfig::ckArgs()
 {
     return config().value("ck_args").toString().split(' ', QString::SkipEmptyParts);
+}
+
+bool AppConfig::isParallel()
+{
+    return config().value("parallel", false).toBool();
 }

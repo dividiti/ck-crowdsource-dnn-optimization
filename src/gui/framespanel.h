@@ -54,15 +54,13 @@ public:
     void stop() { _stopFlag = true; }
     bool isStopped() const { return _isStopped; }
 
-public slots:
-    void runInternal();
-    void stopInternal();
-
 signals:
     void finished(const ExperimentProbe& probe);
     void stopped();
 
 private slots:
+    void runInternal();
+    void stopInternal();
     void scenarioFinished(const QString &error);
 
 private:
@@ -93,6 +91,7 @@ private:
     ImagesBank* _images = nullptr;
     ExperimentContext* _context;
     QList<BatchItem*> _batchItems;
+    bool _runParallel;
 
     void clearBatch();
     void prepareBatch(const ScenarioRunParams &params);

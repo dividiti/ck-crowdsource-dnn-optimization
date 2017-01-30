@@ -15,18 +15,11 @@ public:
     QString workdir() const { return _workdir; }
     const QStringList& arguments() const { return _arguments; }
     int imageFileArgIndex() const { return _imageFileArgIndex; }
-    //const QProcessEnvironment& environment() const { return _env; }
 
 private:
-    //QProcessEnvironment _env;
-    QStringList /*_paths,*/ _arguments;
+    QStringList _arguments;
     QString _workdir, _program;
     int _imageFileArgIndex = -1;
-
-    //void processFiles(const RecognitionScenario& scenario);
-    //void prepareProgram(const QStringList &args);
-    //void prepareArguments(const QStringList &args);
-    //void prepareInvironment();
 };
 
 //-----------------------------------------------------------------------------
@@ -35,7 +28,7 @@ class ScenarioRunner : public QObject
 {
     Q_OBJECT
 public:
-    explicit ScenarioRunner(const ScenarioRunParams &params, QObject *parent = 0);
+    explicit ScenarioRunner(const ScenarioRunParams &params, int scenarioId, QObject *parent = 0);
 
     void run(const QString& imageFile, bool waitForFinish = false);
 
@@ -46,8 +39,6 @@ public:
 
     bool ok() const { return _error.isEmpty(); }
     QString error() const { return _error; }
-
-    ExperimentProbe readProbe() const;
 
 signals:
     void scenarioFinished(const QString &error);
@@ -63,7 +54,6 @@ private:
     QStringList _arguments;
     int _imageFileArgIndex;
     QString _error, _stderr, _stdout;
-    //QString _timersFile;
 };
 
 #endif // SCENARIORUNNER_H

@@ -2,7 +2,6 @@
 #include "experimentcontext.h"
 #include "featurespanel.h"
 #include "infolabel.h"
-#include "platformfeaturesprovider.h"
 #include "scenarioslistwidget.h"
 #include "scenariosprovider.h"
 #include "utils.h"

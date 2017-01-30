@@ -17,7 +17,7 @@ ImagesBank::ImagesBank()
     qDebug() << "Images directory:" << imagesDir;
 
     auto imagesFilter = AppConfig::imagesFilter();
-    qDebug() << "Images filter:" << imagesFilter.join(";");
+    qDebug() << "Images filter:" << imagesFilter.join(",");
 
     QDir dir(imagesDir);
     for (const QString& entry: dir.entryList(imagesFilter, QDir::Files))
@@ -27,6 +27,7 @@ ImagesBank::ImagesBank()
 }
 
 //-----------------------------------------------------------------------------
+
 StdoutResults::StdoutResults(const QString& text)
 {
     // 0.9835 - "n03793489 mouse, computer mouse"
@@ -61,7 +62,7 @@ BatchItem::BatchItem(int index, int imageOffset, const ScenarioRunParams& params
     _images = images;
     _imageIndex = imageOffset;
     _frame = new FrameWidget;
-    _runner = new ScenarioRunner(params);
+    _runner = new ScenarioRunner(params, _index);
     connect(_runner, &ScenarioRunner::scenarioFinished, this, &BatchItem::scenarioFinished);
 }
 
@@ -109,8 +110,10 @@ void BatchItem::scenarioFinished(const QString &error)
     _imageIndex++;
     if (_imageIndex == _images->size())
         _imageIndex = 0;
+
     if (nextBatch)
-        QTimer::singleShot(1000, nextBatch, &BatchItem::runInternal);
+        QTimer::singleShot(100, nextBatch, &BatchItem::runInternal);
+    else runInternal();
 }
 
 void BatchItem::stopInternal()
@@ -127,6 +130,9 @@ void BatchItem::stopInternal()
 
 FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QWidget(parent)
 {
+    _runParallel = AppConfig::isParallel();
+    qDebug() << "Run in parallel:" << _runParallel;
+
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentStopping()), this, SLOT(experimentStopping()));
@@ -157,14 +163,11 @@ void FramesPanel::experimentStarted()
     auto scenario = _context->currentScenario();
     qDebug() << "Start experiment for scenario" << scenario.title();
 
-    if (!scenario.allFilesAreLoaded())
+    if (!prepareImages())
     {
-        AppEvents::error(tr("Not all files of scenario were loaded"));
-        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
         return;
+        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
     }
-
-    if (!prepareImages()) return;
 
     ScenarioRunParams params(scenario);
 
@@ -172,8 +175,11 @@ void FramesPanel::experimentStarted()
     prepareBatch(params);
 
     qDebug() << "Start batch processing";
-    //for (auto item: _batchItems) item->run();
-    _batchItems.at(0)->run();
+    if (_runParallel)
+        for (auto item: _batchItems)
+            item->run();
+    else
+        _batchItems.at(0)->run();
 }
 
 void FramesPanel::experimentStopping()
@@ -201,9 +207,12 @@ void FramesPanel::prepareBatch(const ScenarioRunParams& params)
         _batchItems.append(item);
         layout()->addWidget(item->frame());
     }
-    for (int i = 0; i < _context->batchSize()-1; i++)
-        _batchItems.at(i)->nextBatch = _batchItems.at(i+1);
-    _batchItems.at(_context->batchSize()-1)->nextBatch = _batchItems.at(0);
+    if (!_runParallel)
+    {
+        for (int i = 0; i < _context->batchSize()-1; i++)
+            _batchItems.at(i)->nextBatch = _batchItems.at(i+1);
+        _batchItems.at(_context->batchSize()-1)->nextBatch = _batchItems.at(0);
+    }
 }
 
 bool FramesPanel::prepareImages()

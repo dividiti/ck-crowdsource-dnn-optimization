@@ -10,16 +10,9 @@ QT_END_NAMESPACE
 class AppConfig
 {
 public:
-    static QString sharedResourcesUrl();
-    static QString sharedRepoUrl();
-    static void setSharedRepoUrl(const QString& url);
-    //static QString email();
-    static QString platformFeaturesCacheFile();
-    //static QString scenariosCacheFile();
-    //static QString scenariosDataDir();
     static QString imagesDir();
     static QStringList imagesFilter();
-    //static bool checkScenarioFilesMd5();
+
     static int selectedScenarioIndex(int experimentIndex);
     static void setSelectedScenarioIndex(int experimentIndex, int scenarioIndex);
 
@@ -30,6 +23,8 @@ public:
     static QString ckBinPath();
     static QString ckExeName();
     static QStringList ckArgs();
+
+    static bool isParallel();
 
 private:
     static QString configFileName();

@@ -18,17 +18,32 @@ CK::CK()
     _ck.setProgram(AppConfig::ckExeName());
     _ck.setWorkingDirectory(AppConfig::ckBinPath());
 #endif
+
+    qDebug() << "CK path:" << _ckPath;
+    qDebug() << "CK bin path:" << _ck.workingDirectory();
+    qDebug() << "CK executable:" << _ck.program();
+    qDebug() << "CK default args:" << _ck.arguments().join(" ");
 }
 
 QList<CkEntry> CK::queryCaffeModels()
 {
     QList<CkEntry> models;
     qDebug() << "Query caffe models...";
-    for (auto result: ck({ "search", "env", "--tags=caffemodel" }))
+    auto args = QStringList{ "search", "env", "--tags=caffemodel" };
+    qDebug() << "Run command:" << _ck.program() + ' ' +  args.join(" ");
+    auto results = ck(args);
+    for (auto result: results)
+        qDebug() << "Search result:" << result;
+    qDebug() << "Parsing results...";
+    for (auto result: results)
     {
         // result = "local:env:fff6cd1bb4dc78f2"
         auto uid = result.section(':', -1);
-        if (uid.isEmpty()) continue;
+        if (uid.isEmpty())
+        {
+            qCritical() << "No env uid founded in results string";
+            continue;
+        }
         auto info = makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
         auto json = QJsonDocument::fromJson(Utils::loadTtextFromFile(info));
         auto name = json.object()["data_name"].toString();

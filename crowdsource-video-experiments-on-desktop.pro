@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui network
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -36,11 +36,9 @@ SOURCES += \
     src/gui/framewidget.cpp \
     src/shell/shellcommands.cpp \
     src/core/appconfig.cpp \
-    src/core/remotedataaccess.cpp \
     src/core/utils.cpp \
     src/core/appevents.cpp \
     src/core/appmodels.cpp \
-    src/core/platformfeaturesprovider.cpp \
     src/core/scenariosprovider.cpp \
     src/ori/OriWidgets.cpp \
     src/ori/OriLabels.cpp \
@@ -60,11 +58,9 @@ HEADERS += \
     src/gui/framewidget.h \
     src/shell/shellcommands.h \
     src/core/appconfig.h \
-    src/core/remotedataaccess.h \
     src/core/utils.h \
     src/core/appevents.h \
     src/core/appmodels.h \
-    src/core/platformfeaturesprovider.h \
     src/core/scenariosprovider.h \
     src/ori/OriWidgets.h \
     src/ori/OriLabels.h \

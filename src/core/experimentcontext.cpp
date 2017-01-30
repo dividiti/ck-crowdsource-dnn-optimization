@@ -1,6 +1,5 @@
 #include "appconfig.h"
 #include "experimentcontext.h"
-#include "platformfeaturesprovider.h"
 #include "scenariosprovider.h"
 
 #include <QDebug>
@@ -20,7 +19,7 @@ void ExperimentContext::setCurrentScenarioIndex(int index)
     if (checkScenarioIndex(index))
     {
         _currentScenarioIndex = index;
-        AppConfig::setSelectedScenarioIndex(experimentIndex, index);
+        AppConfig::setSelectedScenarioIndex(_experimentIndex, index);
     }
 }
 
@@ -39,7 +38,7 @@ void ExperimentContext::setBatchSize(int value)
     if (value >= minBatchSize() && value <= maxBatchSize())
     {
         _batchSize = value;
-        AppConfig::setBatchSize(experimentIndex, value);
+        AppConfig::setBatchSize(_experimentIndex, value);
     }
 }
 
@@ -59,8 +58,8 @@ void ExperimentContext::stopExperiment()
 void ExperimentContext::loadFromConfig()
 {
     // TODO: values will be saved into config, despite of they just have been read
-    setCurrentScenarioIndex(AppConfig::selectedScenarioIndex(experimentIndex));
-    setBatchSize(AppConfig::batchSize(experimentIndex));
+    setCurrentScenarioIndex(AppConfig::selectedScenarioIndex(_experimentIndex));
+    setBatchSize(AppConfig::batchSize(_experimentIndex));
 }
 
 void ExperimentContext::recognitionFinished(const ExperimentProbe &p)

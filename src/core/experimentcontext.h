@@ -14,8 +14,7 @@ class ExperimentContext : public QObject
     Q_OBJECT
 
 public:
-    int experimentIndex = -1;
-    //PlatformFeaturesProvider* platformFeaturesProvider;
+    int experimentIndex() const { return _experimentIndex; }
     ScenariosProvider* scenariosProvider;
 
     bool checkScenarioIndex(int index) const;
@@ -47,10 +46,13 @@ public slots:
     void recognitionFinished(const ExperimentProbe& p);
 
 private:
+    int _experimentIndex = -1;
     bool _isExperimentStarted = false;
     int _currentScenarioIndex = -1;
     int _batchSize = 2;
     ExperimentResult _result;
+
+    friend class MainWindow;
 };
 
 #endif // EXPERIMENTCONTEXT_H
