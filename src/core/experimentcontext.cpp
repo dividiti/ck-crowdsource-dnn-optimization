@@ -57,8 +57,11 @@ void ExperimentContext::stopExperiment()
 
 void ExperimentContext::loadFromConfig()
 {
-    // TODO: values will be saved into config, despite of they just have been read
-    setCurrentScenarioIndex(AppConfig::selectedScenarioIndex(_experimentIndex));
+    auto index = AppConfig::selectedScenarioIndex(_experimentIndex);
+    if (!checkScenarioIndex(index) && !scenariosProvider->currentList().isEmpty())
+        index = 0;
+    setCurrentScenarioIndex(index);
+
     setBatchSize(AppConfig::batchSize(_experimentIndex));
 }
 

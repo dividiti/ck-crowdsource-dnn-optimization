@@ -16,6 +16,7 @@
 FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWidget(parent)
 {
     _context = context;
+    connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
 
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
@@ -155,7 +156,6 @@ void FeaturesPanel::enableControls(bool on)
 
 void FeaturesPanel::startExperiment()
 {
-    enableControls(false);
     _context->startExperiment();
 }
 
@@ -163,6 +163,11 @@ void FeaturesPanel::stopExperiment()
 {
     _buttonStop->setEnabled(false);
     _context->stopExperiment();
+}
+
+void FeaturesPanel::experimentStarted()
+{
+    enableControls(false);
 }
 
 void FeaturesPanel::experimentFinished()

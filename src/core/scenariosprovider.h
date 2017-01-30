@@ -12,7 +12,8 @@ class ScenariosProvider : public QObject
 public:
     explicit ScenariosProvider(QObject *parent = 0);
 
-    static RecognitionScenarios queryFromCK();
+    static RecognitionScenarios queryModelByUid(const QString &modelUid);
+    static RecognitionScenarios queryAllModels();
 
     const RecognitionScenarios& currentList() const { return _current; }
     void setCurrentList(const RecognitionScenarios& scenarios);

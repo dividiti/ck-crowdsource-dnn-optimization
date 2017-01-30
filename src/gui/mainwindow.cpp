@@ -22,7 +22,7 @@ void setInitialWindowGeometry(QWidget* w)
     w->resize(desktop.width()*0.75, w->height()*2);
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWindow(parent)
 {
     setWindowIcon(QIcon(":/icon/main"));
     setAttribute(Qt::WA_DeleteOnClose);
@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setInitialWindowGeometry(this);
     Utils::moveToDesktopCenter(this);
 
-    initialize();
+    initialize(runParams);
 }
 
 MainWindow::~MainWindow()
@@ -60,14 +60,22 @@ MainWindow::~MainWindow()
     Utils::closeAllInfoWindows();
 }
 
-void MainWindow::initialize()
+void MainWindow::initialize(const AppRunParams &runParams)
 {
-    qDebug() << "initialize";
+    qDebug() << "initialize main window";
 
-    auto scenarios = _scenariosProvider->queryFromCK();
+    RecognitionScenarios scenarios;
+    if (!runParams.isEmpty())
+        scenarios = _scenariosProvider->queryModelByUid(runParams.dnnModelUid);
+    if (scenarios.isEmpty())
+        scenarios = _scenariosProvider->queryAllModels();
     _scenariosProvider->setCurrentList(scenarios);
 
     updateExperimentConditions();
+
+    if (runParams.startImmediately)
+        for (auto e: _experiments)
+            e->context.startExperiment();
 }
 
 void MainWindow::onError(const QString& msg)

@@ -24,6 +24,7 @@ private slots:
     void setBatchSize();
     void startExperiment();
     void stopExperiment();
+    void experimentStarted();
     void experimentFinished();
     void currentScenarioSelected(int index);
 

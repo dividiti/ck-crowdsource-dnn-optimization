@@ -21,14 +21,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(const AppRunParams& runParams, QWidget *parent = 0);
     ~MainWindow();
 
 private:
     QList<Experiment*> _experiments;
     ScenariosProvider* _scenariosProvider;
 
-    void initialize();
+    void initialize(const AppRunParams &runParams);
     void updateExperimentConditions();
 
 private slots:

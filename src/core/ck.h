@@ -12,6 +12,7 @@ public:
     CK();
 
     QList<CkEntry> queryCaffeModels();
+    CkEntry queryModelByUid(const QString& uid);
 
 private:
     QProcess _ck;

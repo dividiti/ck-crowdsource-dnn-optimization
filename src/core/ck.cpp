@@ -34,24 +34,35 @@ QList<CkEntry> CK::queryCaffeModels()
     auto results = ck(args);
     for (auto result: results)
         qDebug() << "Search result:" << result;
-    qDebug() << "Parsing results...";
-    for (auto result: results)
+    if (!results.isEmpty())
     {
-        // result = "local:env:fff6cd1bb4dc78f2"
-        auto uid = result.section(':', -1);
-        if (uid.isEmpty())
+        qDebug() << "Parsing results...";
+        for (auto result: results)
         {
-            qCritical() << "No env uid founded in results string";
-            continue;
+            // result = "local:env:fff6cd1bb4dc78f2"
+            auto uid = result.section(':', -1);
+            auto model = queryModelByUid(uid);
+            if (!model.isEmpty())
+                models << model;
         }
-        auto info = makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
-        auto json = QJsonDocument::fromJson(Utils::loadTtextFromFile(info));
-        auto name = json.object()["data_name"].toString();
-        if (name.isEmpty()) continue;
-        qDebug() << "Model env found:" << uid << name;
-        models << CkEntry { uid, name };
     }
     return models;
+}
+
+CkEntry CK::queryModelByUid(const QString& uid)
+{
+    if (uid.isEmpty())
+    {
+        qCritical() << "No env uid founded";
+        return CkEntry();
+    }
+    auto info = makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
+    auto json = QJsonDocument::fromJson(Utils::loadTtextFromFile(info));
+    auto name = json.object()["data_name"].toString();
+    if (name.isEmpty())
+        return CkEntry();
+    qDebug() << "Model env found:" << uid << name;
+    return CkEntry { uid, name };
 }
 
 QStringList CK::ck(const QStringList& args)

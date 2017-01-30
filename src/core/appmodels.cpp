@@ -12,6 +12,13 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
+QString CkEntry::str() const
+{
+    return QString("%1: %2").arg(uid, name);
+}
+
+//-----------------------------------------------------------------------------
+
 void RecognitionScenario::parseCK(const CkEntry& entry)
 {
     _uid = entry.uid;
@@ -30,14 +37,11 @@ QString RecognitionScenario::html() const
 
 //-----------------------------------------------------------------------------
 
-void RecognitionScenarios::loadFromCK(const QList<CkEntry>& entries)
+void RecognitionScenarios::append(const CkEntry& entry)
 {
-    for (auto entry: entries)
-    {
-        RecognitionScenario scenario;
-        scenario.parseCK(entry);
-        _items << scenario;
-    }
+    RecognitionScenario scenario;
+    scenario.parseCK(entry);
+    _items << scenario;
 }
 
 //-----------------------------------------------------------------------------

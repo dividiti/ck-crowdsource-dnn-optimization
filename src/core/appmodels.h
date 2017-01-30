@@ -10,6 +10,21 @@ class CkEntry
 public:
     QString uid;
     QString name;
+
+    QString str() const;
+
+    bool isEmpty() const { return uid.isEmpty(); }
+};
+
+//-----------------------------------------------------------------------------
+
+class AppRunParams
+{
+public:
+    QString dnnModelUid;
+    bool startImmediately = false;
+
+    bool isEmpty() const { return dnnModelUid.isEmpty(); }
 };
 
 //-----------------------------------------------------------------------------
@@ -34,12 +49,11 @@ private:
 class RecognitionScenarios
 {
 public:
+    void append(const CkEntry& entry);
     const QList<RecognitionScenario>& items() const { return _items; }
 
     bool isEmpty() const { return _items.isEmpty(); }
     QString str() const;
-
-    void loadFromCK(const QList<CkEntry>& entries);
 
 private:
     QList<RecognitionScenario> _items;

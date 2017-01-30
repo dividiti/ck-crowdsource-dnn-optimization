@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "appmodels.h"
+
 QT_BEGIN_NAMESPACE
 class QApplication;
 class QTextStream;
@@ -13,14 +15,20 @@ class ShellCommands : public QObject
     Q_OBJECT
 
 public:
+    enum Result { CommandIgnored, CommandFinished, ParamsAcquired };
+
     explicit ShellCommands(QObject *parent = 0);
 
-    bool process(const QApplication& app);
+    Result process(const QApplication& app);
+
+    AppRunParams appRunParams() const { return _appParams; }
 
 private:
     void command_caffeModels();
 
 private:
+    AppRunParams _appParams;
+
     QTextStream& cout();
 };
 

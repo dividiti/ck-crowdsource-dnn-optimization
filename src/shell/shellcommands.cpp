@@ -10,7 +10,7 @@ ShellCommands::ShellCommands(QObject *parent) : QObject(parent)
 {
 }
 
-bool ShellCommands::process(const QApplication &app)
+ShellCommands::Result ShellCommands::process(const QApplication &app)
 {
     QCommandLineParser cmdLine;
     cmdLine.addHelpOption();
@@ -19,14 +19,25 @@ bool ShellCommands::process(const QApplication &app)
     QCommandLineOption option_caffeModels("1", "Query caffe models.");
     cmdLine.addOption(option_caffeModels);
 
+    QCommandLineOption option_runRecognition("2", "Run recognition with specified model.", "model_uid");
+    cmdLine.addOption(option_runRecognition);
+
     cmdLine.process(app);
 
     if (cmdLine.isSet(option_caffeModels))
+    {
         command_caffeModels();
-    else
-        return false;
+        return CommandFinished;
+    }
 
-    return true;
+    if (cmdLine.isSet(option_runRecognition))
+    {
+        _appParams.dnnModelUid = cmdLine.value(option_runRecognition);
+        _appParams.startImmediately = true;
+        return ParamsAcquired;
+    }
+
+    return CommandIgnored;
 }
 
 QTextStream& ShellCommands::cout()
@@ -38,5 +49,5 @@ QTextStream& ShellCommands::cout()
 void ShellCommands::command_caffeModels()
 {
     for (auto m: CK().queryCaffeModels())
-        cout() << m.uid << ": " << m.name << endl;
+        cout() << m.str() << endl;
 }

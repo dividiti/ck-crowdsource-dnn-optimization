@@ -9,11 +9,22 @@ int main(int argc, char *argv[])
     app.addLibraryPath(app.applicationDirPath());
     app.setApplicationVersion("1.0.0.0");
 
+    AppRunParams runParams;
     ShellCommands cmds;
-    if (cmds.process(app))
+    switch (cmds.process(app))
+    {
+    case ShellCommands::CommandIgnored:
+        break;
+
+    case ShellCommands::CommandFinished:
         return 0;
 
-    (new MainWindow)->show();
+    case ShellCommands::ParamsAcquired:
+        runParams = cmds.appRunParams();
+        break;
+    }
+
+    (new MainWindow(runParams))->show();
 
     return app.exec();
 }
