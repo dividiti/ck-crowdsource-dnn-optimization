@@ -8,13 +8,15 @@
 
 ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
+    setObjectName("experimentPanel");
+
     auto layout = new QHBoxLayout;
-    layout->setSpacing(12);
+    layout->setSpacing(0);
+    layout->setMargin(0);
     layout->addWidget(new FramesPanel(context));
     layout->addWidget(_featuresPanel = new FeaturesPanel(context));
     layout->addWidget(new ResultsPanel(context));
 
-    setFrameShape(QFrame::StyledPanel);
     setLayout(layout);
 }
 

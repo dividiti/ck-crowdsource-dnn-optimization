@@ -122,11 +122,12 @@ void errorDlg(const QString& text)
 QWidget* makeDivider()
 {
     auto divider = new QFrame;
+    divider->setProperty("qss-role", "divider");
     divider->setFrameShape(QFrame::HLine);
-    divider->setStyleSheet(QString("border-top-width: 1px;"
-                                   "border-top-style: solid;"
-                                   "border-top-color: %1;")
-                           .arg(divider->palette().color(QPalette::Dark).name()));
+//    divider->setStyleSheet(QString("border-top-width: 1px;"
+//                                   "border-top-style: solid;"
+//                                   "border-top-color: %1;")
+//                           .arg(divider->palette().color(QPalette::Dark).name()));
     return divider;
 }
 

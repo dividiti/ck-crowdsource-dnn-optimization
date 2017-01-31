@@ -1,7 +1,7 @@
 #ifndef FRAMESPANEL_H
 #define FRAMESPANEL_H
 
-#include <QWidget>
+#include <QFrame>
 #include <QList>
 
 class ExperimentContext;
@@ -70,7 +70,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class FramesPanel : public QWidget
+class FramesPanel : public QFrame
 {
     Q_OBJECT
 

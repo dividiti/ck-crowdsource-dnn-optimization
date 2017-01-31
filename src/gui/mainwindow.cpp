@@ -32,7 +32,10 @@ MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWi
     connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
     auto experimentsWidget = new QWidget;
-    experimentsWidget->setLayout(new QVBoxLayout);
+    auto experimentLayout = new QVBoxLayout;
+    experimentLayout->setMargin(0);
+    experimentLayout->setSpacing(0);
+    experimentsWidget->setLayout(experimentLayout);
 
     for (int i = 0; i < EXPERIMENT_COUNT; i++)
     {

@@ -16,6 +16,11 @@ QString AppConfig::configFileName()
     return qApp->applicationDirPath() + QDir::separator() + "app.conf";
 }
 
+QString AppConfig::styleSheetFileName()
+{
+    return qApp->applicationDirPath() + QDir::separator() + "app.qss";
+}
+
 QString AppConfig::imagesDir()
 {
     return QDir(qApp->applicationDirPath() + QDir::separator() +

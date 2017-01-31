@@ -7,17 +7,23 @@
 #include <QBoxLayout>
 #include <QPushButton>
 
-ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QWidget(parent)
+ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
+    setObjectName("resultsPanel");
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::experimentResultReady, this, &ResultsPanel::experimentResultReady);
 
-    _infoTimePerFrame = new InfoLabel(tr("Time per image\n(FPS):"));
+    _infoTimePerFrame = new InfoLabel(tr("TIME PER\nIMAGE (FPS)"));
     _infoTimePerBatch = new InfoLabel(tr("Time per batch:"));
     _infoMemoryUsage = new InfoLabel(tr("Memory usage\nper image:"));
 
-    auto buttonPublish = new QPushButton(tr("Publish"));
+    auto buttonPublish = new QPushButton;
+    buttonPublish->setToolTip(tr("Publish"));
+    buttonPublish->setIcon(QIcon(":/tools/publish"));
+    buttonPublish->setObjectName("buttonPublish");
     buttonPublish->setEnabled(false);
 
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
@@ -28,7 +34,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QWidge
         Utils::makeDivider(),
         _infoMemoryUsage,*/
         0,
-        buttonPublish,
+        Ori::Gui::layoutH({0, buttonPublish, 0})
     }));
 }
 

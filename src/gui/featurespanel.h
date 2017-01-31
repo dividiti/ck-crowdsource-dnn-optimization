@@ -1,13 +1,13 @@
 #ifndef FEATURESPANEL_H
 #define FEATURESPANEL_H
 
-#include <QWidget>
+#include <QFrame>
 #include <QPointer>
 
 class ExperimentContext;
 class InfoLabel;
 
-class FeaturesPanel : public QWidget
+class FeaturesPanel : public QFrame
 {
     Q_OBJECT
 public:

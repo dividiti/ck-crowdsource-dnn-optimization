@@ -3,22 +3,23 @@
 #include <QBoxLayout>
 #include <QLabel>
 
-InfoLabel::InfoLabel(QWidget *parent) : QWidget(parent)
+InfoLabel::InfoLabel(QWidget *parent) : QVBoxLayout(parent)
 {
     _title = new QLabel;
-    auto f = _title->font();
-    f.setBold(true);
-    _title->setFont(f);
+    _title->setObjectName("infoLabelTitle");
+//    auto f = _title->font();
+//    f.setBold(true);
+//    _title->setFont(f);
 
     _info = new QLabel;
-    f = _info->font();
-    f.setPointSize(f.pointSize()+1);
-    _info->setFont(f);
+    _info->setObjectName("infoLabelValue");
+//    f = _info->font();
+//    f.setPointSize(f.pointSize()+1);
+//    _info->setFont(f);
 
-    setLayout(new QVBoxLayout);
-    layout()->setMargin(0);
-    layout()->addWidget(_title);
-    layout()->addWidget(_info);
+    setMargin(0);
+    addWidget(_title);
+    addWidget(_info);
 }
 
 InfoLabel::InfoLabel(const QString& title, QWidget *parent): InfoLabel(parent)

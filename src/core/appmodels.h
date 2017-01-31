@@ -23,9 +23,12 @@ public:
 class AppRunParams
 {
 public:
+    enum RunMode { Normal, EditStyle };
+
     QString engineUid;
     QString modelUid;
     bool startImmediately = false;
+    RunMode runMode = Normal;
 };
 
 //-----------------------------------------------------------------------------

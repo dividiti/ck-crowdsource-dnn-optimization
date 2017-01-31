@@ -12,8 +12,11 @@
 #include <QLabel>
 #include <QPushButton>
 
-FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWidget(parent)
+FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFrame(parent)
 {
+    setObjectName("featuresPanel");
+    //setProperty("panelType", "features");
+
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
@@ -21,14 +24,16 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
     _buttonStart = new QPushButton(tr("Start"));
+    _buttonStart->setObjectName("buttonStart");
     _buttonStop = new QPushButton(tr("Stop"));
+    _buttonStop->setObjectName("buttonStop");
     _buttonStop->setVisible(false);
     connect(_buttonStart, SIGNAL(pressed()), this, SLOT(startExperiment()));
     connect(_buttonStop, SIGNAL(pressed()), this, SLOT(stopExperiment()));
 
-    _infoEngine = new InfoLabel(tr("Caffe Engine:"));
-    _infoModel = new InfoLabel(tr("Caffe Model:"));
-    _infoBatchSize = new InfoLabel(tr("Frames count:"));
+    _infoEngine = new InfoLabel(tr("CAFFE ENGINE"));
+    _infoModel = new InfoLabel(tr("CAFFE MODEL"));
+    _infoBatchSize = new InfoLabel(tr("FRAMES COUNT"));
 
     _linkSelectEngine = makeLink(tr("Select"), tr("Select another engine"), SLOT(selectEngine()));
     _linkSelectModel = makeLink(tr("Select"), tr("Select another scenario"), SLOT(selectModel()));
@@ -61,7 +66,8 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
 
 QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, const char* slot)
 {
-    auto link = new QLabel(QString("<a href='dummy'>%1</a>").arg(text));
+    auto link = new QLabel(QString("<a href='dummy'><span style='color:#AFB3B5'>%1</span></a>").arg(text));
+    link->setProperty("qss-role", "link");
     link->setToolTip(tooltip);
     connect(link, SIGNAL(linkActivated(QString)), this, slot);
     return link;

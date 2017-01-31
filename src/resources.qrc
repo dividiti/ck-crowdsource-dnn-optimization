@@ -6,6 +6,7 @@
         <file alias="info">../images/info.svg</file>
         <file alias="delete">../images/trash_bin.svg</file>
         <file alias="download">../images/download.svg</file>
+        <file alias="publish">../images/ico-publish.svg</file>
     </qresource>
     <qresource prefix="/sample">
         <file alias="1">../images/sample1.jpg</file>

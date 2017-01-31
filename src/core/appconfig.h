@@ -30,6 +30,7 @@ public:
     static bool isParallel();
     static bool logRecognitionOutput();
 
+    static QString styleSheetFileName();
 private:
     static QString configFileName();
     static QSettings& config();

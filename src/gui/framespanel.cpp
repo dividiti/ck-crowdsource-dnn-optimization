@@ -161,8 +161,10 @@ void BatchItem::stopInternal()
 
 //-----------------------------------------------------------------------------
 
-FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QWidget(parent)
+FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
+    setObjectName("framesPanel");
+
     _runParallel = AppConfig::isParallel();
     qDebug() << "Run in parallel:" << _runParallel;
 

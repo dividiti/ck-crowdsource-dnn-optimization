@@ -1,12 +1,12 @@
 #ifndef RESULTSPANEL_H
 #define RESULTSPANEL_H
 
-#include <QWidget>
+#include <QFrame>
 
 class ExperimentContext;
 class InfoLabel;
 
-class ResultsPanel : public QWidget
+class ResultsPanel : public QFrame
 {
     Q_OBJECT
 public:

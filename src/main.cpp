@@ -1,4 +1,7 @@
+#include "core/appconfig.h"
+#include "core/utils.h"
 #include "gui/mainwindow.h"
+#include "gui/stylesheeteditor.h"
 #include "shell/shellcommands.h"
 
 #include <QApplication>
@@ -24,7 +27,12 @@ int main(int argc, char *argv[])
         break;
     }
 
+    qApp->setStyleSheet(Utils::loadTtextFromFile(AppConfig::styleSheetFileName()));
+
     (new MainWindow(runParams))->show();
+
+    if (runParams.runMode == AppRunParams::EditStyle)
+        (new StyleSheetEditor)->show();
 
     return app.exec();
 }

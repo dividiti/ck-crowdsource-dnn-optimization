@@ -25,6 +25,9 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     QCommandLineOption option_runRecognition("3", "Run recognition with specified model.");
     cmdLine.addOption(option_runRecognition);
 
+    QCommandLineOption option_editStyle("4", "Edit application style.");
+    cmdLine.addOption(option_editStyle);
+
     QCommandLineOption option_recognitionEngine("engine", QString("caffe-lib uid to run recognition (for command %1).")
                                                .arg(option_runRecognition.names().first()), "uid");
     cmdLine.addOption(option_recognitionEngine);
@@ -45,6 +48,12 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     {
         command_caffeLibs();
         return CommandFinished;
+    }
+
+    if (cmdLine.isSet(option_editStyle))
+    {
+        _appParams.runMode = AppRunParams::EditStyle;
+        return ParamsAcquired;
     }
 
     if (cmdLine.isSet(option_runRecognition))

@@ -1,13 +1,13 @@
 #ifndef INFOLABEL_H
 #define INFOLABEL_H
 
-#include <QWidget>
+#include <QVBoxLayout>
 
 QT_BEGIN_NAMESPACE
 class QLabel;
 QT_END_NAMESPACE
 
-class InfoLabel : public QWidget
+class InfoLabel : public QVBoxLayout
 {
     Q_OBJECT
 
