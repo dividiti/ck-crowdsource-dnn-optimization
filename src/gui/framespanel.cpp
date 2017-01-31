@@ -28,7 +28,7 @@ ImagesBank::ImagesBank()
 
 //-----------------------------------------------------------------------------
 
-StdoutResults::StdoutResults(const QString& text)
+void OutputParser::parse(ExperimentProbe &probe, const QString& text)
 {
     // 0.9835 - "n03793489 mouse, computer mouse"
     static QLatin1String predictionMarker("0.");
@@ -40,18 +40,40 @@ StdoutResults::StdoutResults(const QString& text)
     {
         QStringRef s = line.trimmed();
         if (s.startsWith(predictionMarker))
-            predictions << s.toString().remove('"');
+            parsePredictionLine(probe, s);
         else if (s.startsWith(timeMarker))
-        {
-            auto nameValue = s.split(":");
-            if (nameValue.size() > 1)
-            {
-                QStringRef value = nameValue.at(1).trimmed();
-                _time = value.left(value.size()-1).toDouble();
-            }
-        }
+            parseTimeLine(probe, s);
     }
-    _predictions = predictions.join("\n");
+}
+
+void OutputParser::parsePredictionLine(ExperimentProbe &probe, const QStringRef line)
+{
+    // 0.9835 - "n03793489 mouse, computer mouse"
+    auto probAndDescr = line.split('-');
+    if (probAndDescr.size() < 2) return;
+    auto prob =  probAndDescr.at(0).trimmed();
+    auto descr = probAndDescr.at(1).trimmed();
+
+    // trim quotes
+    descr = descr.left(descr.length()-1).right(descr.length()-2);
+    auto spacePos = descr.indexOf(' ');
+    auto id = spacePos > 0? descr.left(spacePos): QStringRef();
+    descr = descr.right(descr.length()-spacePos-1);
+
+    PredictionResult prediction;
+    prediction.probability = prob.toDouble();
+    prediction.description = descr.toString();
+    prediction.id = id.toString();
+    probe.predictions << prediction;
+}
+
+void OutputParser::parseTimeLine(ExperimentProbe &probe, const QStringRef line)
+{
+    // "execution_time": 0.244448,
+    auto nameAndValue = line.split(":");
+    if (nameAndValue.size() < 2) return;
+    QStringRef value = nameAndValue.at(1).trimmed();
+    probe.time = value.left(value.size()-1).toDouble();
 }
 
 //-----------------------------------------------------------------------------
@@ -88,11 +110,12 @@ void BatchItem::scenarioFinished(const QString &error)
 {
     if (error.isEmpty())
     {
-        _frame->loadImage(_images->imageFile(_imageIndex));
-        StdoutResults res(_runner->getStdout());
-        _frame->showInfo(res.predictions());
+        auto imageFile = _images->imageFile(_imageIndex);
+        _frame->loadImage(imageFile);
         ExperimentProbe p;
-        p.time = res.time();
+        p.image = imageFile;
+        OutputParser::parse(p, _runner->getStdout());
+        _frame->showPredictions(p.predictions);
         emit finished(p);
     }
     else

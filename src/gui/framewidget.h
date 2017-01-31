@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "appmodels.h"
+
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QPixmap;
@@ -16,14 +18,17 @@ public:
     explicit FrameWidget(QWidget *parent = 0);
 
     void loadImage(const QString& path);
-    void showInfo(const QString& info);
+    void showPredictions(const QVector<PredictionResult> &predictions);
 
 private:
-    QLabel *_imageView, *_textInfo;
+    QLabel *_imageView;
+    QList<QLabel*> _predictions;
 
     const QPixmap& frame() const;
     QPixmap getSampleImage();
     QPixmap getFramedImage(const QPixmap& source);
+
+    void setTrimmedText(QLabel* label, const QString& text);
 };
 
 #endif // FRAMEWIDGET_H

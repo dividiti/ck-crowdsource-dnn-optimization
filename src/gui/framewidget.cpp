@@ -4,8 +4,10 @@
 #include <QDebug>
 #include <QLabel>
 #include <QPainter>
+#include <QResizeEvent>
 
 #define FRAME_CONTENT_H 102
+#define PREDICTIONS_COUNT 5
 
 QPixmap FrameWidget::getSampleImage()
 {
@@ -21,19 +23,22 @@ FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
 
     _imageView = new QLabel;
 
-    _textInfo = new QLabel;
-    _textInfo->setWordWrap(true);
-    _textInfo->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
     auto layoutInfo = new QVBoxLayout;
-    layoutInfo->setMargin(6);
+    layoutInfo->setMargin(0);
     layoutInfo->setSpacing(4);
-    layoutInfo->addWidget(_textInfo);
+    for (int i = 0; i < PREDICTIONS_COUNT; i++)
+    {
+        auto label = new QLabel;
+        label->setTextFormat(Qt::PlainText);
+        layoutInfo->addWidget(label);
+        _predictions << label;
+    }
 
     auto layout = new QVBoxLayout;
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(_imageView);
+    layout->addSpacing(4);
     layout->addLayout(layoutInfo);
     layout->addStretch();
 
@@ -65,7 +70,22 @@ QPixmap FrameWidget::getFramedImage(const QPixmap& source)
     return image;
 }
 
-void FrameWidget::showInfo(const QString& info)
+void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions)
 {
-    _textInfo->setText(info);
+    for (int i = 0; i < _predictions.size(); i++)
+        if (i < predictions.size())
+        {
+            auto text = QString("%1 - %2")
+                    .arg(predictions.at(i).probability, 0, 'f', 2)
+                    .arg(predictions.at(i).description);
+            setTrimmedText(_predictions.at(i), text);
+        }
+        else _predictions.at(i)->clear();
+}
+
+void FrameWidget::setTrimmedText(QLabel* label, const QString& text)
+{
+    static QFontMetrics metrics(label->font());
+    static int targetWidth = label->width();
+    label->setText(metrics.elidedText(text, Qt::ElideRight, targetWidth));
 }

@@ -4,6 +4,7 @@
 #include <QString>
 #include <QJsonObject>
 #include <QList>
+#include <QVector>
 
 class CkEntry
 {
@@ -61,11 +62,23 @@ private:
 
 //-----------------------------------------------------------------------------
 
+class PredictionResult
+{
+public:
+    double probability = 0;
+    QString description;
+    QString id;
+};
+
+//-----------------------------------------------------------------------------
+
 class ExperimentProbe
 {
 public:
-    double time;
-    double memory;
+    QString image;
+    double time = 0;
+    double memory = 0;
+    QVector<PredictionResult> predictions;
 };
 
 //-----------------------------------------------------------------------------

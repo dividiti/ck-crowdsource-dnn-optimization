@@ -24,17 +24,13 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class StdoutResults
+class OutputParser
 {
 public:
-    StdoutResults(const QString& text);
-
-    QString predictions() const { return _predictions; }
-    double time() const { return _time; }
-
+    static void parse(ExperimentProbe& probe, const QString& text);
 private:
-    QString _predictions;
-    double _time = 0;
+    static void parsePredictionLine(ExperimentProbe &probe, const QStringRef line);
+    static void parseTimeLine(ExperimentProbe &probe, const QStringRef line);
 };
 
 //-----------------------------------------------------------------------------
