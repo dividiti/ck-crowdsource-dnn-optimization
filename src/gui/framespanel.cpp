@@ -28,14 +28,12 @@ ImagesBank::ImagesBank()
 
 //-----------------------------------------------------------------------------
 
-void OutputParser::parse(ExperimentProbe &probe, const QString& text)
+QString OutputParser::parse(ExperimentProbe &probe, const QString& text)
 {
-    // 0.9835 - "n03793489 mouse, computer mouse"
-    static QLatin1String predictionMarker("0.");
-    // "execution_time": 0.244448,
-    static QLatin1String timeMarker("\"execution_time\":");
+    static QLatin1String predictionMarker("0."); // 0.9835 - "n03793489 mouse, computer mouse"
+    static QLatin1String timeMarker("\"execution_time\":"); // "execution_time": 0.244448,
+    static QLatin1String errorMarker("CK error:");
 
-    QStringList predictions;
     for (const QStringRef& line: text.splitRef('\n', QString::SkipEmptyParts))
     {
         QStringRef s = line.trimmed();
@@ -43,7 +41,11 @@ void OutputParser::parse(ExperimentProbe &probe, const QString& text)
             parsePredictionLine(probe, s);
         else if (s.startsWith(timeMarker))
             parseTimeLine(probe, s);
+        else if (s.startsWith(errorMarker))
+            return s.toString();
     }
+
+    return QString();
 }
 
 void OutputParser::parsePredictionLine(ExperimentProbe &probe, const QStringRef line)
@@ -113,15 +115,23 @@ void BatchItem::scenarioFinished(const QString &error)
         auto imageFile = _images->imageFile(_imageIndex);
         _frame->loadImage(imageFile);
         ExperimentProbe p;
-        p.image = imageFile;
-        OutputParser::parse(p, _runner->getStdout());
-        _frame->showPredictions(p.predictions);
-        emit finished(p);
+        auto err = OutputParser::parse(p, _runner->getStdout());
+        if (err.isEmpty())
+        {
+            _frame->showPredictions(p.predictions);
+            p.image = imageFile;
+            emit finished(p);
+        }
+        else
+        {
+            _stopFlag = true;
+            AppEvents::error(QString("Frame %1:\n%2").arg(_index).arg(err));
+        }
     }
     else
     {
         _stopFlag = true;
-        AppEvents::error(error);
+        AppEvents::error(QString("Frame %1:\n%2").arg(_index).arg(error));
     }
 
     if (_stopFlag)
@@ -176,23 +186,25 @@ FramesPanel::~FramesPanel()
 
 void FramesPanel::experimentStarted()
 {
-    if (!_context->currentScenarioExists())
+    auto res = canStart();
+    if (!res.isEmpty())
     {
-        AppEvents::error(tr("No scenario selected"));
+        AppEvents::error(res);
         QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
         return;
     }
-
-    auto scenario = _context->currentScenario();
-    qDebug() << "Start experiment for scenario" << scenario.title();
 
     if (!prepareImages())
     {
-        return;
         QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+        return;
     }
 
-    ScenarioRunParams params(scenario);
+    auto engine = _context->engines().current();
+    auto scenario = _context->currentScenario();
+    qDebug() << "Start experiment for" << engine.title() << "on" << scenario.title();
+
+    ScenarioRunParams params(engine, scenario);
 
     clearBatch();
     prepareBatch(params);
@@ -266,4 +278,15 @@ void FramesPanel::batchStopped()
         qDebug() << "Batch processing finished";
         emit _context->experimentFinished();
     }
+}
+
+QString FramesPanel::canStart()
+{
+    if (!_context->engines().hasCurrent())
+        return tr("No engine selected");
+
+    if (!_context->currentScenarioExists())
+        return tr("No scenario selected");
+
+    return QString();
 }

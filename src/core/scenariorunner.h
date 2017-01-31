@@ -9,7 +9,7 @@
 class ScenarioRunParams
 {
 public:
-    ScenarioRunParams(const RecognitionScenario& scenario);
+    ScenarioRunParams(const CkEntry& engine, const RecognitionScenario& scenario);
 
     QString program() const { return _program; }
     QString workdir() const { return _workdir; }
@@ -20,6 +20,8 @@ private:
     QStringList _arguments;
     QString _workdir, _program;
     int _imageFileArgIndex = -1;
+
+    QString getProgramForEngine(const CkEntry& engine);
 };
 
 //-----------------------------------------------------------------------------
@@ -54,6 +56,8 @@ private:
     QStringList _arguments;
     int _imageFileArgIndex;
     QString _error, _stderr, _stdout;
+    QStringList _stdoutLog, _stderrLog;
+    bool _logOutput;
 };
 
 #endif // SCENARIORUNNER_H

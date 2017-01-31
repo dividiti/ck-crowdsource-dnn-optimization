@@ -27,7 +27,7 @@ private:
 class OutputParser
 {
 public:
-    static void parse(ExperimentProbe& probe, const QString& text);
+    static QString parse(ExperimentProbe& probe, const QString& text);
 private:
     static void parsePredictionLine(ExperimentProbe &probe, const QStringRef line);
     static void parseTimeLine(ExperimentProbe &probe, const QStringRef line);
@@ -93,6 +93,7 @@ private:
     void prepareBatch(const ScenarioRunParams &params);
     bool prepareImages();
     bool allItemsStopped();
+    QString canStart();
 };
 
 #endif // FRAMESPANEL_H

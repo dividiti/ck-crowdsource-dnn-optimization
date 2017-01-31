@@ -28,6 +28,7 @@ public:
     static QStringList ckArgs();
 
     static bool isParallel();
+    static bool logRecognitionOutput();
 
 private:
     static QString configFileName();

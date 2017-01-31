@@ -103,3 +103,8 @@ bool AppConfig::isParallel()
 {
     return config().value("parallel", false).toBool();
 }
+
+bool AppConfig::logRecognitionOutput()
+{
+    return config().value("log_recognition_output", false).toBool();
+}
