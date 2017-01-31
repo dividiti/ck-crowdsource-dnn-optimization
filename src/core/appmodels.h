@@ -12,6 +12,8 @@ public:
     QString uid;
     QString name;
 
+    QString title() const { return name; }
+
     QString str() const;
 
     bool isEmpty() const { return uid.isEmpty(); }

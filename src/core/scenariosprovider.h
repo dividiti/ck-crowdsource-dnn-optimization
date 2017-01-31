@@ -18,9 +18,6 @@ public:
     const RecognitionScenarios& currentList() const { return _current; }
     void setCurrentList(const RecognitionScenarios& scenarios);
 
-signals:
-    void scenariosReceived(RecognitionScenarios scenarios);
-
 private:
     RecognitionScenarios _current;
 };

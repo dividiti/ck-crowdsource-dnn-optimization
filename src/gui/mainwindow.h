@@ -29,7 +29,6 @@ private:
     ScenariosProvider* _scenariosProvider;
 
     void initialize(const AppRunParams &runParams);
-    void updateExperimentConditions();
 
 private slots:
     void onError(const QString& msg);

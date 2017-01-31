@@ -9,6 +9,31 @@
 class PlatformFeaturesProvider;
 class ScenariosProvider;
 
+template<typename TItem> class ListContainer
+{
+public:
+    bool hasCurrent() const { return checkIndex(_currenIndex); }
+    const TItem& current() const { return _items.at(_currenIndex); }
+
+    int currentIndex() const { return _currenIndex; }
+    void setCurrentIndex(int index) { if (checkIndex(index)) _currenIndex = index; }
+    void setCurrentIndexOrDefault(int index);
+    bool checkIndex(int index) const { return index >= 0 && index < _items.size(); }
+
+    const QList<TItem>& items() const { return _items; }
+    bool isEmpty() const { return _items.isEmpty(); }
+
+    bool selectCurrentViaDialog();
+
+private:
+    int _currenIndex = -1;
+    QList<TItem> _items;
+
+    friend class MainWindow;
+};
+
+//-----------------------------------------------------------------------------
+
 class ExperimentContext : public QObject
 {
     Q_OBJECT
@@ -16,6 +41,8 @@ class ExperimentContext : public QObject
 public:
     int experimentIndex() const { return _experimentIndex; }
     ScenariosProvider* scenariosProvider;
+
+    ListContainer<CkEntry>& engines() { return _engines; }
 
     bool checkScenarioIndex(int index) const;
     bool currentScenarioExists() const;
@@ -51,6 +78,8 @@ private:
     int _currentScenarioIndex = -1;
     int _batchSize = 2;
     ExperimentResult _result;
+
+    ListContainer<CkEntry> _engines;
 
     friend class MainWindow;
 };

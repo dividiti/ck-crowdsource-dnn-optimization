@@ -1,5 +1,6 @@
 #include "appconfig.h"
 #include "appevents.h"
+#include "ck.h"
 #include "mainwindow.h"
 #include "experimentpanel.h"
 #include "utils.h"
@@ -71,7 +72,14 @@ void MainWindow::initialize(const AppRunParams &runParams)
         scenarios = _scenariosProvider->queryAllModels();
     _scenariosProvider->setCurrentList(scenarios);
 
-    updateExperimentConditions();
+    auto engines = CK().queryCaffeLibs();
+
+    for (auto e: _experiments)
+    {
+        e->context._engines._items = engines;
+        e->context.loadFromConfig();
+        e->panel->updateExperimentConditions();
+    }
 
     if (runParams.startImmediately)
         for (auto e: _experiments)
@@ -87,13 +95,4 @@ void MainWindow::onError(const QString& msg)
 void MainWindow::onInfo(const QString& msg)
 {
     statusBar()->showMessage(msg);
-}
-
-void MainWindow::updateExperimentConditions()
-{
-    for (auto e: _experiments)
-    {
-        e->context.loadFromConfig();
-        e->panel->updateExperimentConditions();
-    }
 }

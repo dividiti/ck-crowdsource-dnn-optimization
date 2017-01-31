@@ -18,9 +18,8 @@ public:
     void updateExperimentConditions();
 
 private slots:
-    void showPlatformInfo();
-    void showScenarioInfo();
-    void selectScenario();
+    void selectEngine();
+    void selectModel();
     void setBatchSize();
     void startExperiment();
     void stopExperiment();
@@ -31,9 +30,9 @@ private slots:
 private:
     ExperimentContext* _context;
     QPointer<ScenariosListWidget> _scenariosWindow;
-    InfoLabel *_infoPlatform, *_infoScenario, *_infoBatchSize;
+    InfoLabel *_infoEngine, *_infoModel, *_infoBatchSize;
     QWidget *_buttonStart, *_buttonStop;
-    QWidget *_linkSelectScenario, *_linkSetBatchSize;
+    QWidget *_linkSelectEngine, *_linkSelectScenario, *_linkSetBatchSize;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
     void enableControls(bool on);

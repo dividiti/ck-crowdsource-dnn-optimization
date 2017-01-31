@@ -34,3 +34,4 @@ void ScenariosProvider::setCurrentList(const RecognitionScenarios& scenarios)
 {
     _current = scenarios;
 }
+

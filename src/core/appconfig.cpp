@@ -27,6 +27,16 @@ QStringList AppConfig::imagesFilter()
     return configValueStr("images_filter", "*.jpg,*.jpeg").split(",", QString::SkipEmptyParts);
 }
 
+int AppConfig::selectedEngineIndex(int experimentIndex)
+{
+    return configValueInt(experimentKey("selected_engine", experimentIndex), -1);
+}
+
+void AppConfig::setSelectedEngineIndex(int experimentIndex, int engineIndex)
+{
+    config().setValue(experimentKey("selected_engine", experimentIndex), engineIndex);
+}
+
 int AppConfig::selectedScenarioIndex(int experimentIndex)
 {
     return configValueInt(experimentKey("selected_scenario", experimentIndex), -1);
