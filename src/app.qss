@@ -1,0 +1,63 @@
+QLabel#infoLabelTitle {
+	font-size: 8pt;
+	font-weight: bold;
+	color: #64ffda;
+	font-family: Verdana;
+}
+QLabel#infoLabelValue {
+	font-size: 10pt;
+	color: #ffffff;
+	font-family: Verdana;
+}
+QWidget#experimentPanel {
+	background: gray;
+	border-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+QWidget#framesPanel {
+	background: #263238;
+	margin: 0px;
+	padding: 6px;
+	border-right: 1px solid #1B2226;
+}
+QFrame#featuresPanel {
+	background: #313c42;
+	margin: 0px;
+	padding: 16px;
+	border-right: 1px solid #21292C;
+}
+QWidget#resultsPanel {
+	background: #313c42;
+	margin: 0px;
+	padding: 16px;
+}
+QPushButton#buttonStart {
+	height: 32px;
+	background: #009688;
+	border-radius: 16px;
+	border: 1px solid #789088;
+	color: #ffffff;
+	font-size: 10pt;
+	font-weight: 600;
+	font-family: Verdana;
+}
+QPushButton#buttonPublish {
+	height: 32px;
+	width: 32px;
+	background: #313c42;
+	border-radius: 16px;
+	border: 1px solid #232A2D;
+	color: #AFB3B5;
+	font-size: 10pt;
+	font-weight: 600;
+	font-family: Verdana;
+
+}
+QFrame[qss-role="divider"] {
+	border-top: 1px solid #21292C;
+}
+QLabel[qss-role="link"] {
+	font-size: 8pt;
+	font-family: Verdana;
+}
