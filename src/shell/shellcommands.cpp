@@ -22,8 +22,16 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     QCommandLineOption option_caffeLibs("2", "Enumerate caffe libs.");
     cmdLine.addOption(option_caffeLibs);
 
-    QCommandLineOption option_runRecognition("3", "Run recognition with specified model.", "model_uid");
+    QCommandLineOption option_runRecognition("3", "Run recognition with specified model.");
     cmdLine.addOption(option_runRecognition);
+
+    QCommandLineOption option_recognitionEngine("engine", QString("caffe-lib uid to run recognition (for command %1).")
+                                               .arg(option_runRecognition.names().first()), "uid");
+    cmdLine.addOption(option_recognitionEngine);
+
+    QCommandLineOption option_recognitionModel("model", QString("caffe-model uid to run recognition (for command %1).")
+                                               .arg(option_runRecognition.names().first()), "uid");
+    cmdLine.addOption(option_recognitionModel);
 
     cmdLine.process(app);
 
@@ -41,7 +49,8 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
 
     if (cmdLine.isSet(option_runRecognition))
     {
-        _appParams.modelUid = cmdLine.value(option_runRecognition);
+        _appParams.engineUid = cmdLine.value(option_recognitionEngine);
+        _appParams.modelUid = cmdLine.value(option_recognitionModel);
         _appParams.startImmediately = true;
         return ParamsAcquired;
     }
