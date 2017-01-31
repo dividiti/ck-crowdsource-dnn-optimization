@@ -25,6 +25,30 @@ CK::CK()
     qDebug() << "CK default args:" << _ck.arguments().join(" ");
 }
 
+QList<CkEntry> CK::getCafeeLibByUidOrAll(const QString& uid)
+{
+    if (uid.isEmpty())
+        return queryCaffeLibs();
+
+    auto env = queryEnvByUid(uid);
+    if (env.isEmpty())
+        return queryCaffeLibs();
+
+    return QList<CkEntry> { env };
+}
+
+QList<CkEntry> CK::getCafeeModelByUidOrAll(const QString& uid)
+{
+    if (uid.isEmpty())
+        return queryCaffeModels();
+
+    auto env = queryEnvByUid(uid);
+    if (env.isEmpty())
+        return queryCaffeModels();
+
+    return QList<CkEntry> { env };
+}
+
 QList<CkEntry> CK::queryCaffeLibs()
 {
     return queryEnvsByTags("lib,caffe");

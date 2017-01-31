@@ -201,10 +201,10 @@ void FramesPanel::experimentStarted()
     }
 
     auto engine = _context->engines().current();
-    auto scenario = _context->currentScenario();
-    qDebug() << "Start experiment for" << engine.title() << "on" << scenario.title();
+    auto model = _context->models().current();
+    qDebug() << "Start experiment for" << engine.title() << "on" << model.title();
 
-    ScenarioRunParams params(engine, scenario);
+    ScenarioRunParams params(engine, model);
 
     clearBatch();
     prepareBatch(params);
@@ -285,7 +285,7 @@ QString FramesPanel::canStart()
     if (!_context->engines().hasCurrent())
         return tr("No engine selected");
 
-    if (!_context->currentScenarioExists())
+    if (!_context->models().hasCurrent())
         return tr("No scenario selected");
 
     return QString();

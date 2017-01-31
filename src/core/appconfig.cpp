@@ -37,14 +37,14 @@ void AppConfig::setSelectedEngineIndex(int experimentIndex, int engineIndex)
     config().setValue(experimentKey("selected_engine", experimentIndex), engineIndex);
 }
 
-int AppConfig::selectedScenarioIndex(int experimentIndex)
+int AppConfig::selectedModelIndex(int experimentIndex)
 {
-    return configValueInt(experimentKey("selected_scenario", experimentIndex), -1);
+    return configValueInt(experimentKey("selected_model", experimentIndex), -1);
 }
 
-void AppConfig::setSelectedScenarioIndex(int experimentIndex, int scenarioIndex)
+void AppConfig::setSelectedModelIndex(int experimentIndex, int modelIndex)
 {
-    config().setValue(experimentKey("selected_scenario", experimentIndex), scenarioIndex);
+    config().setValue(experimentKey("selected_model", experimentIndex), modelIndex);
 }
 
 int AppConfig::batchSize(int experimentIndex)

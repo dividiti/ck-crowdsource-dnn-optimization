@@ -6,14 +6,12 @@
 
 class ExperimentContext;
 class InfoLabel;
-class ScenariosListWidget;
 
 class FeaturesPanel : public QWidget
 {
     Q_OBJECT
 public:
     explicit FeaturesPanel(ExperimentContext *context, QWidget *parent = 0);
-    ~FeaturesPanel();
 
     void updateExperimentConditions();
 
@@ -25,14 +23,12 @@ private slots:
     void stopExperiment();
     void experimentStarted();
     void experimentFinished();
-    void currentScenarioSelected(int index);
 
 private:
     ExperimentContext* _context;
-    QPointer<ScenariosListWidget> _scenariosWindow;
     InfoLabel *_infoEngine, *_infoModel, *_infoBatchSize;
     QWidget *_buttonStart, *_buttonStop;
-    QWidget *_linkSelectEngine, *_linkSelectScenario, *_linkSetBatchSize;
+    QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSetBatchSize;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
     void enableControls(bool on);

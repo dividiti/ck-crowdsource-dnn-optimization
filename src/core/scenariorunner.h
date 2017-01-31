@@ -9,7 +9,7 @@
 class ScenarioRunParams
 {
 public:
-    ScenarioRunParams(const CkEntry& engine, const RecognitionScenario& scenario);
+    ScenarioRunParams(const CkEntry& engine, const CkEntry& model);
 
     QString program() const { return _program; }
     QString workdir() const { return _workdir; }

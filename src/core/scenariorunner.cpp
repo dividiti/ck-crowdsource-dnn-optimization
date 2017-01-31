@@ -6,9 +6,9 @@
 #include <QDir>
 #include <QStringList>
 
-ScenarioRunParams::ScenarioRunParams(const CkEntry &engine, const RecognitionScenario& scenario)
+ScenarioRunParams::ScenarioRunParams(const CkEntry &engine, const CkEntry& model)
 {
-    qDebug() << "Prepare scenario" << scenario.title();
+    qDebug() << "Prepare" << engine.title() << "on" << model.title();
 
 #ifdef Q_OS_WIN32
     _program = "python";
@@ -25,7 +25,7 @@ ScenarioRunParams::ScenarioRunParams(const CkEntry &engine, const RecognitionSce
             << "run"
             << "program:" + getProgramForEngine(engine)
             << "--cmd_key=use_external_image"
-            << "--deps.caffemodel=" + scenario.uid()
+            << "--deps.caffemodel=" + model.uid
             << QString();
     _imageFileArgIndex = _arguments.size()-1;
     _arguments.append(AppConfig::ckArgs());

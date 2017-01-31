@@ -13,8 +13,8 @@ public:
     static QString imagesDir();
     static QStringList imagesFilter();
 
-    static int selectedScenarioIndex(int experimentIndex);
-    static void setSelectedScenarioIndex(int experimentIndex, int scenarioIndex);
+    static int selectedModelIndex(int experimentIndex);
+    static void setSelectedModelIndex(int experimentIndex, int modelIndex);
 
     static int selectedEngineIndex(int experimentIndex);
     static void setSelectedEngineIndex(int experimentIndex, int engineIndex);

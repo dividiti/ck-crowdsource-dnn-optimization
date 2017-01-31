@@ -34,13 +34,10 @@ MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWi
     auto experimentsWidget = new QWidget;
     experimentsWidget->setLayout(new QVBoxLayout);
 
-    _scenariosProvider = new ScenariosProvider(this);
-
     for (int i = 0; i < EXPERIMENT_COUNT; i++)
     {
         auto e = new Experiment;
         e->context._experimentIndex = i;
-        e->context.scenariosProvider = _scenariosProvider;
         e->panel = new ExperimentPanel(&e->context);
         _experiments.append(e);
 
@@ -65,18 +62,14 @@ void MainWindow::initialize(const AppRunParams &runParams)
 {
     qDebug() << "initialize main window";
 
-    RecognitionScenarios scenarios;
-    if (!runParams.isEmpty())
-        scenarios = _scenariosProvider->queryModelByUid(runParams.dnnModelUid);
-    if (scenarios.isEmpty())
-        scenarios = _scenariosProvider->queryAllModels();
-    _scenariosProvider->setCurrentList(scenarios);
-
-    auto engines = CK().queryCaffeLibs();
+    CK ck;
+    auto engines = ck.getCafeeLibByUidOrAll(runParams.engineUid);
+    auto models = ck.getCafeeModelByUidOrAll(runParams.modelUid);
 
     for (auto e: _experiments)
     {
         e->context._engines._items = engines;
+        e->context._models._items = models;
         e->context.loadFromConfig();
         e->panel->updateExperimentConditions();
     }

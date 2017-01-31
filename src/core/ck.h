@@ -11,6 +11,9 @@ class CK
 public:
     CK();
 
+    QList<CkEntry> getCafeeLibByUidOrAll(const QString& uid);
+    QList<CkEntry> getCafeeModelByUidOrAll(const QString& uid);
+
     QList<CkEntry> queryCaffeLibs();
     QList<CkEntry> queryCaffeModels();
     CkEntry queryEnvByUid(const QString& uid);

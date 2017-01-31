@@ -41,7 +41,7 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
 
     if (cmdLine.isSet(option_runRecognition))
     {
-        _appParams.dnnModelUid = cmdLine.value(option_runRecognition);
+        _appParams.modelUid = cmdLine.value(option_runRecognition);
         _appParams.startImmediately = true;
         return ParamsAcquired;
     }

@@ -39,11 +39,8 @@ SOURCES += \
     src/core/utils.cpp \
     src/core/appevents.cpp \
     src/core/appmodels.cpp \
-    src/core/scenariosprovider.cpp \
     src/ori/OriWidgets.cpp \
-    src/ori/OriLabels.cpp \
     src/core/experimentcontext.cpp \
-    src/gui/scenarioslistwidget.cpp \
     src/core/jsonformat.cpp \
     src/core/scenariorunner.cpp \
     src/core/ck.cpp
@@ -61,11 +58,8 @@ HEADERS += \
     src/core/utils.h \
     src/core/appevents.h \
     src/core/appmodels.h \
-    src/core/scenariosprovider.h \
     src/ori/OriWidgets.h \
-    src/ori/OriLabels.h \
     src/core/experimentcontext.h \
-    src/gui/scenarioslistwidget.h \
     src/core/jsonformat.h \
     src/core/scenariorunner.h \
     src/core/ck.h

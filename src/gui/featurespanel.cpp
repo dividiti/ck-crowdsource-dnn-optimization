@@ -3,8 +3,6 @@
 #include "experimentcontext.h"
 #include "featurespanel.h"
 #include "infolabel.h"
-#include "scenarioslistwidget.h"
-#include "scenariosprovider.h"
 #include "utils.h"
 #include "../ori/OriWidgets.h"
 
@@ -33,7 +31,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
     _infoBatchSize = new InfoLabel(tr("Frames count:"));
 
     _linkSelectEngine = makeLink(tr("Select"), tr("Select another engine"), SLOT(selectEngine()));
-    _linkSelectScenario = makeLink(tr("Select"), tr("Select another scenario"), SLOT(selectModel()));
+    _linkSelectModel = makeLink(tr("Select"), tr("Select another scenario"), SLOT(selectModel()));
     _linkSetBatchSize = makeLink(tr("Change"), tr("Change batch size"), SLOT(setBatchSize()));
 
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
@@ -47,7 +45,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
         Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
         {
             _infoModel,
-            Ori::Gui::layoutH({ _linkSelectScenario, 0 })
+            Ori::Gui::layoutH({ _linkSelectModel, 0 })
         }),
         Utils::makeDivider(),
         Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
@@ -61,12 +59,6 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QWid
     }));
 }
 
-FeaturesPanel::~FeaturesPanel()
-{
-    if (_scenariosWindow)
-        delete _scenariosWindow;
-}
-
 QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, const char* slot)
 {
     auto link = new QLabel(QString("<a href='dummy'>%1</a>").arg(text));
@@ -78,7 +70,7 @@ QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, co
 void FeaturesPanel::selectEngine()
 {
     if (_context->engines().isEmpty())
-        return Utils::infoDlg(tr("Recognition engines is not loaded"));
+        return Utils::infoDlg(tr("Recognition engines not found"));
 
     if (_context->engines().selectCurrentViaDialog())
     {
@@ -89,19 +81,14 @@ void FeaturesPanel::selectEngine()
 
 void FeaturesPanel::selectModel()
 {
-    const RecognitionScenarios& scenarios = _context->scenariosProvider->currentList();
-    if (scenarios.isEmpty())
-        return Utils::infoDlg(tr("Recognition scenarios is not loaded yet"));
+    if (_context->models().isEmpty())
+        return Utils::infoDlg(tr("Recognition models not found"));
 
-    if (!_scenariosWindow)
+    if (_context->models().selectCurrentViaDialog())
     {
-        _scenariosWindow = new ScenariosListWidget(_context);
-        connect(_scenariosWindow.data(), SIGNAL(currentScenarioSelected(int)), this, SLOT(currentScenarioSelected(int)));
-        Utils::moveToDesktopCenter(_scenariosWindow);
-        _scenariosWindow->show();
+        AppConfig::setSelectedModelIndex(_context->experimentIndex(), _context->models().currentIndex());
+        updateExperimentConditions();
     }
-    else
-        _scenariosWindow->activateWindow();
 }
 
 void FeaturesPanel::updateExperimentConditions()
@@ -112,21 +99,11 @@ void FeaturesPanel::updateExperimentConditions()
         ? _context->engines().current().title().replace("(", "\n(")
         : NA);
 
-    _infoModel->setInfo(_context->currentScenarioExists()
-        ? _context->currentScenario().title().replace("(", "\n(")
+    _infoModel->setInfo(_context->models().hasCurrent()
+        ? _context->models().current().title().replace("(", "\n(")
         : NA);
 
     _infoBatchSize->setInfo(QString::number(_context->batchSize()));
-}
-
-void FeaturesPanel::currentScenarioSelected(int index)
-{
-    qDebug() << "currentScenarioSelected" << index;
-    if (_context->currentScenarioIndex() != index)
-    {
-        _context->setCurrentScenarioIndex(index);
-        updateExperimentConditions();
-    }
 }
 
 void FeaturesPanel::setBatchSize()
@@ -147,7 +124,7 @@ void FeaturesPanel::enableControls(bool on)
     _buttonStop->setEnabled(!on);
     _buttonStop->setVisible(!on);
     _linkSelectEngine->setVisible(on);
-    _linkSelectScenario->setVisible(on);
+    _linkSelectModel->setVisible(on);
     _linkSetBatchSize->setVisible(on);
 }
 

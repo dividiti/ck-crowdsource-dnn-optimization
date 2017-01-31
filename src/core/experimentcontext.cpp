@@ -1,6 +1,5 @@
 #include "appconfig.h"
 #include "experimentcontext.h"
-#include "scenariosprovider.h"
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -49,35 +48,6 @@ template class ListContainer<CkEntry>;
 
 //-----------------------------------------------------------------------------
 
-bool ExperimentContext::checkScenarioIndex(int index) const
-{
-    return index >= 0 && index < currentScenarios().size();
-}
-
-bool ExperimentContext::currentScenarioExists() const
-{
-    return checkScenarioIndex(_currentScenarioIndex);
-}
-
-void ExperimentContext::setCurrentScenarioIndex(int index)
-{
-    if (checkScenarioIndex(index))
-    {
-        _currentScenarioIndex = index;
-        AppConfig::setSelectedScenarioIndex(_experimentIndex, index);
-    }
-}
-
-const RecognitionScenario& ExperimentContext::currentScenario() const
-{
-    return currentScenarios().at(_currentScenarioIndex);
-}
-
-const QList<RecognitionScenario>& ExperimentContext::currentScenarios() const
-{
-    return scenariosProvider->currentList().items();
-}
-
 void ExperimentContext::setBatchSize(int value)
 {
     if (value >= minBatchSize() && value <= maxBatchSize())
@@ -103,11 +73,7 @@ void ExperimentContext::stopExperiment()
 void ExperimentContext::loadFromConfig()
 {
     _engines.setCurrentIndexOrDefault(AppConfig::selectedEngineIndex(_experimentIndex));
-
-    auto index = AppConfig::selectedScenarioIndex(_experimentIndex);
-    if (!checkScenarioIndex(index) && !scenariosProvider->currentList().isEmpty())
-        index = 0;
-    setCurrentScenarioIndex(index);
+    _models.setCurrentIndexOrDefault(AppConfig::selectedModelIndex(_experimentIndex));
 
     setBatchSize(AppConfig::batchSize(_experimentIndex));
 }

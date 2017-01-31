@@ -6,9 +6,6 @@
 #include <QObject>
 #include <QList>
 
-class PlatformFeaturesProvider;
-class ScenariosProvider;
-
 template<typename TItem> class ListContainer
 {
 public:
@@ -40,16 +37,9 @@ class ExperimentContext : public QObject
 
 public:
     int experimentIndex() const { return _experimentIndex; }
-    ScenariosProvider* scenariosProvider;
 
     ListContainer<CkEntry>& engines() { return _engines; }
-
-    bool checkScenarioIndex(int index) const;
-    bool currentScenarioExists() const;
-    int currentScenarioIndex() const { return _currentScenarioIndex; }
-    void setCurrentScenarioIndex(int index);
-    const RecognitionScenario& currentScenario() const;
-    const QList<RecognitionScenario>& currentScenarios() const;
+    ListContainer<CkEntry>& models() { return _models; }
 
     int batchSize() const { return _batchSize; }
     void setBatchSize(int value);
@@ -75,11 +65,9 @@ public slots:
 private:
     int _experimentIndex = -1;
     bool _isExperimentStarted = false;
-    int _currentScenarioIndex = -1;
     int _batchSize = 2;
     ExperimentResult _result;
-
-    ListContainer<CkEntry> _engines;
+    ListContainer<CkEntry> _engines, _models;
 
     friend class MainWindow;
 };
