@@ -60,7 +60,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
 
 QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, const char* slot)
 {
-    auto link = new QLabel(QString("<a href='dummy'><span style='color:#AFB3B5'>%1</span></a>").arg(text));
+    auto link = new QLabel(QString("<a href='dummy'><span style='color:#969C9E'>%1</span></a>").arg(text));
     link->setProperty("qss-role", "link");
     link->setToolTip(tooltip);
     connect(link, SIGNAL(linkActivated(QString)), this, slot);

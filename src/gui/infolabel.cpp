@@ -9,18 +9,20 @@ InfoLabel::InfoLabel(QWidget *parent) : QVBoxLayout(parent)
     _title->setObjectName("infoLabelTitle");
     auto f = _title->font();
     f.setLetterSpacing(QFont::AbsoluteSpacing, 0.8);
-//    f.setBold(true);
     _title->setFont(f);
 
     _info = new QLabel;
     _info->setObjectName("infoLabelValue");
-//    f = _info->font();
-//    f.setPointSize(f.pointSize()+1);
-//    _info->setFont(f);
+
+    _infoAux = new QLabel;
+    _infoAux->setObjectName("infoLabelValueAux");
+    _infoAux->setVisible(false);
 
     setMargin(0);
+    setSpacing(0);
     addWidget(_title);
     addWidget(_info);
+    addWidget(_infoAux);
 }
 
 InfoLabel::InfoLabel(const QString& title, QWidget *parent): InfoLabel(parent)
@@ -33,7 +35,9 @@ void InfoLabel::setTitle(const QString& value)
     _title->setText(value);
 }
 
-void InfoLabel::setInfo(const QString& value)
+void InfoLabel::setInfo(const QString& value, const QString &auxValue)
 {
     _info->setText(value);
+    _infoAux->setText(auxValue);
+    _infoAux->setVisible(!auxValue.isEmpty());
 }

@@ -8,6 +8,21 @@ QLabel#infoLabelValue {
 	font-size: 13px;
 	color: #ffffff;
 	font-family: Verdana;
+	margin: 4px 0 0 -4px;
+}
+ResultsPanel QLabel#infoLabelValue {
+	font-size: 18px;
+	color: #ffffff;
+	line-height: 18px;
+	font-family: Verdana;
+	font-weight: bold;
+	margin: 4px 0 0 -4px;
+}
+ResultsPanel QLabel#infoLabelValueAux {
+	font-size: 13px;
+	color: #969C9E;
+	font-family: Verdana;
+	margin: 4px 0 0 -4px;
 }
 QFrame#experimentPanel {
 	background: gray;
@@ -42,7 +57,7 @@ QPushButton#buttonStart {
 	width: 154px;
 	background: #009688;
 	border-radius: 16px;
-	border: 1px solid #789088;
+	border: 1px solid #1F272A;
 	color: #ffffff;
 	font-size: 10pt;
 	font-weight: 600;

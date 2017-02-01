@@ -16,10 +16,10 @@ public:
     explicit InfoLabel(const QString& title, QWidget *parent = 0);
 
     void setTitle(const QString& value);
-    void setInfo(const QString& value);
+    void setInfo(const QString& value, const QString& auxValue = QString());
 
 private:
-    QLabel *_title, *_info;
+    QLabel *_title, *_info, *_infoAux;
 };
 
 #endif // INFOLABEL_H

@@ -39,7 +39,7 @@ void ResultsPanel::experimentStarted()
 void ResultsPanel::experimentResultReady()
 {
     auto r = _context->experimentResult();
-    _infoTimePerFrame->setInfo(QString("%1\n(%2)").arg(r.timePerImage).arg(r.imagesPerSecond));
+    _infoTimePerFrame->setInfo(QString::number(r.timePerImage), QString("(%1)").arg(r.imagesPerSecond));
     _infoTimePerBatch->setInfo(QString::number(r.timePerBatch));
     _infoMemoryUsage->setInfo(QString::number(r.memoryPerImage));
 }
