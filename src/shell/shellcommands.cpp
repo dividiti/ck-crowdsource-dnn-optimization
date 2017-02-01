@@ -1,5 +1,6 @@
 #include "appconfig.h"
 #include "ck.h"
+#include "recognizer.h"
 #include "shellcommands.h"
 
 #include <QApplication>
@@ -43,6 +44,10 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
                                                .arg(option_runRecognition.names().first()), "uid");
     cmdLine.addOption(option_recognitionImages);
 
+    QCommandLineOption option_recognize("6", "Recognize smth.");
+    cmdLine.addOption(option_recognize);
+
+
     cmdLine.process(app);
 
     if (cmdLine.isSet(option_caffeModels))
@@ -78,6 +83,12 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
         return ParamsAcquired;
     }
 
+    if (cmdLine.isSet(option_recognize))
+    {
+        command_recognize();
+        return CommandFinished;
+    }
+
     return CommandIgnored;
 }
 
@@ -103,4 +114,18 @@ void ShellCommands::command_imageSources()
 {
     for (auto dataset: CK().queryCaffeImages())
         cout() << dataset.str() << endl;
+}
+
+void ShellCommands::command_recognize()
+{
+    QString proxy("/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/classification");
+    QString model("/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/tmp-05LaUH.prototxt");
+    QString weights("/home/nikolay/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
+    QString mean("/home/nikolay/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
+    QString labels("/home/nikolay/CK/ck-caffe/program/caffe-classification/synset_words.txt");
+    QString image("/home/nikolay/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg");
+    Recognizer r(proxy, model, weights, mean, labels);
+    auto predictions = r.recognize(image);
+    for (auto p: predictions)
+        cout() << QString("%1 - %3 - %2").arg(p.probability).arg(p.description).arg(p.id) << endl;
 }
