@@ -29,7 +29,6 @@ MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWi
     setAttribute(Qt::WA_DeleteOnClose);
 
     connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
-    connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
     auto experimentsWidget = new QWidget;
     auto experimentLayout = new QVBoxLayout;
@@ -86,9 +85,4 @@ void MainWindow::onError(const QString& msg)
 {
     statusBar()->clearMessage();
     QMessageBox::critical(this, windowTitle(), msg);
-}
-
-void MainWindow::onInfo(const QString& msg)
-{
-    statusBar()->showMessage(msg);
 }

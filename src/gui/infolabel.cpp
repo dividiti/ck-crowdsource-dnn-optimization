@@ -7,9 +7,10 @@ InfoLabel::InfoLabel(QWidget *parent) : QVBoxLayout(parent)
 {
     _title = new QLabel;
     _title->setObjectName("infoLabelTitle");
-//    auto f = _title->font();
+    auto f = _title->font();
+    f.setLetterSpacing(QFont::AbsoluteSpacing, 0.8);
 //    f.setBold(true);
-//    _title->setFont(f);
+    _title->setFont(f);
 
     _info = new QLabel;
     _info->setObjectName("infoLabelValue");

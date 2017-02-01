@@ -5,12 +5,10 @@
 #include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>
-#include <QPushButton>
 
 ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
     setObjectName("resultsPanel");
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
@@ -20,12 +18,6 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
     _infoTimePerBatch = new InfoLabel(tr("Time per batch:"));
     _infoMemoryUsage = new InfoLabel(tr("Memory usage\nper image:"));
 
-    auto buttonPublish = new QPushButton;
-    buttonPublish->setToolTip(tr("Publish"));
-    buttonPublish->setIcon(QIcon(":/tools/publish"));
-    buttonPublish->setObjectName("buttonPublish");
-    buttonPublish->setEnabled(false);
-
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
     {
         _infoTimePerFrame,
@@ -34,7 +26,6 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
         Utils::makeDivider(),
         _infoMemoryUsage,*/
         0,
-        Ori::Gui::layoutH({0, buttonPublish, 0})
     }));
 }
 

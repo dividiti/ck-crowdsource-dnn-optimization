@@ -22,13 +22,9 @@ public:
 
 private:
     QLabel *_imageView;
-    QList<QLabel*> _predictions;
+    QList<class PredictionView*> _predictions;
 
-    const QPixmap& frame() const;
-    QPixmap getSampleImage();
-    QPixmap getFramedImage(const QPixmap& source);
-
-    void setTrimmedText(QLabel* label, const QString& text);
+    QPixmap fitImage(const QPixmap& source);
 };
 
 #endif // FRAMEWIDGET_H

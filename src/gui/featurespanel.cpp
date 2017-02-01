@@ -10,26 +10,14 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QLabel>
-#include <QPushButton>
 
 FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFrame(parent)
 {
     setObjectName("featuresPanel");
-    //setProperty("panelType", "features");
 
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
-
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-
-    _buttonStart = new QPushButton(tr("Start"));
-    _buttonStart->setObjectName("buttonStart");
-    _buttonStop = new QPushButton(tr("Stop"));
-    _buttonStop->setObjectName("buttonStop");
-    _buttonStop->setVisible(false);
-    connect(_buttonStart, SIGNAL(pressed()), this, SLOT(startExperiment()));
-    connect(_buttonStop, SIGNAL(pressed()), this, SLOT(stopExperiment()));
 
     _infoEngine = new InfoLabel(tr("CAFFE ENGINE"));
     _infoModel = new InfoLabel(tr("CAFFE MODEL"));
@@ -59,8 +47,6 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
             Ori::Gui::layoutH({ _linkSetBatchSize, 0 })
         }),
         0,
-        _buttonStart,
-        _buttonStop
     }));
 }
 
@@ -125,24 +111,9 @@ void FeaturesPanel::setBatchSize()
 
 void FeaturesPanel::enableControls(bool on)
 {
-    _buttonStart->setVisible(on);
-    _buttonStart->setEnabled(on);
-    _buttonStop->setEnabled(!on);
-    _buttonStop->setVisible(!on);
     _linkSelectEngine->setVisible(on);
     _linkSelectModel->setVisible(on);
     _linkSetBatchSize->setVisible(on);
-}
-
-void FeaturesPanel::startExperiment()
-{
-    _context->startExperiment();
-}
-
-void FeaturesPanel::stopExperiment()
-{
-    _buttonStop->setEnabled(false);
-    _context->stopExperiment();
 }
 
 void FeaturesPanel::experimentStarted()

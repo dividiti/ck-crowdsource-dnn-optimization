@@ -1,4 +1,5 @@
 #include "framewidget.h"
+#include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -6,39 +7,69 @@
 #include <QPainter>
 #include <QResizeEvent>
 
-#define FRAME_CONTENT_H 102
+#define FRAME_CONTENT_W 160
+#define FRAME_CONTENT_H 147
 #define PREDICTIONS_COUNT 5
 
-QPixmap FrameWidget::getSampleImage()
+class PredictionView : public QWidget
 {
-    int index = qrand()%10 + 1;
-    auto sample = QPixmap(QString(":/sample/%1").arg(index));
-    return getFramedImage(sample);
-}
+public:
+    PredictionView(int index)
+    {
+        _prob = new QLabel;
+        _prob->setTextFormat(Qt::PlainText);
+        _prob->setObjectName("predictionProb");
+        _prob->setProperty("qss-prediction-line", index);
+        _descr = new QLabel;
+        _descr->setTextFormat(Qt::PlainText);
+        _descr->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        _descr->setObjectName("predictionDescr");
+        _descr->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        _descr->setProperty("qss-prediction-line", index);
+        setLayout(Ori::Gui::layoutH(0, 0, {_prob, Ori::Gui::spacing(16), _descr}));
+    }
+    void setProb(double value)
+    {
+        _prob->setText(QString::number(value, 'f', 2));
+    }
+    void setDescr(const QString& text)
+    {
+        static QFontMetrics metrics(_descr->font());
+        _descr->setText(metrics.elidedText(text, Qt::ElideRight, _descr->width()));
+    }
+    void clear()
+    {
+        _prob->clear();
+        _descr->clear();
+    }
+private:
+    QLabel *_prob, *_descr;
+};
+
+//-----------------------------------------------------------------------------
 
 FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    setFixedWidth(frame().width());
+    setFixedWidth(FRAME_CONTENT_W);
 
     _imageView = new QLabel;
+    _imageView->setObjectName("frameImage");
 
     auto layoutInfo = new QVBoxLayout;
     layoutInfo->setMargin(0);
     layoutInfo->setSpacing(4);
     for (int i = 0; i < PREDICTIONS_COUNT; i++)
     {
-        auto label = new QLabel;
-        label->setTextFormat(Qt::PlainText);
-        layoutInfo->addWidget(label);
-        _predictions << label;
+        auto view = new PredictionView(i+1);
+        layoutInfo->addWidget(view);
+        _predictions << view;
     }
 
     auto layout = new QVBoxLayout;
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(_imageView);
-    layout->addSpacing(4);
     layout->addLayout(layoutInfo);
     layout->addStretch();
 
@@ -47,26 +78,18 @@ FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
 
 void FrameWidget::loadImage(const QString& path)
 {
-    _imageView->setPixmap(getFramedImage(QPixmap(path)));
+    _imageView->setPixmap(fitImage(QPixmap(path)));
 }
 
-const QPixmap& FrameWidget::frame() const
-{
-    static QPixmap frame(":/images/frame");
-    return frame;
-}
-
-QPixmap FrameWidget::getFramedImage(const QPixmap& source)
+QPixmap FrameWidget::fitImage(const QPixmap& source)
 {
     int h = FRAME_CONTENT_H;
     int w = h * source.width() / source.height();
 
-    auto s = frame().size();
-    QPixmap image(s);
+    QPixmap image(FRAME_CONTENT_W, FRAME_CONTENT_H);
     image.fill(Qt::transparent); // force transparency
     QPainter painter(&image);
-    painter.drawPixmap((s.width()-w)/2, (s.height()-h)/2, w, h, source);
-    painter.drawPixmap(0, 0, frame());
+    painter.drawPixmap((FRAME_CONTENT_W-w)/2, (FRAME_CONTENT_H-h)/2, w, h, source);
     return image;
 }
 
@@ -75,17 +98,8 @@ void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions)
     for (int i = 0; i < _predictions.size(); i++)
         if (i < predictions.size())
         {
-            auto text = QString("%1 - %2")
-                    .arg(predictions.at(i).probability, 0, 'f', 2)
-                    .arg(predictions.at(i).description);
-            setTrimmedText(_predictions.at(i), text);
+            _predictions.at(i)->setProb(predictions.at(i).probability);
+            _predictions.at(i)->setDescr(predictions.at(i).description);
         }
         else _predictions.at(i)->clear();
-}
-
-void FrameWidget::setTrimmedText(QLabel* label, const QString& text)
-{
-    static QFontMetrics metrics(label->font());
-    static int targetWidth = label->width();
-    label->setText(metrics.elidedText(text, Qt::ElideRight, targetWidth));
 }

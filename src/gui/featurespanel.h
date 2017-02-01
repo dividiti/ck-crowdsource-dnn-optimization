@@ -19,15 +19,12 @@ private slots:
     void selectEngine();
     void selectModel();
     void setBatchSize();
-    void startExperiment();
-    void stopExperiment();
     void experimentStarted();
     void experimentFinished();
 
 private:
     ExperimentContext* _context;
     InfoLabel *_infoEngine, *_infoModel, *_infoBatchSize;
-    QWidget *_buttonStart, *_buttonStop;
     QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSetBatchSize;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
