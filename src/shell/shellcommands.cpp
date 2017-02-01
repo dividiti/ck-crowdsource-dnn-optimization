@@ -22,10 +22,13 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     QCommandLineOption option_caffeLibs("2", "Enumerate caffe libs.");
     cmdLine.addOption(option_caffeLibs);
 
-    QCommandLineOption option_runRecognition("3", "Run recognition with specified model.");
+    QCommandLineOption option_imageSources("3", "Enumerate image datasets.");
+    cmdLine.addOption(option_imageSources);
+
+    QCommandLineOption option_runRecognition("4", "Run recognition with specified model.");
     cmdLine.addOption(option_runRecognition);
 
-    QCommandLineOption option_editStyle("4", "Edit application style.");
+    QCommandLineOption option_editStyle("5", "Edit application style.");
     cmdLine.addOption(option_editStyle);
 
     QCommandLineOption option_recognitionEngine("engine", QString("caffe-lib uid to run recognition (for command %1).")
@@ -35,6 +38,10 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     QCommandLineOption option_recognitionModel("model", QString("caffe-model uid to run recognition (for command %1).")
                                                .arg(option_runRecognition.names().first()), "uid");
     cmdLine.addOption(option_recognitionModel);
+
+    QCommandLineOption option_recognitionImages("images", QString("imagenet dataset uid to run recognition (for command %1).")
+                                               .arg(option_runRecognition.names().first()), "uid");
+    cmdLine.addOption(option_recognitionImages);
 
     cmdLine.process(app);
 
@@ -50,6 +57,12 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
         return CommandFinished;
     }
 
+    if (cmdLine.isSet(option_imageSources))
+    {
+        command_imageSources();
+        return CommandFinished;
+    }
+
     if (cmdLine.isSet(option_editStyle))
     {
         _appParams.runMode = AppRunParams::EditStyle;
@@ -60,6 +73,7 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     {
         _appParams.engineUid = cmdLine.value(option_recognitionEngine);
         _appParams.modelUid = cmdLine.value(option_recognitionModel);
+        _appParams.imagesUid = cmdLine.value(option_recognitionImages);
         _appParams.startImmediately = true;
         return ParamsAcquired;
     }
@@ -83,4 +97,10 @@ void ShellCommands::command_caffeModels()
 {
     for (auto model: CK().queryCaffeModels())
         cout() << model.str() << endl;
+}
+
+void ShellCommands::command_imageSources()
+{
+    for (auto dataset: CK().queryCaffeImages())
+        cout() << dataset.str() << endl;
 }

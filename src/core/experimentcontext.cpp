@@ -25,7 +25,7 @@ bool ListContainer<TItem>::selectCurrentViaDialog()
     QVector<QRadioButton*> flags;
     for (int i = 0; i < _items.size(); i++)
     {
-        auto flag = new QRadioButton(_items.at(i).name);
+        auto flag = new QRadioButton(_items.at(i).title());
         flag->setChecked(i == _currenIndex);
         layout->addWidget(flag);
         flags << flag;
@@ -45,6 +45,7 @@ bool ListContainer<TItem>::selectCurrentViaDialog()
 }
 
 template class ListContainer<CkEntry>;
+template class ListContainer<ImagesDataset>;
 
 //-----------------------------------------------------------------------------
 
@@ -74,6 +75,7 @@ void ExperimentContext::loadFromConfig()
 {
     _engines.setCurrentIndexOrDefault(AppConfig::selectedEngineIndex(_experimentIndex));
     _models.setCurrentIndexOrDefault(AppConfig::selectedModelIndex(_experimentIndex));
+    _images.setCurrentIndexOrDefault(AppConfig::selectedImagesIndex(_experimentIndex));
 
     setBatchSize(AppConfig::batchSize(_experimentIndex));
 }

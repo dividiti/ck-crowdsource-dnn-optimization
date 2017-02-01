@@ -24,3 +24,15 @@ void ExperimentResult::accumulate(const ExperimentProbe& p)
     timePerImage = totalTime/imagesCount;
     imagesPerSecond = (timePerImage > 0)? 1/timePerImage: 0;
 }
+
+//-----------------------------------------------------------------------------
+
+QString ImagesDataset::str() const
+{
+    return _title;
+}
+
+void ImagesDataset::buildCorrectnessMap()
+{
+    // TODO
+}

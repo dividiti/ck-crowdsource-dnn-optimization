@@ -19,6 +19,9 @@ public:
     static int selectedEngineIndex(int experimentIndex);
     static void setSelectedEngineIndex(int experimentIndex, int engineIndex);
 
+    static int selectedImagesIndex(int experimentIndex);
+    static void setSelectedImagesIndex(int experimentIndex, int imagesIndex);
+
     static int batchSize(int experimentIndex);
     static void setBatchSize(int experimentIndex, int batchSize);
 

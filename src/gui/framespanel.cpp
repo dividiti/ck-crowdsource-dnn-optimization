@@ -11,9 +11,9 @@
 #include <QDir>
 #include <QTimer>
 
-ImagesBank::ImagesBank()
+ImagesBank::ImagesBank(const QString& imagesDir)
 {
-    auto imagesDir = AppConfig::imagesDir();
+    //auto imagesDir = AppConfig::imagesDir();
     qDebug() << "Images directory:" << imagesDir;
 
     auto imagesFilter = AppConfig::imagesFilter();
@@ -256,7 +256,7 @@ bool FramesPanel::prepareImages()
 {
     qDebug() << "Prepare images";
     if (!_images)
-        _images = new ImagesBank();
+        _images = new ImagesBank(_context->images().current().imagesPath());
     if (_images->size() < 1)
     {
         AppEvents::error(tr("No images for processing"));
@@ -289,6 +289,9 @@ QString FramesPanel::canStart()
 
     if (!_context->models().hasCurrent())
         return tr("No scenario selected");
+
+    if (!_context->images().hasCurrent())
+        return tr("No image source selected");
 
     return QString();
 }

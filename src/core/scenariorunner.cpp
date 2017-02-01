@@ -16,6 +16,7 @@ ScenarioRunParams::ScenarioRunParams(const CkEntry &engine, const CkEntry& model
     _workdir = AppConfig::ckBinPath();
     _program = AppConfig::ckExeName();
 #endif
+    // TODO: same initialization as in CK, should be merged
     _arguments = QStringList()
         #ifdef Q_OS_WIN32
             << "-W"

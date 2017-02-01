@@ -3,14 +3,70 @@
 #include "ck.h"
 #include "utils.h"
 
+#include <QFile>
 #include <QDebug>
 #include <QDir>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+
+class CkEnvMeta
+{
+public:
+    CkEnvMeta(const QString& uid)
+    {
+        auto file = Utils::makePath({ AppConfig::ckPath(), "local", "env", uid, ".cm", "meta.json" });
+        auto text = Utils::loadTtextFromFile(file);
+        auto doc = QJsonDocument::fromJson(text);
+        _json = doc.object();
+        if (_json.isEmpty())
+        {
+            qWarning() << "Invalid meta file" << file;
+            return;
+        }
+        _ok = true;
+    }
+
+    QString envVar(const QString& name)
+    {
+        static QString keyEnv("env");
+
+        if (!_json.contains(keyEnv))
+        {
+            qWarning() << QString("Meta does not contain key '%1'").arg(keyEnv);
+            return QString();
+        }
+        auto env = _json[keyEnv].toObject();
+        if (!env.contains(name))
+        {
+            qWarning() << QString("Meta key '%1' does not contain key '%2'").arg(keyEnv).arg(name);
+            return QString();
+        }
+        return env[name].toString();
+    }
+
+    QStringList tags()
+    {
+        auto json = _json["tags"].toArray();
+        QStringList tags;
+        for (auto it = json.constBegin(); it != json.constEnd(); it++)
+            tags << (*it).toString();
+        return tags;
+    }
+
+    bool ok() const { return _ok; }
+
+private:
+    QJsonObject _json;
+    bool _ok = false;
+};
+
+//-----------------------------------------------------------------------------
 
 CK::CK()
 {
     _ckPath = AppConfig::ckPath();
+    // TODO: same initialization as in ScenarioRuner, should be merged
 #ifdef Q_OS_WIN32
     _ck.setProgram("python");
     _args = QStringList { "-W", "ignore::DeprecationWarning", AppConfig::ckBinPath()+"\\..\\ck\\kernel.py" };
@@ -49,6 +105,22 @@ QList<CkEntry> CK::getCafeeModelByUidOrAll(const QString& uid)
     return QList<CkEntry> { env };
 }
 
+QList<ImagesDataset> CK::getCafeeImagesByUidOrAll(const QString& uid)
+{
+    if (uid.isEmpty())
+        return queryCaffeImages();
+
+    auto env = queryEnvByUid(uid);
+    if (env.isEmpty())
+        return queryCaffeImages();
+
+    auto images = loadDataset(env);
+    if (images.isEmpty())
+        return queryCaffeImages();
+
+    return QList<ImagesDataset> { images };
+}
+
 QList<CkEntry> CK::queryCaffeLibs()
 {
     return queryEnvsByTags("lib,caffe");
@@ -57,6 +129,19 @@ QList<CkEntry> CK::queryCaffeLibs()
 QList<CkEntry> CK::queryCaffeModels()
 {
     return queryEnvsByTags("caffemodel");
+}
+
+QList<ImagesDataset> CK::queryCaffeImages()
+{
+    QList<ImagesDataset> datasets;
+    auto envs = queryEnvsByTags("dataset,caffe,aux");
+    for (auto env: envs)
+    {
+        auto dataset = loadDataset(env);
+        if (!dataset.isEmpty())
+            datasets << dataset;
+    }
+    return datasets;
 }
 
 QList<CkEntry> CK::queryEnvsByTags(const QString& tags)
@@ -91,7 +176,7 @@ CkEntry CK::queryEnvByUid(const QString& uid)
         qCritical() << "No env uid founded";
         return CkEntry();
     }
-    auto info = makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
+    auto info = Utils::makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
     auto json = QJsonDocument::fromJson(Utils::loadTtextFromFile(info));
     auto name = json.object()["data_name"].toString();
     if (name.isEmpty())
@@ -123,7 +208,41 @@ QStringList CK::ck(const QStringList& args)
     return output.split("\n", QString::SkipEmptyParts);
 }
 
-QString CK::makePath(const QStringList &parts) const
+ImagesDataset CK::loadDataset(const CkEntry &env)
 {
-    return parts.join(QDir::separator());
+    static QString keyImagenetVal("CK_CAFFE_IMAGENET_VAL_TXT");
+    static QString keyImagenetWords("CK_CAFFE_IMAGENET_SYNSET_WORDS_TXT");
+    static QString keyImagenetPath("CK_CAFFE_IMAGENET_VAL");
+
+    qDebug() << "Loading dataset info for" << env.str();
+    auto meta = CkEnvMeta(env.uid);
+    if (!meta.ok()) return ImagesDataset();
+
+    auto valFile = meta.envVar(keyImagenetVal);
+    auto wordsFile = meta.envVar(keyImagenetWords);
+    qDebug() << keyImagenetVal + ": " + valFile;
+    qDebug() << keyImagenetWords + ": " + wordsFile;
+
+    auto tags = meta.tags();
+    qDebug() << "TAGS: " + tags.join(",");
+    tags.removeAll("aux");
+    tags.append("raw");
+    auto envs = queryEnvsByTags(tags.join(","));
+    if (envs.isEmpty()) return ImagesDataset();
+    if (envs.size() > 1)
+        qWarning() << "Several datasets found, take first.";
+
+    meta = CkEnvMeta(envs.first().uid);
+    if (!meta.ok()) return ImagesDataset();
+
+    auto imagesPath = meta.envVar(keyImagenetPath);
+    qDebug() << keyImagenetPath + ": " + imagesPath;
+
+    ImagesDataset ds;
+    ds._title = env.name;
+    ds._valFile = valFile;
+    ds._wordsFile = wordsFile;
+    ds._imagesPath = imagesPath;
+    qDebug() << "OK. Dataset loaded" << env.str();
+    return ds;
 }

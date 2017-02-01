@@ -13,9 +13,11 @@ public:
 
     QList<CkEntry> getCafeeLibByUidOrAll(const QString& uid);
     QList<CkEntry> getCafeeModelByUidOrAll(const QString& uid);
+    QList<ImagesDataset> getCafeeImagesByUidOrAll(const QString& uid);
 
     QList<CkEntry> queryCaffeLibs();
     QList<CkEntry> queryCaffeModels();
+    QList<ImagesDataset> queryCaffeImages();
     CkEntry queryEnvByUid(const QString& uid);
 
 private:
@@ -24,8 +26,8 @@ private:
     QStringList _args;
 
     QStringList ck(const QStringList &args);
-    QString makePath(const QStringList &parts) const;
     QList<CkEntry> queryEnvsByTags(const QString& tags);
+    ImagesDataset loadDataset(const CkEntry& env);
 };
 
 #endif // CK_H

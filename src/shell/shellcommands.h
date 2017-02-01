@@ -26,6 +26,7 @@ public:
 private:
     void command_caffeModels();
     void command_caffeLibs();
+    void command_imageSources();
 
 private:
     AppRunParams _appParams;

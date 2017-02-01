@@ -19,13 +19,15 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
 
-    _infoEngine = new InfoLabel(tr("CAFFE ENGINE"));
-    _infoModel = new InfoLabel(tr("CAFFE MODEL"));
-    _infoBatchSize = new InfoLabel(tr("FRAMES COUNT"));
+    _infoEngine = new InfoLabel("CAFFE ENGINE");
+    _infoModel = new InfoLabel("CAFFE MODEL");
+    _infoImages = new InfoLabel("IMAGE SOURCE");
+    _infoBatchSize = new InfoLabel("FRAMES COUNT");
 
-    _linkSelectEngine = makeLink(tr("Select"), tr("Select another engine"), SLOT(selectEngine()));
-    _linkSelectModel = makeLink(tr("Select"), tr("Select another scenario"), SLOT(selectModel()));
-    _linkSetBatchSize = makeLink(tr("Change"), tr("Change batch size"), SLOT(setBatchSize()));
+    _linkSelectEngine = makeLink("Select", "Select another engine", SLOT(selectEngine()));
+    _linkSelectModel = makeLink("Select", "Select another scenario", SLOT(selectModel()));
+    _linkSelectImages = makeLink("Select", "Select image source", SLOT(selectImages()));
+    _linkSetBatchSize = makeLink("Change", "Change batch size", SLOT(setBatchSize()));
 
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
     {
@@ -39,6 +41,12 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
         {
             _infoModel,
             Ori::Gui::layoutH({ _linkSelectModel, 0 })
+        }),
+        Utils::makeDivider(),
+        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
+        {
+            _infoImages,
+            Ori::Gui::layoutH({ _linkSelectImages, 0 })
         }),
         Utils::makeDivider(),
         Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
@@ -83,6 +91,18 @@ void FeaturesPanel::selectModel()
     }
 }
 
+void FeaturesPanel::selectImages()
+{
+    if (_context->images().isEmpty())
+        return Utils::infoDlg(tr("Image datasets not found"));
+
+    if (_context->images().selectCurrentViaDialog())
+    {
+        AppConfig::setSelectedImagesIndex(_context->experimentIndex(), _context->images().currentIndex());
+        updateExperimentConditions();
+    }
+}
+
 void FeaturesPanel::updateExperimentConditions()
 {
     static QString NA("N/A");
@@ -93,6 +113,10 @@ void FeaturesPanel::updateExperimentConditions()
 
     _infoModel->setInfo(_context->models().hasCurrent()
         ? _context->models().current().title().replace("(", "\n(")
+        : NA);
+
+    _infoImages->setInfo(_context->images().hasCurrent()
+        ? _context->images().current().title().replace("(", "\n(")
         : NA);
 
     _infoBatchSize->setInfo(QString::number(_context->batchSize()));
@@ -113,6 +137,7 @@ void FeaturesPanel::enableControls(bool on)
 {
     _linkSelectEngine->setVisible(on);
     _linkSelectModel->setVisible(on);
+    _linkSelectImages->setVisible(on);
     _linkSetBatchSize->setVisible(on);
 }
 

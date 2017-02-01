@@ -13,7 +13,7 @@ class ScenarioRunParams;
 class ImagesBank
 {
 public:
-    ImagesBank();
+    ImagesBank(const QString &imagesDir);
 
     int size() const { return _images.size(); }
     QString imageFile(int index) const { return _images.at(index); }

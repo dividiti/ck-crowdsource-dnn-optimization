@@ -20,7 +20,7 @@ void setInitialWindowGeometry(QWidget* w)
     auto desktop = QApplication::desktop()->availableGeometry(w);
     w->adjustSize();
     // take some more space on the screen than auto-sized
-    w->resize(desktop.width()*0.75, w->height()*2);
+    w->resize(desktop.width()*0.75, w->height());
 }
 
 MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWindow(parent)
@@ -67,11 +67,13 @@ void MainWindow::initialize(const AppRunParams &runParams)
     CK ck;
     auto engines = ck.getCafeeLibByUidOrAll(runParams.engineUid);
     auto models = ck.getCafeeModelByUidOrAll(runParams.modelUid);
+    auto images = ck.getCafeeImagesByUidOrAll(runParams.imagesUid);
 
     for (auto e: _experiments)
     {
         e->context._engines._items = engines;
         e->context._models._items = models;
+        e->context._images._items = images;
         e->context.loadFromConfig();
         e->panel->updateExperimentConditions();
     }

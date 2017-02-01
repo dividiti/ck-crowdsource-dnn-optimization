@@ -27,6 +27,7 @@ public:
 
     QString engineUid;
     QString modelUid;
+    QString imagesUid;
     bool startImmediately = false;
     RunMode runMode = Normal;
 };
@@ -66,6 +67,28 @@ public:
 
     void reset();
     void accumulate(const ExperimentProbe& p);
+};
+
+//-----------------------------------------------------------------------------
+
+class ImagesDataset {
+public:
+    QString title() const { return _title; }
+    QString imagesPath() const { return _imagesPath; }
+
+    QString str() const;
+    bool isEmpty() const { return _imagesPath.isEmpty(); }
+
+    bool hasCorrectnessMap() const { return _hasCorrectnessMap; }
+    void buildCorrectnessMap();
+
+private:
+    QString _title, _imagesPath;
+
+    QString _valFile, _wordsFile;
+    bool _hasCorrectnessMap = false;
+
+    friend class CK;
 };
 
 #endif // APPMODELS_H

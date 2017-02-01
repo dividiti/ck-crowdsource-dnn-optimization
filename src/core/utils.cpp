@@ -5,6 +5,7 @@
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QPalette>
@@ -40,6 +41,11 @@ void saveTextToFile(const QString& path, const QByteArray text)
 
     if (file.write(text) == -1)
         return AppEvents::error(qApp->tr("Fail writing into file %1: %2").arg(path).arg(file.errorString()));
+}
+
+QString makePath(const QStringList &parts)
+{
+    return parts.join(QDir::separator());
 }
 
 QString bytesIntoHumanReadable(long bytes)

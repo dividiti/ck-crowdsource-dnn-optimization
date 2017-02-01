@@ -52,6 +52,16 @@ void AppConfig::setSelectedModelIndex(int experimentIndex, int modelIndex)
     config().setValue(experimentKey("selected_model", experimentIndex), modelIndex);
 }
 
+int AppConfig::selectedImagesIndex(int experimentIndex)
+{
+    return configValueInt(experimentKey("selected_images", experimentIndex), -1);
+}
+
+void AppConfig::setSelectedImagesIndex(int experimentIndex, int imagesIndex)
+{
+    config().setValue(experimentKey("selected_images", experimentIndex), imagesIndex);
+}
+
 int AppConfig::batchSize(int experimentIndex)
 {
     return configValueInt(experimentKey("batch_size", experimentIndex), 2);

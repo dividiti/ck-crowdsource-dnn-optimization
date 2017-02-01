@@ -40,6 +40,7 @@ public:
 
     ListContainer<CkEntry>& engines() { return _engines; }
     ListContainer<CkEntry>& models() { return _models; }
+    ListContainer<ImagesDataset>& images() { return _images; }
 
     int batchSize() const { return _batchSize; }
     void setBatchSize(int value);
@@ -68,6 +69,7 @@ private:
     int _batchSize = 2;
     ExperimentResult _result;
     ListContainer<CkEntry> _engines, _models;
+    ListContainer<ImagesDataset> _images;
 
     friend class MainWindow;
 };
