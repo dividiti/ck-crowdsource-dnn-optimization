@@ -118,13 +118,13 @@ void ShellCommands::command_imageSources()
 
 void ShellCommands::command_recognize()
 {
-    QString proxy("/home/kolyan/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
+    QString lib("/home/kolyan/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
     QString model("/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/tmp-05LaUH.prototxt");
     QString weights("/home/nikolay/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
     QString mean("/home/nikolay/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
     QString labels("/home/nikolay/CK/ck-caffe/program/caffe-classification/synset_words.txt");
     QString image("/home/nikolay/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg");
-    Recognizer r(proxy);
+    Recognizer r(lib);
     if (!r.ready()) return;
     r.prepare(model, weights, mean, labels);
     auto probe = r.recognize(image);

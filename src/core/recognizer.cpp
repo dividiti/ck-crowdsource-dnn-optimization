@@ -43,25 +43,30 @@ QFunctionPointer Recognizer::resolve(const char* symbol)
 void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
                          const QString &meanFile, const QString &labelFile)
 {
-    dnnPrepare(modelFile.toUtf8().data(), weightsFile.toUtf8().data(),
-               meanFile.toUtf8().data(), labelFile.toUtf8().data());
+    ck_dnn_proxy__init_param p;
+    p.model_file = modelFile.toUtf8().data();
+    p.trained_file = weightsFile.toUtf8().data();
+    p.mean_file = meanFile.toUtf8().data();
+    p.label_file = labelFile.toUtf8().data();
+    dnnPrepare(&p);
 }
 
 ExperimentProbe Recognizer::recognize(const QString& imageFile)
 {
     ExperimentProbe probe;
+    ck_dnn_proxy__recognition_param param;
+    param.image_file = imageFile.toUtf8().data();
     ck_dnn_proxy__recognition_result result;
-    int res = dnnRecognize(imageFile.toUtf8().data(), &result);
-    if (res == 0)
+    dnnRecognize(&param, &result);
+    probe.image = imageFile;
+    probe.time = result.time;
+    probe.memory = result.memory;
+    for (int i = 0; i < PREDICTIONS_COUNT; i++)
     {
-        probe.image = imageFile;
-        probe.time = result.time;
-        probe.memory = result.memory;
-        qDebug() << "OK";
-    }
-    else
-    {
-        qCritical() << "FAILED";
+        PredictionResult p;
+        p.probability = result.predictions[i].accuracy;
+        p.id = QString::number(result.predictions[i].index);
+        probe.predictions << p;
     }
     return probe;
 }

@@ -10,16 +10,40 @@ QT_END_NAMESPACE
 
 #include "appmodels.h"
 
+//-----------------------------------------------------------------------------
+
+#define PREDICTIONS_COUNT 5
+
+struct ck_dnn_proxy__init_param
+{
+    const char *model_file;
+    const char *trained_file;
+    const char *mean_file;
+    const char *label_file;
+};
+
+struct ck_dnn_proxy__recognition_param
+{
+    const char* image_file;
+};
+
 struct ck_dnn_proxy__recognition_result
 {
     double time;
     double memory;
+    struct
+    {
+        double accuracy;
+        int index;
+    }
+    predictions[PREDICTIONS_COUNT];
 };
 
-typedef void (*DnnPrepare)(const char *model_file, const char *trained_file,
-                           const char *mean_file, const char *label_file);
-typedef int (*DnnRecognize)(const char *image_file, ck_dnn_proxy__recognition_result* result);
+typedef void (*DnnPrepare)(ck_dnn_proxy__init_param *param);
+typedef void (*DnnRecognize)(ck_dnn_proxy__recognition_param *param,
+                             ck_dnn_proxy__recognition_result *result);
 
+//-----------------------------------------------------------------------------
 
 class Recognizer
 {
