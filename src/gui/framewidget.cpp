@@ -98,7 +98,7 @@ void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions)
     for (int i = 0; i < _predictions.size(); i++)
         if (i < predictions.size())
         {
-            _predictions.at(i)->setProb(predictions.at(i).probability);
+            _predictions.at(i)->setProb(predictions.at(i).accuracy);
             _predictions.at(i)->setDescr(predictions.at(i).description);
         }
         else _predictions.at(i)->clear();

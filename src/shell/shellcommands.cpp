@@ -127,10 +127,11 @@ void ShellCommands::command_recognize()
     Recognizer r(lib);
     if (!r.ready()) return;
     r.prepare(model, weights, mean, labels);
-    auto probe = r.recognize(image);
+    ExperimentProbe probe;
+    r.recognize(image, probe);
     cout() << "time: " << QString::number(probe.time) << endl;
     cout() << "memory: " << QString::number(probe.memory) << endl;
     for (auto p: probe.predictions)
-        cout() << QString("%1 - %3 - %2").arg(p.probability).arg(p.description).arg(p.id) << endl;
+        cout() << QString("%1 - %3 - %2").arg(p.accuracy).arg(p.description).arg(p.index) << endl;
 }
 

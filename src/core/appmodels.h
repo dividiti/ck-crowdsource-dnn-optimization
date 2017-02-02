@@ -37,9 +37,9 @@ public:
 class PredictionResult
 {
 public:
-    double probability = 0;
+    double accuracy = 0;
     QString description;
-    QString id;
+    QString index;
 };
 
 //-----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public:
     double memoryPerImage;
 
     void reset();
-    void accumulate(const ExperimentProbe& p);
+    void accumulate(const ExperimentProbe *p);
 };
 
 //-----------------------------------------------------------------------------
@@ -98,12 +98,13 @@ class DnnEngine
 {
 public:
     QString title() const { return _title; }
+    QString library() const { return _library; }
 
     QString str() const;
-    bool isEmpty() const { return _libFile.isEmpty(); }
+    bool isEmpty() const { return _library.isEmpty(); }
 
 private:
-    QString _title, _libFile;
+    QString _title, _library;
 
     friend class CK;
 };

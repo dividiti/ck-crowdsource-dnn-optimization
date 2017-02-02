@@ -23,8 +23,8 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     _buttonStop = new QPushButton(tr("Stop"));
     _buttonStop->setObjectName("buttonStop");
     _buttonStop->setVisible(false);
-    connect(_buttonStart, SIGNAL(pressed()), this, SLOT(startExperiment()));
-    connect(_buttonStop, SIGNAL(pressed()), this, SLOT(stopExperiment()));
+    connect(_buttonStart, SIGNAL(clicked(bool)), this, SLOT(startExperiment()));
+    connect(_buttonStop, SIGNAL(clicked(bool)), this, SLOT(stopExperiment()));
 
     auto buttonPublish = new QPushButton;
     buttonPublish->setToolTip(tr("Publish"));

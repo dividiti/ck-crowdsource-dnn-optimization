@@ -11,7 +11,6 @@
 #include <QDesktopWidget>
 #include <QDir>
 #include <QMessageBox>
-#include <QStatusBar>
 
 #define EXPERIMENT_COUNT 1
 
@@ -71,7 +70,7 @@ void MainWindow::initialize(const AppRunParams &runParams)
 
     for (auto e: _experiments)
     {
-        //e->context._engines._items = engines;
+        e->context._engines._items = engines;
         e->context._models._items = models;
         e->context._images._items = images;
         e->context.loadFromConfig();
@@ -85,6 +84,5 @@ void MainWindow::initialize(const AppRunParams &runParams)
 
 void MainWindow::onError(const QString& msg)
 {
-    statusBar()->clearMessage();
     QMessageBox::critical(this, windowTitle(), msg);
 }

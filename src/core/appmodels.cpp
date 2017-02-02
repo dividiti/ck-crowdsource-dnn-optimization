@@ -17,10 +17,10 @@ void ExperimentResult::reset()
     memoryPerImage = 0;
 }
 
-void ExperimentResult::accumulate(const ExperimentProbe& p)
+void ExperimentResult::accumulate(const ExperimentProbe* p)
 {
     imagesCount++;
-    totalTime += p.time;
+    totalTime += p->time;
     timePerImage = totalTime/imagesCount;
     imagesPerSecond = (timePerImage > 0)? 1/timePerImage: 0;
 }
@@ -41,5 +41,5 @@ void ImagesDataset::buildCorrectnessMap()
 
 QString DnnEngine::str() const
 {
-    return QString("%1: %2").arg(_title, _libFile);
+    return QString("%1: %2").arg(_title, _library);
 }

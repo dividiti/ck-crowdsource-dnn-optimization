@@ -45,6 +45,7 @@ bool ListContainer<TItem>::selectCurrentViaDialog()
 }
 
 template class ListContainer<CkEntry>;
+template class ListContainer<DnnEngine>;
 template class ListContainer<ImagesDataset>;
 
 //-----------------------------------------------------------------------------
@@ -80,8 +81,9 @@ void ExperimentContext::loadFromConfig()
     setBatchSize(AppConfig::batchSize(_experimentIndex));
 }
 
-void ExperimentContext::recognitionFinished(const ExperimentProbe &p)
+void ExperimentContext::recognitionFinished(const ExperimentProbe *p)
 {
     _result.accumulate(p);
     emit experimentResultReady();
 }
+

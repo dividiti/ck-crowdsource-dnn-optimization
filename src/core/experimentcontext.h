@@ -38,7 +38,7 @@ class ExperimentContext : public QObject
 public:
     int experimentIndex() const { return _experimentIndex; }
 
-    ListContainer<CkEntry>& engines() { return _engines; }
+    ListContainer<DnnEngine>& engines() { return _engines; }
     ListContainer<CkEntry>& models() { return _models; }
     ListContainer<ImagesDataset>& images() { return _images; }
 
@@ -61,14 +61,15 @@ signals:
     void experimentResultReady();
 
 public slots:
-    void recognitionFinished(const ExperimentProbe& p);
+    void recognitionFinished(const ExperimentProbe* p);
 
 private:
     int _experimentIndex = -1;
     bool _isExperimentStarted = false;
     int _batchSize = 2;
     ExperimentResult _result;
-    ListContainer<CkEntry> _engines, _models;
+    ListContainer<CkEntry> _models;
+    ListContainer<DnnEngine> _engines;
     ListContainer<ImagesDataset> _images;
 
     friend class MainWindow;

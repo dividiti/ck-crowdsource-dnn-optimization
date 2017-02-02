@@ -246,7 +246,7 @@ DnnEngine CK::loadEngine(const CkEntry& env)
 
     DnnEngine engine;
     engine._title = packageName;
-    engine._libFile = packageLib;
+    engine._library = packageLib;
     qDebug() << "OK. Engine loaded:" << env.uid << engine.title();
     return engine;
 }

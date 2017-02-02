@@ -1,3 +1,4 @@
+#include "appevents.h"
 #include "recognizer.h"
 
 #include <QDebug>
@@ -9,7 +10,7 @@ Recognizer::Recognizer(const QString& proxyLib)
     _lib = new QLibrary(proxyLib);
     if (!_lib->load())
     {
-        qCritical() << "Unable to load libray" << _lib->errorString();
+        AppEvents::error(_lib->errorString());
         return;
     }
     dnnPrepare = (DnnPrepare)resolve("ck_dnn_proxy__prepare");
@@ -36,7 +37,7 @@ QFunctionPointer Recognizer::resolve(const char* symbol)
 {
     auto func = _lib->resolve(symbol);
     if (!func)
-        qCritical() << "FAILED: Unable to resolve" << symbol << _lib->errorString();
+        AppEvents::error(_lib->errorString());
     return func;
 }
 
@@ -51,9 +52,8 @@ void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
     dnnPrepare(&p);
 }
 
-ExperimentProbe Recognizer::recognize(const QString& imageFile)
+void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
 {
-    ExperimentProbe probe;
     ck_dnn_proxy__recognition_param param;
     param.image_file = imageFile.toUtf8().data();
     ck_dnn_proxy__recognition_result result;
@@ -61,12 +61,11 @@ ExperimentProbe Recognizer::recognize(const QString& imageFile)
     probe.image = imageFile;
     probe.time = result.time;
     probe.memory = result.memory;
+    if (probe.predictions.capacity() < PREDICTIONS_COUNT)
+        probe.predictions.resize(PREDICTIONS_COUNT);
     for (int i = 0; i < PREDICTIONS_COUNT; i++)
     {
-        PredictionResult p;
-        p.probability = result.predictions[i].accuracy;
-        p.id = QString::number(result.predictions[i].index);
-        probe.predictions << p;
+        probe.predictions[i].accuracy = result.predictions[i].accuracy;
+        probe.predictions[i].index  = QString::number(result.predictions[i].index);
     }
-    return probe;
 }

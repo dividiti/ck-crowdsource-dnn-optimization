@@ -54,9 +54,11 @@ public:
     void prepare(const QString &modelFile, const QString &weightsFile,
                  const QString &meanFile, const QString &labelFile);
 
-    ExperimentProbe recognize(const QString& imageFile);
+    void recognize(const QString& imageFile, ExperimentProbe& probe);
 
     bool ready() const;
+
+    int predictionsCount() const { return PREDICTIONS_COUNT; }
 
 private:
     QLibrary* _lib = nullptr;

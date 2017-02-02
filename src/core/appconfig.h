@@ -30,9 +30,6 @@ public:
     static QString ckExeName();
     static QStringList ckArgs();
 
-    static bool isParallel();
-    static bool logRecognitionOutput();
-
     static QString styleSheetFileName();
 private:
     static QString configFileName();

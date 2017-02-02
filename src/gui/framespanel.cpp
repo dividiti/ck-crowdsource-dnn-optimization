@@ -3,7 +3,7 @@
 #include "experimentcontext.h"
 #include "framespanel.h"
 #include "framewidget.h"
-#include "scenariorunner.h"
+#include "recognizer.h"
 
 #include <QApplication>
 #include <QBoxLayout>
@@ -13,7 +13,6 @@
 
 ImagesBank::ImagesBank(const QString& imagesDir)
 {
-    //auto imagesDir = AppConfig::imagesDir();
     qDebug() << "Images directory:" << imagesDir;
 
     auto imagesFilter = AppConfig::imagesFilter();
@@ -28,135 +27,38 @@ ImagesBank::ImagesBank(const QString& imagesDir)
 
 //-----------------------------------------------------------------------------
 
-QString OutputParser::parse(ExperimentProbe &probe, const QString& text)
-{
-    static QLatin1String predictionMarker("0."); // 0.9835 - "n03793489 mouse, computer mouse"
-    static QLatin1String timeMarker("\"execution_time\":"); // "execution_time": 0.244448,
-    static QLatin1String errorMarker("CK error:");
-
-    for (const QStringRef& line: text.splitRef('\n', QString::SkipEmptyParts))
-    {
-        QStringRef s = line.trimmed();
-        if (s.startsWith(predictionMarker))
-            parsePredictionLine(probe, s);
-        else if (s.startsWith(timeMarker))
-            parseTimeLine(probe, s);
-        else if (s.startsWith(errorMarker))
-            return s.toString();
-    }
-
-    return QString();
-}
-
-void OutputParser::parsePredictionLine(ExperimentProbe &probe, const QStringRef line)
-{
-    // 0.9835 - "n03793489 mouse, computer mouse"
-    auto probAndDescr = line.split('-');
-    if (probAndDescr.size() < 2) return;
-    auto prob =  probAndDescr.at(0).trimmed();
-    auto descr = probAndDescr.at(1).trimmed();
-
-    // trim quotes
-    descr = descr.left(descr.length()-1).right(descr.length()-2);
-    auto spacePos = descr.indexOf(' ');
-    auto id = spacePos > 0? descr.left(spacePos): QStringRef();
-    descr = descr.right(descr.length()-spacePos-1);
-
-    PredictionResult prediction;
-    prediction.probability = prob.toDouble();
-    prediction.description = descr.toString();
-    prediction.id = id.toString();
-    probe.predictions << prediction;
-}
-
-void OutputParser::parseTimeLine(ExperimentProbe &probe, const QStringRef line)
-{
-    // "execution_time": 0.244448,
-    auto nameAndValue = line.split(":");
-    if (nameAndValue.size() < 2) return;
-    QStringRef value = nameAndValue.at(1).trimmed();
-    probe.time = value.left(value.size()-1).toDouble();
-}
-
-//-----------------------------------------------------------------------------
-
-BatchItem::BatchItem(int index, int imageOffset, const ScenarioRunParams& params, ImagesBank *images) : QObject(0)
+BatchItem::BatchItem(int index, int imageOffset, Recognizer *recognizer, ImagesBank *images) : QThread(0)
 {
     _index = index;
     _images = images;
     _imageIndex = imageOffset;
+    _recognizer = recognizer;
     _frame = new FrameWidget;
-    _runner = new ScenarioRunner(params, _index);
-    connect(_runner, &ScenarioRunner::scenarioFinished, this, &BatchItem::scenarioFinished);
+    _probe.predictions.resize(_recognizer->predictionsCount());
 }
 
 BatchItem::~BatchItem()
 {
     delete _frame;
-    delete _runner;
 }
 
 void BatchItem::run()
 {
-    _isStopped = false;
-    _stopFlag = false;
-    runInternal();
-}
-
-void BatchItem::runInternal()
-{
-    _runner->run(_images->imageFile(_imageIndex));
-}
-
-void BatchItem::scenarioFinished(const QString &error)
-{
-    if (error.isEmpty())
+    while (!isInterruptionRequested())
     {
         auto imageFile = _images->imageFile(_imageIndex);
+        _recognizer->recognize(imageFile, _probe);
+        msleep(qrand()%500 + 500);
         _frame->loadImage(imageFile);
-        ExperimentProbe p;
-        auto err = OutputParser::parse(p, _runner->getStdout());
-        if (err.isEmpty())
-        {
-            _frame->showPredictions(p.predictions);
-            p.image = imageFile;
-            emit finished(p);
-        }
-        else
-        {
-            _stopFlag = true;
-            AppEvents::error(QString("Frame %1:\n%2").arg(_index).arg(err));
-        }
+        _frame->showPredictions(_probe.predictions);
+        emit finished(&_probe);
+
+        _imageIndex++;
+        if (_imageIndex == _images->size())
+            _imageIndex = 0;
     }
-    else
-    {
-        _stopFlag = true;
-        AppEvents::error(QString("Frame %1:\n%2").arg(_index).arg(error));
-    }
-
-    if (_stopFlag)
-    {
-        stopInternal();
-        return;
-    }
-
-    _imageIndex++;
-    if (_imageIndex == _images->size())
-        _imageIndex = 0;
-
-    if (nextBatch)
-        QTimer::singleShot(100, nextBatch, &BatchItem::runInternal);
-    else runInternal();
-}
-
-void BatchItem::stopInternal()
-{
     qDebug() << "Batch item stopped" << _index;
-    _isStopped = true;
     emit stopped();
-
-    if (nextBatch && !nextBatch->_isStopped)
-        QTimer::singleShot(10, nextBatch, &BatchItem::stopInternal);
 }
 
 //-----------------------------------------------------------------------------
@@ -164,9 +66,6 @@ void BatchItem::stopInternal()
 FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
     setObjectName("framesPanel");
-
-    _runParallel = AppConfig::isParallel();
-    qDebug() << "Run in parallel:" << _runParallel;
 
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
@@ -184,6 +83,7 @@ FramesPanel::~FramesPanel()
 {
     clearBatch();
     if (_images) delete _images;
+    if (_recognizer) delete _recognizer;
 }
 
 void FramesPanel::experimentStarted()
@@ -203,26 +103,34 @@ void FramesPanel::experimentStarted()
     }
 
     auto engine = _context->engines().current();
-    auto model = _context->models().current();
-    qDebug() << "Start experiment for" << engine.title() << "on" << model.title();
+    //auto model = _context->models().current();
+    qDebug() << "Start experiment for" << engine.title();// << "on" << model.title();
 
-    ScenarioRunParams params(engine, model);
+
+    if (_recognizer) delete _recognizer;
+    _recognizer = new Recognizer(engine.library());
+    if (!_recognizer->ready())
+    {
+        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+        return;
+    }
+
+    // TODO: prepare recognizer
 
     clearBatch();
-    prepareBatch(params);
+    prepareBatch();
 
     qDebug() << "Start batch processing";
-    if (_runParallel)
-        for (auto item: _batchItems)
-            item->run();
-    else
-        _batchItems.at(0)->run();
+    _experimentFinished = false;
+    for (auto item: _batchItems)
+        item->start();
 }
 
 void FramesPanel::experimentStopping()
 {
     qDebug() << "Stopping batch processing";
-    for (auto item: _batchItems) item->stop();
+    for (auto item: _batchItems)
+        item->requestInterruption();
 }
 
 void FramesPanel::clearBatch()
@@ -232,23 +140,17 @@ void FramesPanel::clearBatch()
     _batchItems.clear();
 }
 
-void FramesPanel::prepareBatch(const ScenarioRunParams& params)
+void FramesPanel::prepareBatch()
 {
     qDebug() << "Prepare batch items";
     for (int i = 0; i < _context->batchSize(); i++)
     {
         int offset = qRound(_images->size()/double(_context->batchSize())*i);
-        auto item = new BatchItem(i, offset, params, _images);
+        auto item = new BatchItem(i, offset, _recognizer, _images);
         connect(item, &BatchItem::stopped, this, &FramesPanel::batchStopped);
         connect(item, &BatchItem::finished, _context, &ExperimentContext::recognitionFinished);
         _batchItems.append(item);
         layout()->addWidget(item->frame());
-    }
-    if (!_runParallel)
-    {
-        for (int i = 0; i < _context->batchSize()-1; i++)
-            _batchItems.at(i)->nextBatch = _batchItems.at(i+1);
-        _batchItems.at(_context->batchSize()-1)->nextBatch = _batchItems.at(0);
     }
 }
 
@@ -256,7 +158,11 @@ bool FramesPanel::prepareImages()
 {
     qDebug() << "Prepare images";
     if (!_images)
-        _images = new ImagesBank(_context->images().current().imagesPath());
+    {
+        auto imagesDir = AppConfig::imagesDir();
+        //auto imagesDir = _context->images().current().imagesPath();
+        _images = new ImagesBank(imagesDir);
+    }
     if (_images->size() < 1)
     {
         AppEvents::error(tr("No images for processing"));
@@ -268,15 +174,16 @@ bool FramesPanel::prepareImages()
 bool FramesPanel::allItemsStopped()
 {
     for (auto item: _batchItems)
-        if (!item->isStopped())
+        if (!item->isFinished())
             return false;
     return true;
 }
 
 void FramesPanel::batchStopped()
 {
-    if (allItemsStopped())
+    if (!_experimentFinished && allItemsStopped())
     {
+        _experimentFinished = true;
         qDebug() << "Batch processing finished";
         emit _context->experimentFinished();
     }
@@ -287,11 +194,11 @@ QString FramesPanel::canStart()
     if (!_context->engines().hasCurrent())
         return tr("No engine selected");
 
-    if (!_context->models().hasCurrent())
-        return tr("No scenario selected");
+//    if (!_context->models().hasCurrent())
+//        return tr("No scenario selected");
 
-    if (!_context->images().hasCurrent())
-        return tr("No image source selected");
+//    if (!_context->images().hasCurrent())
+//        return tr("No image source selected");
 
     return QString();
 }
