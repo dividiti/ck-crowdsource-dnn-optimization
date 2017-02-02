@@ -1,6 +1,7 @@
 #include "appevents.h"
 #include "appconfig.h"
 #include "ck.h"
+#include "ckjson.h"
 #include "utils.h"
 
 #include <QFile>
@@ -9,59 +10,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-
-class CkEnvMeta
-{
-public:
-    CkEnvMeta(const QString& uid)
-    {
-        auto file = Utils::makePath({ AppConfig::ckPath(), "local", "env", uid, ".cm", "meta.json" });
-        auto text = Utils::loadTtextFromFile(file);
-        auto doc = QJsonDocument::fromJson(text);
-        _json = doc.object();
-        if (_json.isEmpty())
-        {
-            qWarning() << "Invalid meta file" << file;
-            return;
-        }
-        _ok = true;
-    }
-
-    QString envVar(const QString& name)
-    {
-        static QString keyEnv("env");
-
-        if (!_json.contains(keyEnv))
-        {
-            qWarning() << QString("Meta does not contain key '%1'").arg(keyEnv);
-            return QString();
-        }
-        auto env = _json[keyEnv].toObject();
-        if (!env.contains(name))
-        {
-            qWarning() << QString("Meta key '%1' does not contain key '%2'").arg(keyEnv).arg(name);
-            return QString();
-        }
-        return env[name].toString();
-    }
-
-    QStringList tags()
-    {
-        auto json = _json["tags"].toArray();
-        QStringList tags;
-        for (auto it = json.constBegin(); it != json.constEnd(); it++)
-            tags << (*it).toString();
-        return tags;
-    }
-
-    bool ok() const { return _ok; }
-
-private:
-    QJsonObject _json;
-    bool _ok = false;
-};
-
-//-----------------------------------------------------------------------------
 
 CK::CK()
 {
@@ -81,16 +29,20 @@ CK::CK()
     qDebug() << "CK default args:" << _ck.arguments().join(" ");
 }
 
-QList<CkEntry> CK::getCafeeLibByUidOrAll(const QString& uid)
+QList<DnnEngine> CK::getEnginesByUidOrAll(const QString& uid)
 {
     if (uid.isEmpty())
-        return queryCaffeLibs();
+        return queryEngines();
 
     auto env = queryEnvByUid(uid);
     if (env.isEmpty())
-        return queryCaffeLibs();
+        return queryEngines();
 
-    return QList<CkEntry> { env };
+    auto engine = loadEngine(env);
+    if (engine.isEmpty())
+        return queryEngines();
+
+    return QList<DnnEngine> { engine };
 }
 
 QList<CkEntry> CK::getCafeeModelByUidOrAll(const QString& uid)
@@ -121,9 +73,17 @@ QList<ImagesDataset> CK::getCafeeImagesByUidOrAll(const QString& uid)
     return QList<ImagesDataset> { images };
 }
 
-QList<CkEntry> CK::queryCaffeLibs()
+QList<DnnEngine> CK::queryEngines()
 {
-    return queryEnvsByTags("lib,caffe");
+    QList<DnnEngine> engines;
+    auto envs = queryEnvsByTags("lib,dnn-proxy");
+    for (auto env: envs)
+    {
+        auto engine = loadEngine(env);
+        if (!engine.isEmpty())
+            engines << engine;
+    }
+    return engines;
 }
 
 QList<CkEntry> CK::queryCaffeModels()
@@ -147,7 +107,6 @@ QList<ImagesDataset> CK::queryCaffeImages()
 QList<CkEntry> CK::queryEnvsByTags(const QString& tags)
 {
     auto args = QStringList{ "search", "env", "--tags="+tags };
-    qDebug() << "Run command:" << _ck.program() + ' ' +  args.join(" ");
     auto results = ck(args);
     if (results.isEmpty())
     {
@@ -188,6 +147,8 @@ CkEntry CK::queryEnvByUid(const QString& uid)
 
 QStringList CK::ck(const QStringList& args)
 {
+    static QString errorMarker("CK error:");
+
 #ifdef Q_OS_WIN32
     QStringList fullArgs = _args;
     fullArgs.append(args);
@@ -195,17 +156,28 @@ QStringList CK::ck(const QStringList& args)
 #else
     _ck.setArguments(args);
 #endif
+    qDebug() << "Run CK command:" << _ck.program() + ' ' +  _ck.arguments().join(" ");
     _ck.start();
     _ck.waitForFinished();
     auto error = _ck.errorString();
     auto errors = QString::fromLatin1(_ck.readAllStandardError());
     auto output = QString::fromLatin1(_ck.readAllStandardOutput());
+//    qDebug() << "STDERR: " + errors;
+//    qDebug() << "STDOUT: " + output;
     if (output.isEmpty() && (_ck.error() != QProcess::UnknownError || !errors.isEmpty()))
     {
         AppEvents::error(QString("Error running program %1/%2: %3\n%4")
             .arg(_ck.workingDirectory()).arg(_ck.program()).arg(error).arg(errors));
+        return QStringList();
     }
-    return output.split("\n", QString::SkipEmptyParts);
+    auto lines = output.split("\n", QString::SkipEmptyParts);
+    for (const QString& line: lines)
+        if (line.startsWith(errorMarker))
+        {
+            AppEvents::error(output);
+            return QStringList();
+        }
+    return lines;
 }
 
 ImagesDataset CK::loadDataset(const CkEntry &env)
@@ -243,6 +215,53 @@ ImagesDataset CK::loadDataset(const CkEntry &env)
     ds._valFile = valFile;
     ds._wordsFile = wordsFile;
     ds._imagesPath = imagesPath;
-    qDebug() << "OK. Dataset loaded" << env.str();
+    qDebug() << "OK. Dataset loaded:" << env.str();
     return ds;
+}
+
+DnnEngine CK::loadEngine(const CkEntry& env)
+{
+    qDebug() << "Loading engine info for " << env.str();
+    auto meta = CkEnvMeta(env.uid);
+    if (!meta.ok()) return DnnEngine();
+
+    auto packageUoa = meta.packageUoa();
+    if (packageUoa.isEmpty()) return DnnEngine();
+
+    auto packagePath = findPackage(packageUoa);
+    if (packagePath.isEmpty()) return DnnEngine();
+
+    auto packageInfo = CkInfo(packagePath);
+    if (!packageInfo.ok()) return DnnEngine();
+
+    auto packageName = packageInfo.dataName();
+    if (packageName.isEmpty()) return DnnEngine();
+    qDebug() << "Engine name: " + packageName;
+
+    auto libPath = meta.valueStr({"customize", "path_lib"});
+    auto libFile = meta.valueStr({"customize", "dynamic_lib"});
+    if (libPath.isEmpty() || libFile.isEmpty()) return DnnEngine();
+    auto packageLib = libPath + QDir::separator() + libFile;
+    qDebug() << "Engine lib: " + packageLib;
+
+    DnnEngine engine;
+    engine._title = packageName;
+    engine._libFile = packageLib;
+    qDebug() << "OK. Engine loaded:" << env.uid << engine.title();
+    return engine;
+}
+
+QString CK::findPackage(const QString& uoa)
+{
+    auto paths = ck({ "find", "package:" + uoa });
+    if (paths.isEmpty())
+    {
+        qDebug() << "Packages not found";
+        return QString();
+    }
+    for (auto path: paths)
+        qDebug() << path;
+    if (paths.size() > 1)
+        qWarning() << "Several packages found, take first.";
+    return paths.first();
 }

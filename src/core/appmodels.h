@@ -71,7 +71,8 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class ImagesDataset {
+class ImagesDataset
+{
 public:
     QString title() const { return _title; }
     QString imagesPath() const { return _imagesPath; }
@@ -87,6 +88,22 @@ private:
 
     QString _valFile, _wordsFile;
     bool _hasCorrectnessMap = false;
+
+    friend class CK;
+};
+
+//-----------------------------------------------------------------------------
+
+class DnnEngine
+{
+public:
+    QString title() const { return _title; }
+
+    QString str() const;
+    bool isEmpty() const { return _libFile.isEmpty(); }
+
+private:
+    QString _title, _libFile;
 
     friend class CK;
 };

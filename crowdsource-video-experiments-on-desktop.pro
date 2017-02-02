@@ -45,7 +45,8 @@ SOURCES += \
     src/core/scenariorunner.cpp \
     src/core/ck.cpp \
     src/gui/stylesheeteditor.cpp \
-    src/core/recognizer.cpp
+    src/core/recognizer.cpp \
+    src/core/ckjson.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -66,7 +67,8 @@ HEADERS += \
     src/core/scenariorunner.h \
     src/core/ck.h \
     src/gui/stylesheeteditor.h \
-    src/core/recognizer.h
+    src/core/recognizer.h \
+    src/core/ckjson.h
 
 RESOURCES += \
     src/resources.qrc

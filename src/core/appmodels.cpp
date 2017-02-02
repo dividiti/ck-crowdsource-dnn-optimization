@@ -36,3 +36,10 @@ void ImagesDataset::buildCorrectnessMap()
 {
     // TODO
 }
+
+//-----------------------------------------------------------------------------
+
+QString DnnEngine::str() const
+{
+    return QString("%1: %2").arg(_title, _libFile);
+}

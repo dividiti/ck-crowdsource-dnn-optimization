@@ -20,8 +20,8 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     QCommandLineOption option_caffeModels("1", "Enumerate caffe models.");
     cmdLine.addOption(option_caffeModels);
 
-    QCommandLineOption option_caffeLibs("2", "Enumerate caffe libs.");
-    cmdLine.addOption(option_caffeLibs);
+    QCommandLineOption option_engines("2", "Enumerate caffe libs.");
+    cmdLine.addOption(option_engines);
 
     QCommandLineOption option_imageSources("3", "Enumerate image datasets.");
     cmdLine.addOption(option_imageSources);
@@ -56,9 +56,9 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
         return CommandFinished;
     }
 
-    if (cmdLine.isSet(option_caffeLibs))
+    if (cmdLine.isSet(option_engines))
     {
-        command_caffeLibs();
+        command_engines();
         return CommandFinished;
     }
 
@@ -98,9 +98,9 @@ QTextStream& ShellCommands::cout()
     return s;
 }
 
-void ShellCommands::command_caffeLibs()
+void ShellCommands::command_engines()
 {
-    for (auto lib: CK().queryCaffeLibs())
+    for (auto lib: CK().queryEngines())
         cout() << lib.str() << endl;
 }
 
@@ -118,14 +118,19 @@ void ShellCommands::command_imageSources()
 
 void ShellCommands::command_recognize()
 {
-    QString proxy("/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/classification");
+    QString proxy("/home/kolyan/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
     QString model("/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/tmp-05LaUH.prototxt");
     QString weights("/home/nikolay/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
     QString mean("/home/nikolay/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
     QString labels("/home/nikolay/CK/ck-caffe/program/caffe-classification/synset_words.txt");
     QString image("/home/nikolay/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg");
-    Recognizer r(proxy, model, weights, mean, labels);
-    auto predictions = r.recognize(image);
-    for (auto p: predictions)
+    Recognizer r(proxy);
+    if (!r.ready()) return;
+    r.prepare(model, weights, mean, labels);
+    auto probe = r.recognize(image);
+    cout() << "time: " << QString::number(probe.time) << endl;
+    cout() << "memory: " << QString::number(probe.memory) << endl;
+    for (auto p: probe.predictions)
         cout() << QString("%1 - %3 - %2").arg(p.probability).arg(p.description).arg(p.id) << endl;
 }
+

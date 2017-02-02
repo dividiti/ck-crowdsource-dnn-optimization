@@ -11,11 +11,11 @@ class CK
 public:
     CK();
 
-    QList<CkEntry> getCafeeLibByUidOrAll(const QString& uid);
+    QList<DnnEngine> getEnginesByUidOrAll(const QString& uid);
     QList<CkEntry> getCafeeModelByUidOrAll(const QString& uid);
     QList<ImagesDataset> getCafeeImagesByUidOrAll(const QString& uid);
 
-    QList<CkEntry> queryCaffeLibs();
+    QList<DnnEngine> queryEngines();
     QList<CkEntry> queryCaffeModels();
     QList<ImagesDataset> queryCaffeImages();
     CkEntry queryEnvByUid(const QString& uid);
@@ -28,6 +28,8 @@ private:
     QStringList ck(const QStringList &args);
     QList<CkEntry> queryEnvsByTags(const QString& tags);
     ImagesDataset loadDataset(const CkEntry& env);
+    DnnEngine loadEngine(const CkEntry& env);
+    QString findPackage(const QString& uoa);
 };
 
 #endif // CK_H
