@@ -38,7 +38,7 @@ class PredictionResult
 {
 public:
     double accuracy = 0;
-    QString description;
+    QString labels;
     QString index;
 };
 

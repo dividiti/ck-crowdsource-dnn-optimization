@@ -118,12 +118,12 @@ void ShellCommands::command_imageSources()
 
 void ShellCommands::command_recognize()
 {
-    QString lib("/home/nikolay/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
-    QString model("/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/tmp-05LaUH.prototxt");
-    QString weights("/home/nikolay/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
-    QString mean("/home/nikolay/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
-    QString labels("/home/nikolay/CK/ck-caffe/program/caffe-classification/synset_words.txt");
-    QString image("/home/nikolay/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg");
+    QString lib("/home/kolyan/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
+    QString model("/home/kolyan/CK/ck-caffe/program/caffe-classification/tmp/tmp-BVwvo7.prototxt");
+    QString weights("/home/kolyan/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
+    QString mean("/home/kolyan/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
+    QString labels("/home/kolyan/CK/ck-caffe/program/caffe-classification/synset_words.txt");
+    QString image("/home/kolyan/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg");
     Recognizer r(lib);
     if (!r.ready()) return;
     r.prepare(model, weights, mean, labels);
@@ -132,6 +132,6 @@ void ShellCommands::command_recognize()
     cout() << "time: " << QString::number(probe.time) << endl;
     cout() << "memory: " << QString::number(probe.memory) << endl;
     for (auto p: probe.predictions)
-        cout() << QString("%1 - %3 - %2").arg(p.accuracy).arg(p.description).arg(p.index) << endl;
+        cout() << QString("%1 - %3 - %2").arg(p.accuracy).arg(p.labels).arg(p.index) << endl;
 }
 

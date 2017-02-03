@@ -2,6 +2,7 @@
 #include "recognizer.h"
 
 #include <QDebug>
+#include <QFile>
 #include <QLibrary>
 
 Recognizer::Recognizer(const QString& proxyLib)
@@ -44,31 +45,40 @@ QFunctionPointer Recognizer::resolve(const char* symbol)
     return func;
 }
 
-void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
-                         const QString &meanFile, const QString &labelFile)
+char* makeLocalStr(const QString& s)
 {
-    const char* model = "/home/nikolay/CK/ck-caffe/program/caffe-classification/tmp/tmp-9nNsmI.prototxt";
-    const char* trained = "/home/nikolay/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel";
-    const char *mean = "/home/nikolay/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto";
-    const char* labels = "/home/nikolay/CK/ck-caffe/program/caffe-classification/synset_words.txt";
+    auto bytes = s.toUtf8();
+    char* data = new char[bytes.length()];
+    memcpy(data, bytes.data(), bytes.length());
+    return data;
+}
+
+void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
+                         const QString &meanFile, const QString &labelsFile)
+{
     ck_dnn_proxy__init_param p;
-    p.model_file = model;//modelFile.toUtf8().data();
-    p.trained_file = trained;//weightsFile.toUtf8().data();
-    p.mean_file = mean;//meanFile.toUtf8().data();
-    p.label_file = labels;//labelFile.toUtf8().data();
+    p.model_file = makeLocalStr(modelFile);
+    p.trained_file = makeLocalStr(weightsFile);
+    p.mean_file = makeLocalStr(meanFile);
     _dnnHandle = dnnPrepare(&p);
+    delete[] p.model_file;
+    delete[] p.trained_file;
+    delete[] p.mean_file;
+
+    loadLabels(labelsFile);
 }
 
 void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
 {
-    const char *image = "/home/nikolay/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg";
+    //const char *image = "/home/kolyan/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg";
 
     ck_dnn_proxy__recognition_param param;
     param.proxy_handle = _dnnHandle;
-    param.image_file = image;//imageFile.toUtf8();
+    param.image_file = makeLocalStr(imageFile);
 
     ck_dnn_proxy__recognition_result result;
     dnnRecognize(&param, &result);
+    delete[] param.image_file;
     probe.image = imageFile;
     probe.time = result.time;
     probe.memory = result.memory;
@@ -77,6 +87,22 @@ void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
     for (int i = 0; i < PREDICTIONS_COUNT; i++)
     {
         probe.predictions[i].accuracy = result.predictions[i].accuracy;
-        probe.predictions[i].description  = QString(result.predictions[i].info.c_str());
+        probe.predictions[i].index = QString(); // TODO separate nXXX from labels
+
+        int index = result.predictions[i].index;
+        if (index >= 0 && index < _labels.size())
+            probe.predictions[i].labels = _labels.at(index);
+    }
+}
+
+void Recognizer::loadLabels(const QString& fileName)
+{
+    QFile inputFile(fileName);
+    if (inputFile.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&inputFile);
+        while (!in.atEnd())
+            _labels << in.readLine();
+       inputFile.close();
     }
 }

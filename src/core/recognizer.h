@@ -14,28 +14,27 @@ QT_END_NAMESPACE
 
 #define PREDICTIONS_COUNT 5
 
+
 struct ck_dnn_proxy__init_param {
     const char *model_file;
     const char *trained_file;
     const char *mean_file;
-    const char *label_file;
 };
 
 struct ck_dnn_proxy__recognition_param {
-        void* proxy_handle;
+    void* proxy_handle;
     const char* image_file;
 };
 
 struct ck_dnn_proxy__recognition_result {
-        int status;
+    int status;
     double time;
     double memory;
     struct {
-                float accuracy;
-                std::string info;
+        float accuracy;
+        int index;
     } predictions[PREDICTIONS_COUNT];
 };
-
 
 typedef void* (*DnnPrepare)(ck_dnn_proxy__init_param*);
 typedef void (*DnnRecognize)(ck_dnn_proxy__recognition_param*,
@@ -51,7 +50,7 @@ public:
     ~Recognizer();
 
     void prepare(const QString &modelFile, const QString &weightsFile,
-                 const QString &meanFile, const QString &labelFile);
+                 const QString &meanFile, const QString &labelsFile);
 
     void recognize(const QString& imageFile, ExperimentProbe& probe);
 
@@ -65,8 +64,10 @@ private:
     DnnRecognize dnnRecognize;
     DnnRelease dnnRelease;
     void* _dnnHandle = nullptr;
+    QStringList _labels;
 
     QFunctionPointer resolve(const char* symbol);
+    void loadLabels(const QString& fileName);
 };
 
 #endif // RECOGNIZER_H
