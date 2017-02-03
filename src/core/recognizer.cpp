@@ -55,7 +55,7 @@ void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
 void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
 {
     ck_dnn_proxy__recognition_param param;
-    param.image_file = imageFile.toUtf8().data();
+    param.image_file = imageFile.toUtf8();
     ck_dnn_proxy__recognition_result result;
     dnnRecognize(&param, &result);
     probe.image = imageFile;

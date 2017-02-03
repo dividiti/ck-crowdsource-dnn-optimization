@@ -5,10 +5,8 @@
 
 #include "appmodels.h"
 
-QT_BEGIN_NAMESPACE
-class QLabel;
-class QPixmap;
-QT_END_NAMESPACE
+class ImageView;
+class PredictionView;
 
 class FrameWidget : public QWidget
 {
@@ -21,10 +19,8 @@ public:
     void showPredictions(const QVector<PredictionResult> &predictions);
 
 private:
-    QLabel *_imageView;
-    QList<class PredictionView*> _predictions;
-
-    QPixmap fitImage(const QPixmap& source);
+    ImageView *_imageView;
+    QList<PredictionView*> _predictions;
 };
 
 #endif // FRAMEWIDGET_H

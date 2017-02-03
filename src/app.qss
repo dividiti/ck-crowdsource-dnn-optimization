@@ -118,6 +118,3 @@ QLabel[qss-prediction-line="4"] {
 QLabel[qss-prediction-line="5"] {
 	color: #505A5E;
 }
-QLabel#frameImage {
-	margin-bottom: 8px;
-}

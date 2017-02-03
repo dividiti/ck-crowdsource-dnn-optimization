@@ -3,13 +3,41 @@
 
 #include <QBoxLayout>
 #include <QDebug>
+#include <QImage>
 #include <QLabel>
 #include <QPainter>
+#include <QPaintEvent>
 #include <QResizeEvent>
 
 #define FRAME_CONTENT_W 160
 #define FRAME_CONTENT_H 147
 #define PREDICTIONS_COUNT 5
+
+class ImageView : public QFrame
+{
+public:
+    void loadImage(const QString& file)
+    {
+        _image.load(file);
+        update();
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        double aspect = _image.width() / double(_image.height());
+        int targetH = event->rect().height();
+        int targetW = targetH * aspect;
+        int fullW = event->rect().width();
+        QPainter p(this);
+        p.drawImage(QRect((fullW - targetW)/2, 0, targetW, targetH), _image, _image.rect());
+    }
+
+private:
+    QImage _image;
+};
+
+//-----------------------------------------------------------------------------
 
 class PredictionView : public QWidget
 {
@@ -53,7 +81,9 @@ FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     setFixedWidth(FRAME_CONTENT_W);
 
-    _imageView = new QLabel;
+    _imageView = new ImageView;
+    _imageView->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    _imageView->setFixedSize(FRAME_CONTENT_W, FRAME_CONTENT_H);
     _imageView->setObjectName("frameImage");
 
     auto layoutInfo = new QVBoxLayout;
@@ -68,7 +98,7 @@ FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
 
     auto layout = new QVBoxLayout;
     layout->setMargin(0);
-    layout->setSpacing(0);
+    layout->setSpacing(4);
     layout->addWidget(_imageView);
     layout->addLayout(layoutInfo);
     layout->addStretch();
@@ -78,19 +108,7 @@ FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
 
 void FrameWidget::loadImage(const QString& path)
 {
-    _imageView->setPixmap(fitImage(QPixmap(path)));
-}
-
-QPixmap FrameWidget::fitImage(const QPixmap& source)
-{
-    int h = FRAME_CONTENT_H;
-    int w = h * source.width() / source.height();
-
-    QPixmap image(FRAME_CONTENT_W, FRAME_CONTENT_H);
-    image.fill(Qt::transparent); // force transparency
-    QPainter painter(&image);
-    painter.drawPixmap((FRAME_CONTENT_W-w)/2, (FRAME_CONTENT_H-h)/2, w, h, source);
-    return image;
+    _imageView->loadImage(path);
 }
 
 void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions)
