@@ -9,6 +9,7 @@
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDir>
+#include <QGridLayout>
 #include <QTimer>
 
 ImagesBank::ImagesBank(const QString& imagesDir)
@@ -46,19 +47,42 @@ void BatchItem::run()
 {
     while (!isInterruptionRequested())
     {
-        auto imageFile = _images->imageFile(_imageIndex);
-        _recognizer->recognize(imageFile, _probe);
-        msleep(qrand()%500 + 500);
-        _frame->loadImage(imageFile);
-        _frame->showPredictions(_probe.predictions);
-        emit finished(&_probe);
-
-        _imageIndex++;
-        if (_imageIndex == _images->size())
-            _imageIndex = 0;
+        runIteration();
     }
     qDebug() << "Batch item stopped" << _index;
     emit stopped();
+}
+
+void BatchItem::runIteration()
+{
+    _imageIndex = qrand() % _images->size();
+
+    auto imageFile = _images->imageFile(_imageIndex);
+    _recognizer->recognize(imageFile, _probe);
+    _frame->loadImage(imageFile);
+    _frame->showPredictions(_probe.predictions);
+    emit finished(&_probe);
+
+//    _imageIndex++;
+//    if (_imageIndex == _images->size())
+//        _imageIndex = 0;
+}
+
+//-----------------------------------------------------------------------------
+
+void BatchSeries::run()
+{
+    while (!isInterruptionRequested())
+    {
+        for (auto batch: _batchItems)
+        {
+            batch->runIteration();
+            if (isInterruptionRequested())
+                break;
+            qApp->processEvents();
+        }
+    }
+    emit finished();
 }
 
 //-----------------------------------------------------------------------------
@@ -73,14 +97,22 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    auto layout = new QHBoxLayout;
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    setLayout(layout);
+    if (!_runInParallel)
+    {
+        _series = new BatchSeries(this);
+        connect(_series, &BatchSeries::finished, _context, &ExperimentContext::experimentFinished);
+    }
+
+    _layout = new QGridLayout;
+    //_layout = new QHBoxLayout;
+    _layout->setSpacing(16);
+    _layout->setMargin(0);
+    setLayout(_layout);
 }
 
 FramesPanel::~FramesPanel()
 {
+    experimentStopping();
     clearBatch();
     if (_images) delete _images;
     if (_recognizer) delete _recognizer;
@@ -114,23 +146,37 @@ void FramesPanel::experimentStarted()
         QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
         return;
     }
+//    QString lib("/home/kolyan/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
+    QString model("/home/kolyan/CK/ck-caffe/program/caffe-classification/tmp/tmp-BVwvo7.prototxt");
+    QString weights("/home/kolyan/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
+    QString mean("/home/kolyan/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
+    QString labels("/home/kolyan/CK/ck-caffe/program/caffe-classification/synset_words.txt");
 
     // TODO: prepare recognizer
+    _recognizer->prepare(model, weights, mean, labels);
 
     clearBatch();
     prepareBatch();
 
     qDebug() << "Start batch processing";
-    _experimentFinished = false;
-    for (auto item: _batchItems)
-        item->start();
+    if (_runInParallel)
+    {
+        _experimentFinished = false;
+        for (auto item: _batchItems)
+            item->start();
+    }
+    else
+        _series->start();
 }
 
 void FramesPanel::experimentStopping()
 {
     qDebug() << "Stopping batch processing";
-    for (auto item: _batchItems)
-        item->requestInterruption();
+    if (_series)
+        _series->requestInterruption();
+    else
+        for (auto item: _batchItems)
+            item->requestInterruption();
 }
 
 void FramesPanel::clearBatch()
@@ -143,15 +189,22 @@ void FramesPanel::clearBatch()
 void FramesPanel::prepareBatch()
 {
     qDebug() << "Prepare batch items";
-    for (int i = 0; i < _context->batchSize(); i++)
+    //int framesCount = _context->batchSize();
+    int framesCount = 8;
+    for (int i = 0; i < framesCount; i++)
     {
-        int offset = qRound(_images->size()/double(_context->batchSize())*i);
+        int offset = qRound(_images->size()/double(framesCount)*i);
         auto item = new BatchItem(i, offset, _recognizer, _images);
         connect(item, &BatchItem::stopped, this, &FramesPanel::batchStopped);
         connect(item, &BatchItem::finished, _context, &ExperimentContext::recognitionFinished);
         _batchItems.append(item);
-        layout()->addWidget(item->frame());
+        int row = (i > framesCount/2-1)? 1: 0;
+        int col = ((i - framesCount/2) < 0)? i: i-framesCount/2;
+        _layout->addWidget(item->frame(), row, col);
+
     }
+    if (_series)
+        _series->setItem(_batchItems);
 }
 
 bool FramesPanel::prepareImages()

@@ -1,9 +1,21 @@
+#include "appconfig.h"
 #include "appevents.h"
 #include "recognizer.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QLibrary>
+
+PredictionLabel::PredictionLabel(const QString& line)
+{
+    int pos = line.indexOf(' ');
+    if (pos > 0)
+        index = line.left(pos);
+    label = line.right(line.length()-pos-1);
+}
+
+//-----------------------------------------------------------------------------
 
 Recognizer::Recognizer(const QString& proxyLib)
 {
@@ -60,18 +72,30 @@ void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
     p.model_file = makeLocalStr(modelFile);
     p.trained_file = makeLocalStr(weightsFile);
     p.mean_file = makeLocalStr(meanFile);
+
+    // TODO: caffe uses glog, but it seems that we can't ask it if it's initialized or not
+    // (https://github.com/baysao/google-glog/issues/113) but second initialization leads to fail
+    static bool nasty_hack_for_if_glog_initialized = false;
+    if (!nasty_hack_for_if_glog_initialized)
+    {
+        p.logs_path = makeLocalStr(AppConfig::logPath());
+        nasty_hack_for_if_glog_initialized = true;
+    }
+    else p.logs_path = nullptr;
+
     _dnnHandle = dnnPrepare(&p);
+    // TODO: process errors
     delete[] p.model_file;
     delete[] p.trained_file;
     delete[] p.mean_file;
+    if (p.logs_path)
+        delete[] p.logs_path;
 
     loadLabels(labelsFile);
 }
 
 void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
 {
-    //const char *image = "/home/kolyan/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg";
-
     ck_dnn_proxy__recognition_param param;
     param.proxy_handle = _dnnHandle;
     param.image_file = makeLocalStr(imageFile);
@@ -79,19 +103,23 @@ void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
     ck_dnn_proxy__recognition_result result;
     dnnRecognize(&param, &result);
     delete[] param.image_file;
+
     probe.image = imageFile;
-    probe.time = result.time;
-    probe.memory = result.memory;
+    probe.time = result.duration;
+    probe.memory = result.memory_usage;
     if (probe.predictions.capacity() < PREDICTIONS_COUNT)
         probe.predictions.resize(PREDICTIONS_COUNT);
     for (int i = 0; i < PREDICTIONS_COUNT; i++)
     {
         probe.predictions[i].accuracy = result.predictions[i].accuracy;
-        probe.predictions[i].index = QString(); // TODO separate nXXX from labels
 
         int index = result.predictions[i].index;
         if (index >= 0 && index < _labels.size())
-            probe.predictions[i].labels = _labels.at(index);
+        {
+            auto label = _labels.at(index);
+            probe.predictions[i].labels = label.label;
+            probe.predictions[i].index = label.index;
+        }
     }
 }
 
@@ -102,7 +130,7 @@ void Recognizer::loadLabels(const QString& fileName)
     {
         QTextStream in(&inputFile);
         while (!in.atEnd())
-            _labels << in.readLine();
+            _labels << PredictionLabel(in.readLine());
        inputFile.close();
     }
 }

@@ -22,12 +22,12 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     _infoEngine = new InfoLabel("CAFFE ENGINE");
     _infoModel = new InfoLabel("CAFFE MODEL");
     _infoImages = new InfoLabel("IMAGE SOURCE");
-    _infoBatchSize = new InfoLabel("FRAMES COUNT");
+//    _infoBatchSize = new InfoLabel("FRAMES COUNT");
 
     _linkSelectEngine = makeLink("Select", "Select another engine", SLOT(selectEngine()));
     _linkSelectModel = makeLink("Select", "Select another scenario", SLOT(selectModel()));
     _linkSelectImages = makeLink("Select", "Select image source", SLOT(selectImages()));
-    _linkSetBatchSize = makeLink("Change", "Change batch size", SLOT(setBatchSize()));
+//    _linkSetBatchSize = makeLink("Change", "Change batch size", SLOT(setBatchSize()));
 
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
     {
@@ -48,12 +48,12 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
             _infoImages,
             Ori::Gui::layoutH({ _linkSelectImages, 0 })
         }),
-        Utils::makeDivider(),
-        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
-        {
-            _infoBatchSize,
-            Ori::Gui::layoutH({ _linkSetBatchSize, 0 })
-        }),
+//        Utils::makeDivider(),
+//        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
+//        {
+//            _infoBatchSize,
+//            Ori::Gui::layoutH({ _linkSetBatchSize, 0 })
+//        }),
         0,
     }));
 }
@@ -119,7 +119,7 @@ void FeaturesPanel::updateExperimentConditions()
         ? _context->images().current().title().replace("(", "\n(")
         : NA);
 
-    _infoBatchSize->setInfo(QString::number(_context->batchSize()));
+//    _infoBatchSize->setInfo(QString::number(_context->batchSize()));
 }
 
 void FeaturesPanel::setBatchSize()
@@ -138,7 +138,7 @@ void FeaturesPanel::enableControls(bool on)
     _linkSelectEngine->setVisible(on);
     _linkSelectModel->setVisible(on);
     _linkSelectImages->setVisible(on);
-    _linkSetBatchSize->setVisible(on);
+//    _linkSetBatchSize->setVisible(on);
 }
 
 void FeaturesPanel::experimentStarted()

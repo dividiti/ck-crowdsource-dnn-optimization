@@ -1,14 +1,14 @@
 #ifndef FRAMEWIDGET_H
 #define FRAMEWIDGET_H
 
-#include <QWidget>
+#include <QFrame>
 
 #include "appmodels.h"
 
 class ImageView;
 class PredictionView;
 
-class FrameWidget : public QWidget
+class FrameWidget : public QFrame
 {
     Q_OBJECT
 

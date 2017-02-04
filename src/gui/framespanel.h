@@ -7,6 +7,10 @@
 
 #include "appmodels.h"
 
+QT_BEGIN_NAMESPACE
+class QGridLayout;
+QT_END_NAMESPACE
+
 class ExperimentContext;
 class ExperimentProbe;
 class FrameWidget;
@@ -36,6 +40,7 @@ public:
     FrameWidget* frame() const { return _frame; }
 
     void run() override;
+    void runIteration();
 
 signals:
     void finished(const ExperimentProbe* probe);
@@ -47,6 +52,26 @@ private:
     FrameWidget* _frame;
     ExperimentProbe _probe;
     int _index, _imageIndex;
+
+};
+
+//-----------------------------------------------------------------------------
+
+class BatchSeries : public QThread
+{
+    Q_OBJECT
+public:
+    BatchSeries(QObject* parent) : QThread(parent) {}
+
+    void run() override;
+
+    void setItem(QList<BatchItem*> items) { _batchItems = items; }
+
+signals:
+    void finished();
+
+private:
+    QList<BatchItem*> _batchItems;
 };
 
 //-----------------------------------------------------------------------------
@@ -70,6 +95,9 @@ private:
     ExperimentContext* _context;
     QList<BatchItem*> _batchItems;
     bool _experimentFinished = false;
+    bool _runInParallel = false;
+    BatchSeries* _series = nullptr;
+    QGridLayout* _layout;
 
     void clearBatch();
     void prepareBatch();

@@ -113,3 +113,13 @@ QStringList AppConfig::ckArgs()
 {
     return config().value("ck_args").toString().split(' ', QString::SkipEmptyParts);
 }
+
+QString AppConfig::logPath()
+{
+    auto defaultPath = qApp->applicationDirPath() + QDir::separator() + "logs";
+    auto path = configValueStr("logs_path", defaultPath);
+    QDir d(path);
+    if (!d.exists())
+        d.mkpath(path);
+    return d.absolutePath();
+}

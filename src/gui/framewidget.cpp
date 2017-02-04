@@ -76,7 +76,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-FrameWidget::FrameWidget(QWidget *parent) : QWidget(parent)
+FrameWidget::FrameWidget(QWidget *parent) : QFrame(parent)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     setFixedWidth(FRAME_CONTENT_W);

@@ -31,6 +31,9 @@ public:
     static QStringList ckArgs();
 
     static QString styleSheetFileName();
+
+    static QString logPath();
+
 private:
     static QString configFileName();
     static QSettings& config();
