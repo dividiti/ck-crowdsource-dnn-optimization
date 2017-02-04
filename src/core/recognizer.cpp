@@ -17,13 +17,70 @@ PredictionLabel::PredictionLabel(const QString& line)
 
 //-----------------------------------------------------------------------------
 
-Recognizer::Recognizer(const QString& proxyLib)
+namespace LibraryPaths
+{
+#ifdef Q_OS_WIN32
+    const QByteArray pathVar("PATH");
+    const char pathSepator = ';';
+#endif
+#ifdef Q_OS_LINUX
+    const QByteArray pathVar("LD_LIBRARY_PATH");
+    const char pathSepator = ':';
+#endif
+#ifdef Q_OS_MAC
+    const QByteArray pathVar("DYLD_FALLBACK_LIBRARY_PATH");
+    const char pathSepator = ':';
+#endif
+
+QByteArray set(const QStringList& paths)
+{
+    auto oldValue = qgetenv(pathVar);
+    auto newValue = paths.join(pathSepator).toUtf8();
+    if (!oldValue.isEmpty())
+        newValue += pathSepator + oldValue;
+    if (!qputenv(pathVar, newValue))
+        qWarning() << "Unable to set env var" << pathVar << "to value" << newValue;
+    qDebug() << pathVar << qgetenv(pathVar);
+    return oldValue;
+}
+
+void set(const QByteArray& paths)
+{
+    qputenv(pathVar, paths);
+}
+
+} // namespace LibraryPaths
+
+//-----------------------------------------------------------------------------
+
+Recognizer::Recognizer(const QString& proxyLib, const QStringList &depLibs)
 {
     qDebug() << "Loading library" << proxyLib;
+
+    // Settings LD_LIBRARY_PATH inside of app does not help to search all dependencies
+    // (although when we set LD_LIBRARY_PATH in console before app is run, it helps).
+    // At least on Ubuntu. So we have to load all deps directly.
+    for (int i = depLibs.size()-1; i >= 0; i--)
+    {
+        auto depLib = depLibs.at(i);
+        if (!QFile(depLib).exists())
+            continue;
+        qDebug() << "Load dep lib" << depLib;
+        auto lib = new QLibrary(depLib);
+        if (!lib->load())
+        {
+            AppEvents::error(lib->errorString());
+            release();
+            return;
+        }
+        _deps << lib;
+    }
+
     _lib = new QLibrary(proxyLib);
     if (!_lib->load())
     {
         AppEvents::error(_lib->errorString());
+        release();
         return;
     }
     dnnPrepare = (DnnPrepare)resolve("ck_dnn_proxy__prepare");
@@ -34,14 +91,34 @@ Recognizer::Recognizer(const QString& proxyLib)
 
 Recognizer::~Recognizer()
 {
+    release();
+}
+
+void Recognizer::release()
+{
+    for (int i = _deps.size()-1; i >= 0; i--)
+    {
+        if (_deps.at(i)->isLoaded())
+            _deps.at(i)->unload();
+        delete _deps.at(i);
+    }
+    _deps.clear();
+
     if (_lib)
     {
         if (_dnnHandle)
+        {
             dnnRelease(_dnnHandle);
+            _dnnHandle = nullptr;
+        }
         if (_lib->isLoaded())
             _lib->unload();
         delete _lib;
+        _lib = nullptr;
     }
+
+    if (!_backupPaths.isEmpty())
+        LibraryPaths::set(_backupPaths);
 }
 
 bool Recognizer::ready() const
@@ -60,8 +137,9 @@ QFunctionPointer Recognizer::resolve(const char* symbol)
 char* makeLocalStr(const QString& s)
 {
     auto bytes = s.toUtf8();
-    char* data = new char[bytes.length()];
+    char* data = new char[bytes.length()+1];
     memcpy(data, bytes.data(), bytes.length());
+    data[bytes.length()] = '\0';
     return data;
 }
 

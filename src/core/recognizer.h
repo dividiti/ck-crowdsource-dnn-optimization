@@ -59,7 +59,7 @@ public:
 class Recognizer
 {
 public:
-    Recognizer(const QString &proxyLib);
+    Recognizer(const QString &proxyLib, const QStringList& depLibs);
     ~Recognizer();
 
     void prepare(const QString &modelFile, const QString &weightsFile,
@@ -73,12 +73,15 @@ public:
 
 private:
     QLibrary* _lib = nullptr;
+    QList<QLibrary*> _deps;
     DnnPrepare dnnPrepare;
     DnnRecognize dnnRecognize;
     DnnRelease dnnRelease;
     void* _dnnHandle = nullptr;
     QList<PredictionLabel> _labels;
+    QByteArray _backupPaths;
 
+    void release();
     QFunctionPointer resolve(const char* symbol);
     void loadLabels(const QString& fileName);
 };

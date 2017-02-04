@@ -88,13 +88,14 @@ private slots:
     void experimentStarted();
     void experimentStopping();
     void batchStopped();
+    void experimentFinished();
 
 private:
     Recognizer* _recognizer = nullptr;
     ImagesBank* _images = nullptr;
     ExperimentContext* _context;
     QList<BatchItem*> _batchItems;
-    bool _experimentFinished = false;
+    bool _experimentFinished = true;
     bool _runInParallel = false;
     BatchSeries* _series = nullptr;
     QGridLayout* _layout;
@@ -102,7 +103,6 @@ private:
     void clearBatch();
     void prepareBatch();
     bool prepareImages();
-    bool allItemsStopped();
     QString canStart();
 };
 

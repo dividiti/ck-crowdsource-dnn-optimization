@@ -90,6 +90,21 @@ QStringList CkEnvMeta::tags() const
     return tags;
 }
 
+QVector<QPair<QString, QString> > CkEnvMeta::setupEnvs() const
+{
+    QVector<QPair<QString, QString> > res;
+    const QString key("setup");
+    if (!_json.contains(key))
+    {
+        errorKeyNotFound(key);
+        return res;
+    }
+    auto setupObj = _json[key].toObject();
+    for (const QString& key: setupObj.keys())
+        res << QPair<QString, QString>(key, setupObj[key].toString());
+    return res;
+}
+
 //-----------------------------------------------------------------------------
 
 CkInfo::CkInfo(const QString& path)

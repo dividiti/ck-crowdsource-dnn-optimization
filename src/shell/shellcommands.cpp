@@ -124,7 +124,7 @@ void ShellCommands::command_recognize()
     QString mean("/home/kolyan/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
     QString labels("/home/kolyan/CK/ck-caffe/program/caffe-classification/synset_words.txt");
     QString image("/home/kolyan/Projects/crowdsource-video-experiments-on-desktop/images/sample1.jpg");
-    Recognizer r(lib);
+    Recognizer r(lib, QStringList());
     if (!r.ready()) return;
     r.prepare(model, weights, mean, labels);
     ExperimentProbe probe;

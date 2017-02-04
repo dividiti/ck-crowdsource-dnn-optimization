@@ -221,7 +221,7 @@ ImagesDataset CK::loadDataset(const CkEntry &env)
 
 DnnEngine CK::loadEngine(const CkEntry& env)
 {
-    qDebug() << "Loading engine info for " << env.str();
+    qDebug() << "Loading engine info for" << env.str();
     auto meta = CkEnvMeta(env.uid);
     if (!meta.ok()) return DnnEngine();
 
@@ -236,17 +236,36 @@ DnnEngine CK::loadEngine(const CkEntry& env)
 
     auto packageName = packageInfo.dataName();
     if (packageName.isEmpty()) return DnnEngine();
-    qDebug() << "Engine name: " + packageName;
+    qDebug() << "Engine name:" << packageName;
 
-    auto libPath = meta.valueStr({"customize", "path_lib"});
-    auto libFile = meta.valueStr({"customize", "dynamic_lib"});
+    auto libPath = meta.pathLib();
+    auto libFile = meta.dynamicLib();
     if (libPath.isEmpty() || libFile.isEmpty()) return DnnEngine();
     auto packageLib = libPath + QDir::separator() + libFile;
-    qDebug() << "Engine lib: " + packageLib;
+    qDebug() << "Engine lib:" << packageLib;
+
+    QStringList pathLibs;
+    auto setupEnvs = meta.setupEnvs();
+    for (auto setupEnv: setupEnvs)
+        if (setupEnv.first.contains("lib"))
+        {
+            auto envUid = setupEnv.second;
+            auto envMeta = CkEnvMeta(envUid);
+            auto libPath = envMeta.pathLib();
+            auto libFile = envMeta.dynamicLib();
+            if (!libPath.isEmpty() && !libFile.isEmpty())
+            {
+                auto lib = libPath + QDir::separator() + libFile;
+                qDebug() << "Lib path:" << lib;
+                pathLibs << lib;
+            }
+            // TODO: we need to go deeper! build full dependecies list
+        }
 
     DnnEngine engine;
     engine._title = packageName;
     engine._library = packageLib;
+    engine._paths = pathLibs;
     qDebug() << "OK. Engine loaded:" << env.uid << engine.title();
     return engine;
 }

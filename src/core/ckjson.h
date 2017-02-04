@@ -2,12 +2,15 @@
 #define CKJSON_H
 
 #include <QJsonObject>
+#include <QStringList>
 
 class CkJson
 {
 public:
+    const QJsonObject& json() const { return _json; }
     bool ok() const { return _ok; }
 
+    QStringList subkeys(const QString& key) const;
     QString valueStr(const QString& key) const;
     QString valueStr(QStringList path) const;
 
@@ -34,6 +37,9 @@ public:
     QString envVar(const QString& name) const;
     QStringList tags() const;
     QString packageUoa() const { return valueStr("package_uoa"); }
+    QString pathLib() const { return valueStr({"customize", "path_lib"}); }
+    QString dynamicLib() const { return valueStr({"customize", "dynamic_lib"}); }
+    QVector<QPair<QString, QString> > setupEnvs() const;
 };
 
 //-----------------------------------------------------------------------------

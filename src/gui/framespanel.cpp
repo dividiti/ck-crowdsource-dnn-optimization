@@ -59,9 +59,16 @@ void BatchItem::runIteration()
 
     auto imageFile = _images->imageFile(_imageIndex);
     _recognizer->recognize(imageFile, _probe);
+    qDebug() << "1";
+
+    // TODO: after "1" after some ten iterations: Segmentation fault
+
     _frame->loadImage(imageFile);
+    qDebug() << "2";
     _frame->showPredictions(_probe.predictions);
+    qDebug() << "3";
     emit finished(&_probe);
+    qDebug() << "4";
 
 //    _imageIndex++;
 //    if (_imageIndex == _images->size())
@@ -79,7 +86,6 @@ void BatchSeries::run()
             batch->runIteration();
             if (isInterruptionRequested())
                 break;
-            qApp->processEvents();
         }
     }
     emit finished();
@@ -89,6 +95,8 @@ void BatchSeries::run()
 
 FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
+    _runInParallel = false; // TODO
+
     setObjectName("framesPanel");
 
     _context = context;
@@ -100,11 +108,10 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
     if (!_runInParallel)
     {
         _series = new BatchSeries(this);
-        connect(_series, &BatchSeries::finished, _context, &ExperimentContext::experimentFinished);
+        connect(_series, &BatchSeries::finished, this, &FramesPanel::experimentFinished);
     }
 
     _layout = new QGridLayout;
-    //_layout = new QHBoxLayout;
     _layout->setSpacing(16);
     _layout->setMargin(0);
     setLayout(_layout);
@@ -112,7 +119,6 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
 
 FramesPanel::~FramesPanel()
 {
-    experimentStopping();
     clearBatch();
     if (_images) delete _images;
     if (_recognizer) delete _recognizer;
@@ -138,35 +144,31 @@ void FramesPanel::experimentStarted()
     //auto model = _context->models().current();
     qDebug() << "Start experiment for" << engine.title();// << "on" << model.title();
 
-
-    if (_recognizer) delete _recognizer;
-    _recognizer = new Recognizer(engine.library());
+    _recognizer = new Recognizer(engine.library(), engine.paths());
     if (!_recognizer->ready())
     {
         QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+        delete _recognizer;
+        _recognizer = nullptr;
         return;
     }
-//    QString lib("/home/kolyan/CK-TOOLS/dnn-proxy-caffe-0.1-gcc-5.4.0-linux-64/lib/libdnnproxy.so");
+    // TODO: prepare recognizer with real data
     QString model("/home/kolyan/CK/ck-caffe/program/caffe-classification/tmp/tmp-BVwvo7.prototxt");
     QString weights("/home/kolyan/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
     QString mean("/home/kolyan/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
     QString labels("/home/kolyan/CK/ck-caffe/program/caffe-classification/synset_words.txt");
-
-    // TODO: prepare recognizer
     _recognizer->prepare(model, weights, mean, labels);
 
     clearBatch();
     prepareBatch();
 
     qDebug() << "Start batch processing";
-    if (_runInParallel)
-    {
-        _experimentFinished = false;
+    _experimentFinished = false;
+    if (_series)
+        _series->start();
+    else
         for (auto item: _batchItems)
             item->start();
-    }
-    else
-        _series->start();
 }
 
 void FramesPanel::experimentStopping()
@@ -224,22 +226,24 @@ bool FramesPanel::prepareImages()
     return true;
 }
 
-bool FramesPanel::allItemsStopped()
-{
-    for (auto item: _batchItems)
-        if (!item->isFinished())
-            return false;
-    return true;
-}
-
 void FramesPanel::batchStopped()
 {
-    if (!_experimentFinished && allItemsStopped())
-    {
-        _experimentFinished = true;
-        qDebug() << "Batch processing finished";
-        emit _context->experimentFinished();
-    }
+    if (_experimentFinished) return;
+
+    for (auto item: _batchItems)
+        if (!item->isFinished())
+            return;
+
+    experimentFinished();
+}
+
+void FramesPanel::experimentFinished()
+{
+    qDebug() << "Batch processing finished";
+    emit _context->experimentFinished();
+    _experimentFinished = true;
+    delete _recognizer;
+    _recognizer = nullptr;
 }
 
 QString FramesPanel::canStart()

@@ -19,7 +19,7 @@ public:
     void loadImage(const QString& file)
     {
         _image.load(file);
-        update();
+        repaint();
     }
 
 protected:
