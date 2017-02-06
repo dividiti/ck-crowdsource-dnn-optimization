@@ -50,7 +50,6 @@ class PredictionLabel
 public:
     PredictionLabel(const QString& line);
 
-    QString index;
     QString label;
 };
 

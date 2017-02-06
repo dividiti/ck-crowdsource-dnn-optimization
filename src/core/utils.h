@@ -11,7 +11,7 @@ QT_END_NAMESPACE
 
 namespace Utils
 {
-QByteArray loadTtextFromFile(const QString& path);
+QByteArray loadTextFromFile(const QString& path);
 bool saveTextToFile(const QString& path, const QByteArray &text);
 QString makePath(const QStringList &parts);
 

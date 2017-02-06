@@ -127,7 +127,7 @@ CkEntry CK::queryEnvByUid(const QString& uid)
         return CkEntry();
     }
     auto info = Utils::makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
-    auto json = QJsonDocument::fromJson(Utils::loadTtextFromFile(info));
+    auto json = QJsonDocument::fromJson(Utils::loadTextFromFile(info));
     auto name = json.object()["data_name"].toString();
     if (name.isEmpty())
         return CkEntry();

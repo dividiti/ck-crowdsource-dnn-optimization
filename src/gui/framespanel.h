@@ -16,18 +16,6 @@ class ExperimentProbe;
 class FrameWidget;
 class Recognizer;
 
-class ImagesBank
-{
-public:
-    ImagesBank(const QString &imagesDir);
-
-    int size() const { return _images.size(); }
-    const QString& imageFile(int index) const { return _images.at(index); }
-
-private:
-    QStringList _images;
-};
-
 //-----------------------------------------------------------------------------
 
 class BatchItem : public QThread
@@ -47,10 +35,10 @@ signals:
     void stopped();
 
 private:
-    ImagesBank* _images;
     Recognizer* _recognizer;
     FrameWidget* _frame;
     ExperimentProbe _probe;
+    ImagesBank* _images;
     int _index;
 };
 
@@ -91,19 +79,19 @@ private slots:
 
 private:
     Recognizer* _recognizer = nullptr;
-    ImagesBank* _images = nullptr;
     ExperimentContext* _context;
     QList<BatchItem*> _batchItems;
     bool _experimentFinished = true;
     bool _runInParallel = false;
     BatchSeries* _series = nullptr;
     QGridLayout* _layout;
+    ImagesBank* _images = nullptr;
 
     void clearBatch();
     void prepareBatch();
-    bool prepareImages();
     QString canStart();
     void abortExperiment(const QString &errorMsg = QString());
+    void releaseExperiment();
 };
 
 #endif // FRAMESPANEL_H

@@ -15,7 +15,7 @@
 namespace Utils
 {
 
-QByteArray loadTtextFromFile(const QString& path)
+QByteArray loadTextFromFile(const QString& path)
 {
     QFile file(path);
     if (!file.exists())

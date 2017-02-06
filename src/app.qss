@@ -33,7 +33,10 @@ QFrame#experimentPanel {
 QFrame#framesPanel {
 	background: #263238;
 	margin: 0px;
-	padding: 6px;
+	padding-left: 16px;
+	padding-right: 16px;
+	padding-top: 24px;
+	padding-bottom: 24px;
 	border-right: 1px solid #1B2226;
 }
 QFrame#featuresPanel {
@@ -84,7 +87,6 @@ QPushButton#buttonPublish {
 	font-size: 10pt;
 	font-weight: 600;
 	font-family: Verdana;
-
 }
 QFrame[qss-role="divider"] {
 	border-top: 1px solid #21292C;

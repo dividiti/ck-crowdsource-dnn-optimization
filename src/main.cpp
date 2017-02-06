@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         break;
     }
 
-    qApp->setStyleSheet(Utils::loadTtextFromFile(AppConfig::styleSheetFileName()));
+    qApp->setStyleSheet(Utils::loadTextFromFile(AppConfig::styleSheetFileName()));
 
     (new MainWindow(runParams))->show();
 

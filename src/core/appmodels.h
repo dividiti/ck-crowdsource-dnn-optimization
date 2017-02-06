@@ -24,7 +24,7 @@ class PredictionResult
 public:
     double accuracy = 0;
     QString labels;
-    QString index;
+    int index;
 };
 
 //-----------------------------------------------------------------------------
@@ -100,19 +100,36 @@ public:
     QString imagesPath() const { return _imagesPath; }
     QString meanFile() const { return _meanFile; }
     QString labelsFile() const { return _labelsFile; }
+    QString valFile() const { return _valFile; }
 
     QString str() const { return _title + ": " + _imagesPath; }
     bool isEmpty() const { return _imagesPath.isEmpty(); }
 
-    bool hasCorrectnessMap() const { return _hasCorrectnessMap; }
-    void buildCorrectnessMap();
-
 private:
     QString _title, _imagesPath;
     QString _valFile, _meanFile, _labelsFile;
-    bool _hasCorrectnessMap = false;
 
     friend class CK;
+};
+
+//-----------------------------------------------------------------------------
+
+class ImageEntry
+{
+public:
+    QString fileName;
+    int correctIndex;
+};
+
+class ImagesBank
+{
+public:
+    ImagesBank(const QString& imagesDir, const QString& valFile);
+
+    const QList<ImageEntry>& images() const { return _images; }
+    bool isEmpty() const { return _images.isEmpty(); }
+private:
+    QList<ImageEntry> _images;
 };
 
 #endif // APPMODELS_H

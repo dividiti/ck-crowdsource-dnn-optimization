@@ -8,7 +8,7 @@
 
 void CkJson::open(const QString& file)
 {
-    auto doc = QJsonDocument::fromJson(Utils::loadTtextFromFile(file));
+    auto doc = QJsonDocument::fromJson(Utils::loadTextFromFile(file));
     _json = doc.object();
     if (_json.isEmpty())
     {

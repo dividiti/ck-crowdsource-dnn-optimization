@@ -12,22 +12,6 @@
 #include <QGridLayout>
 #include <QTimer>
 
-ImagesBank::ImagesBank(const QString& imagesDir)
-{
-    qDebug() << "Images directory:" << imagesDir;
-
-    auto imagesFilter = AppConfig::imagesFilter();
-    qDebug() << "Images filter:" << imagesFilter.join(",");
-
-    QDir dir(imagesDir);
-    for (const QString& entry: dir.entryList(imagesFilter, QDir::Files))
-        _images << imagesDir + QDir::separator() + entry;
-
-    qDebug() << "Images found:" << _images.size();
-}
-
-//-----------------------------------------------------------------------------
-
 BatchItem::BatchItem(int index, Recognizer *recognizer, ImagesBank *images) : QThread(0)
 {
     _index = index;
@@ -56,12 +40,11 @@ void BatchItem::run()
 
 void BatchItem::runIteration()
 {
-    int imageIndex = qrand() % _images->size();
-    auto imageFile = _images->imageFile(imageIndex);
-    _recognizer->recognize(imageFile, _probe);
-    qDebug() << "Iteration" << ++batchesProcessed;
-    _frame->loadImage(imageFile);
-    _frame->showPredictions(_probe.predictions);
+    int imageIndex = qrand() % _images->images().size();
+    auto image = _images->images().at(imageIndex);
+    _recognizer->recognize(image.fileName, _probe);
+    _frame->loadImage(image.fileName, image.correctIndex);
+    _frame->showPredictions(_probe.predictions, image.correctIndex);
     emit finished(&_probe);
 }
 
@@ -97,7 +80,7 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
     }
 
     _layout = new QGridLayout;
-    _layout->setSpacing(16);
+    _layout->setSpacing(24);
     _layout->setMargin(0);
     setLayout(_layout);
 }
@@ -105,8 +88,7 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
 FramesPanel::~FramesPanel()
 {
     clearBatch();
-    if (_images) delete _images;
-    if (_recognizer) delete _recognizer;
+    releaseExperiment();
 }
 
 void FramesPanel::experimentStarted()
@@ -115,12 +97,14 @@ void FramesPanel::experimentStarted()
     if (!res.isEmpty())
         return abortExperiment(res);
 
-    if (!prepareImages())
-        return abortExperiment();
+    const DnnModel& model = _context->models().current();
+    const DnnEngine& engine = _context->engines().current();
+    const ImagesDataset& images = _context->images().current();
 
-    auto engine = _context->engines().current();
-    auto model = _context->models().current();
-    auto images = _context->images().current();
+    _images = new ImagesBank(images.imagesPath(), images.valFile());
+    if (_images->isEmpty())
+        return abortExperiment("No images for processing");
+
     qDebug() << "----------------------------------------------";
     qDebug() << "Start experiment for" << engine.title()
              << "on" << model.title()
@@ -160,12 +144,8 @@ void FramesPanel::abortExperiment(const QString& errorMsg)
 {
     if (!errorMsg.isEmpty())
         AppEvents::error(errorMsg);
-    if (_recognizer)
-    {
-        delete _recognizer;
-        _recognizer = nullptr;
-    }
     QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+    releaseExperiment();
 }
 
 void FramesPanel::clearBatch()
@@ -194,23 +174,6 @@ void FramesPanel::prepareBatch()
         _series->setItems(_batchItems);
 }
 
-bool FramesPanel::prepareImages()
-{
-    qDebug() << "Prepare images";
-    if (!_images)
-    {
-        //auto imagesDir = AppConfig::imagesDir();
-        auto imagesDir = _context->images().current().imagesPath();
-        _images = new ImagesBank(imagesDir);
-    }
-    if (_images->size() < 1)
-    {
-        AppEvents::error(tr("No images for processing"));
-        return false;
-    }
-    return true;
-}
-
 void FramesPanel::batchStopped()
 {
     if (_experimentFinished) return;
@@ -227,8 +190,7 @@ void FramesPanel::experimentFinished()
     qDebug() << "Batch processing finished";
     emit _context->experimentFinished();
     _experimentFinished = true;
-    delete _recognizer;
-    _recognizer = nullptr;
+    releaseExperiment();
 }
 
 QString FramesPanel::canStart()
@@ -243,4 +205,18 @@ QString FramesPanel::canStart()
         return tr("No image source selected");
 
     return QString();
+}
+
+void FramesPanel::releaseExperiment()
+{
+    if (_recognizer)
+    {
+        delete _recognizer;
+        _recognizer = nullptr;
+    }
+    if (_images)
+    {
+        delete _images;
+        _images = nullptr;
+    }
 }

@@ -13,8 +13,6 @@
 PredictionLabel::PredictionLabel(const QString& line)
 {
     int pos = line.indexOf(' ');
-    if (pos > 0)
-        index = line.left(pos);
     label = line.right(line.length()-pos-1);
 }
 
@@ -202,14 +200,11 @@ void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
     for (int i = 0; i < PREDICTIONS_COUNT; i++)
     {
         probe.predictions[i].accuracy = result.predictions[i].accuracy;
-
         int index = result.predictions[i].index;
         if (index >= 0 && index < _labels.size())
-        {
-            auto label = _labels.at(index);
-            probe.predictions[i].labels = label.label;
-            probe.predictions[i].index = label.index;
-        }
+            probe.predictions[i].labels = _labels.at(index).label;
+        else probe.predictions[i].labels.clear();
+        probe.predictions[i].index = index;
     }
 }
 
@@ -236,7 +231,7 @@ bool Recognizer::checkFileExists(const QString& fileName)
 QString Recognizer::prepareModelFile(const QString& fileName)
 {
     qDebug() << "Prepare model file" << fileName;
-    auto text = Utils::loadTtextFromFile(fileName);
+    auto text = Utils::loadTextFromFile(fileName);
     if (text.isEmpty()) return QString();
     text = text.replace("$#batch_size#$", "1");
     auto tmpFile = Utils::makePath({ AppConfig::tmpPath(), "tmp.caffemodel" });
