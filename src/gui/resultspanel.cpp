@@ -15,8 +15,8 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
     connect(_context, &ExperimentContext::experimentResultReady, this, &ResultsPanel::experimentResultReady);
 
     _infoTimePerFrame = new InfoLabel(tr("TIME PER\nIMAGE (FPS)"));
-    _infoTimePerBatch = new InfoLabel(tr("Time per batch:"));
-    _infoMemoryUsage = new InfoLabel(tr("Memory usage\nper image:"));
+//    _infoTimePerBatch = new InfoLabel(tr("Time per batch:"));
+//    _infoMemoryUsage = new InfoLabel(tr("Memory usage\nper image:"));
 
     setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
     {
@@ -32,14 +32,15 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
 void ResultsPanel::experimentStarted()
 {
     _infoTimePerFrame->setInfo("N/A");
-    _infoTimePerBatch->setInfo("N/A");
-    _infoMemoryUsage->setInfo("N/A");
+//    _infoTimePerBatch->setInfo("N/A");
+//    _infoMemoryUsage->setInfo("N/A");
 }
 
 void ResultsPanel::experimentResultReady()
 {
     auto r = _context->experimentResult();
-    _infoTimePerFrame->setInfo(QString::number(r.timePerImage), QString("(%1)").arg(r.imagesPerSecond));
-    _infoTimePerBatch->setInfo(QString::number(r.timePerBatch));
-    _infoMemoryUsage->setInfo(QString::number(r.memoryPerImage));
+    _infoTimePerFrame->setInfo(QString::number(r.timePerImage, 'f', 2),
+                               QString("(%1)").arg(r.imagesPerSecond, 0, 'f', 2));
+//    _infoTimePerBatch->setInfo(QString::number(r.timePerBatch));
+//    _infoMemoryUsage->setInfo(QString::number(r.memoryPerImage));
 }

@@ -24,9 +24,9 @@ public:
     AppRunParams appRunParams() const { return _appParams; }
 
 private:
-    void command_caffeModels();
+    void command_models();
     void command_engines();
-    void command_imageSources();
+    void command_images();
     void command_recognize();
 
 private:

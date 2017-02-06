@@ -44,7 +44,7 @@ bool ListContainer<TItem>::selectCurrentViaDialog()
     return res;
 }
 
-template class ListContainer<CkEntry>;
+template class ListContainer<DnnModel>;
 template class ListContainer<DnnEngine>;
 template class ListContainer<ImagesDataset>;
 
@@ -74,8 +74,8 @@ void ExperimentContext::stopExperiment()
 
 void ExperimentContext::loadFromConfig()
 {
-    _engines.setCurrentIndexOrDefault(AppConfig::selectedEngineIndex(_experimentIndex));
     _models.setCurrentIndexOrDefault(AppConfig::selectedModelIndex(_experimentIndex));
+    _engines.setCurrentIndexOrDefault(AppConfig::selectedEngineIndex(_experimentIndex));
     _images.setCurrentIndexOrDefault(AppConfig::selectedImagesIndex(_experimentIndex));
 
     setBatchSize(AppConfig::batchSize(_experimentIndex));

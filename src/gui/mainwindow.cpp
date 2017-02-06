@@ -9,7 +9,6 @@
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDesktopWidget>
-#include <QDir>
 #include <QMessageBox>
 
 #define EXPERIMENT_COUNT 1
@@ -61,17 +60,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::initialize(const AppRunParams &runParams)
 {
-    qDebug() << "initialize main window";
+    qDebug() << "Initialize main window";
 
     CK ck;
+    auto models = ck.getModelsByUidOrAll(runParams.modelUid);
     auto engines = ck.getEnginesByUidOrAll(runParams.engineUid);
-    auto models = ck.getCafeeModelByUidOrAll(runParams.modelUid);
-    auto images = ck.getCafeeImagesByUidOrAll(runParams.imagesUid);
+    auto images = ck.getImagesByUidOrAll(runParams.imagesUid);
 
     for (auto e: _experiments)
     {
-        e->context._engines._items = engines;
         e->context._models._items = models;
+        e->context._engines._items = engines;
         e->context._images._items = images;
         e->context.loadFromConfig();
         e->panel->updateExperimentConditions();

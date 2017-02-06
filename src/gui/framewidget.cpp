@@ -9,8 +9,8 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 
-#define FRAME_CONTENT_W 160
-#define FRAME_CONTENT_H 147
+#define FRAME_CONTENT_W 220
+#define FRAME_CONTENT_H 165
 #define PREDICTIONS_COUNT 5
 
 class ImageView : public QFrame
@@ -39,7 +39,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class PredictionView : public QWidget
+class PredictionView : public QFrame
 {
 public:
     PredictionView(int index)
@@ -54,7 +54,13 @@ public:
         _descr->setObjectName("predictionDescr");
         _descr->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         _descr->setProperty("qss-prediction-line", index);
-        setLayout(Ori::Gui::layoutH(0, 0, {_prob, Ori::Gui::spacing(16), _descr}));
+        setLayout(Ori::Gui::layoutH(0, 0, {
+                                        Ori::Gui::spacing(4),
+                                        _prob,
+                                        Ori::Gui::spacing(16),
+                                        _descr,
+                                        Ori::Gui::spacing(4),
+                                    }));
     }
     void setProb(double value)
     {

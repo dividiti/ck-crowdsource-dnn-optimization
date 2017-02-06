@@ -62,7 +62,7 @@ public:
     Recognizer(const QString &proxyLib, const QStringList& depLibs);
     ~Recognizer();
 
-    void prepare(const QString &modelFile, const QString &weightsFile,
+    bool prepare(const QString &modelFile, const QString &weightsFile,
                  const QString &meanFile, const QString &labelsFile);
 
     void recognize(const QString& imageFile, ExperimentProbe& probe);
@@ -79,11 +79,13 @@ private:
     DnnRelease dnnRelease;
     void* _dnnHandle = nullptr;
     QList<PredictionLabel> _labels;
-    QByteArray _backupPaths;
+    QString _tmpModelFile;
 
     void release();
     QFunctionPointer resolve(const char* symbol);
     void loadLabels(const QString& fileName);
+    bool checkFileExists(const QString& fileName);
+    QString prepareModelFile(const QString& fileName);
 };
 
 #endif // RECOGNIZER_H

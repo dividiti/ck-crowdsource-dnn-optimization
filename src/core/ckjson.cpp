@@ -12,7 +12,7 @@ void CkJson::open(const QString& file)
     _json = doc.object();
     if (_json.isEmpty())
     {
-        qWarning() << "Invalid CK-json file: " << file;
+        qWarning() << "Invalid CK-json file:" << file;
         return;
     }
     _ok = true;
@@ -20,12 +20,12 @@ void CkJson::open(const QString& file)
 
 void CkJson::errorKeyNotFound(const QString& key) const
 {
-    qWarning() << "Required key not found: " + key;
+    qWarning() << "Required key not found:" << key;
 }
 
 void CkJson::warnKeyIsEmpty(const QString& key) const
 {
-    qWarning() << key + " is empty";
+    qWarning() << key << "is empty";
 }
 
 QString CkJson::valueStr(const QString& key) const

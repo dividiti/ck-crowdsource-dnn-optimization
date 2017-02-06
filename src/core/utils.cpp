@@ -23,24 +23,28 @@ QByteArray loadTtextFromFile(const QString& path)
         AppEvents::warning(qApp->tr("File not found: %1").arg(path));
         return QByteArray();
     }
-
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         AppEvents::error(qApp->tr("Unable to open file %1: %2").arg(path).arg(file.errorString()));
         return QByteArray();
     }
-
     return file.readAll();
 }
 
-void saveTextToFile(const QString& path, const QByteArray text)
+bool saveTextToFile(const QString& path, const QByteArray& text)
 {
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return AppEvents::error(qApp->tr("Unable to create file %1: %2").arg(path).arg(file.errorString()));
-
+    {
+        AppEvents::error(qApp->tr("Unable to create file %1: %2").arg(path).arg(file.errorString()));
+        return false;
+    }
     if (file.write(text) == -1)
-        return AppEvents::error(qApp->tr("Fail writing into file %1: %2").arg(path).arg(file.errorString()));
+    {
+        AppEvents::error(qApp->tr("Fail writing into file %1: %2").arg(path).arg(file.errorString()));
+        return false;
+    }
+    return true;
 }
 
 QString makePath(const QStringList &parts)

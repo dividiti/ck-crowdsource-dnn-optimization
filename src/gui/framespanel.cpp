@@ -28,11 +28,10 @@ ImagesBank::ImagesBank(const QString& imagesDir)
 
 //-----------------------------------------------------------------------------
 
-BatchItem::BatchItem(int index, int imageOffset, Recognizer *recognizer, ImagesBank *images) : QThread(0)
+BatchItem::BatchItem(int index, Recognizer *recognizer, ImagesBank *images) : QThread(0)
 {
     _index = index;
     _images = images;
-    _imageIndex = imageOffset;
     _recognizer = recognizer;
     _frame = new FrameWidget;
     _probe.predictions.resize(_recognizer->predictionsCount());
@@ -42,6 +41,8 @@ BatchItem::~BatchItem()
 {
     delete _frame;
 }
+
+int batchesProcessed = 0;
 
 void BatchItem::run()
 {
@@ -55,39 +56,23 @@ void BatchItem::run()
 
 void BatchItem::runIteration()
 {
-    _imageIndex = qrand() % _images->size();
-
-    auto imageFile = _images->imageFile(_imageIndex);
+    int imageIndex = qrand() % _images->size();
+    auto imageFile = _images->imageFile(imageIndex);
     _recognizer->recognize(imageFile, _probe);
-    qDebug() << "1";
-
-    // TODO: after "1" after some ten iterations: Segmentation fault
-
+    qDebug() << "Iteration" << ++batchesProcessed;
     _frame->loadImage(imageFile);
-    qDebug() << "2";
     _frame->showPredictions(_probe.predictions);
-    qDebug() << "3";
     emit finished(&_probe);
-    qDebug() << "4";
-
-//    _imageIndex++;
-//    if (_imageIndex == _images->size())
-//        _imageIndex = 0;
 }
 
 //-----------------------------------------------------------------------------
 
 void BatchSeries::run()
 {
+    int i = 0;
+    int count = _batchItems.size();
     while (!isInterruptionRequested())
-    {
-        for (auto batch: _batchItems)
-        {
-            batch->runIteration();
-            if (isInterruptionRequested())
-                break;
-        }
-    }
+        _batchItems.at(i++ % count)->runIteration();
     emit finished();
 }
 
@@ -128,36 +113,26 @@ void FramesPanel::experimentStarted()
 {
     auto res = canStart();
     if (!res.isEmpty())
-    {
-        AppEvents::error(res);
-        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
-        return;
-    }
+        return abortExperiment(res);
 
     if (!prepareImages())
-    {
-        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
-        return;
-    }
+        return abortExperiment();
 
     auto engine = _context->engines().current();
-    //auto model = _context->models().current();
-    qDebug() << "Start experiment for" << engine.title();// << "on" << model.title();
+    auto model = _context->models().current();
+    auto images = _context->images().current();
+    qDebug() << "----------------------------------------------";
+    qDebug() << "Start experiment for" << engine.title()
+             << "on" << model.title()
+             << "on" << images.title();
 
     _recognizer = new Recognizer(engine.library(), engine.paths());
     if (!_recognizer->ready())
-    {
-        QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
-        delete _recognizer;
-        _recognizer = nullptr;
-        return;
-    }
-    // TODO: prepare recognizer with real data
-    QString model("/home/kolyan/CK/ck-caffe/program/caffe-classification/tmp/tmp-BVwvo7.prototxt");
-    QString weights("/home/kolyan/CK-TOOLS/caffemodel-bvlc-googlenet/bvlc_googlenet.caffemodel");
-    QString mean("/home/kolyan/CK/ck-caffe/program/caffe-classification/imagenet_mean.binaryproto");
-    QString labels("/home/kolyan/CK/ck-caffe/program/caffe-classification/synset_words.txt");
-    _recognizer->prepare(model, weights, mean, labels);
+        return abortExperiment();
+
+    if (!_recognizer->prepare(model.modelFile(), model.weightsFile(),
+                              images.meanFile(), images.labelsFile()))
+        return abortExperiment();
 
     clearBatch();
     prepareBatch();
@@ -181,6 +156,18 @@ void FramesPanel::experimentStopping()
             item->requestInterruption();
 }
 
+void FramesPanel::abortExperiment(const QString& errorMsg)
+{
+    if (!errorMsg.isEmpty())
+        AppEvents::error(errorMsg);
+    if (_recognizer)
+    {
+        delete _recognizer;
+        _recognizer = nullptr;
+    }
+    QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
+}
+
 void FramesPanel::clearBatch()
 {
     for (auto item: _batchItems)
@@ -191,12 +178,10 @@ void FramesPanel::clearBatch()
 void FramesPanel::prepareBatch()
 {
     qDebug() << "Prepare batch items";
-    //int framesCount = _context->batchSize();
-    int framesCount = 8;
+    const int framesCount = 8;
     for (int i = 0; i < framesCount; i++)
     {
-        int offset = qRound(_images->size()/double(framesCount)*i);
-        auto item = new BatchItem(i, offset, _recognizer, _images);
+        auto item = new BatchItem(i, _recognizer, _images);
         connect(item, &BatchItem::stopped, this, &FramesPanel::batchStopped);
         connect(item, &BatchItem::finished, _context, &ExperimentContext::recognitionFinished);
         _batchItems.append(item);
@@ -206,7 +191,7 @@ void FramesPanel::prepareBatch()
 
     }
     if (_series)
-        _series->setItem(_batchItems);
+        _series->setItems(_batchItems);
 }
 
 bool FramesPanel::prepareImages()
@@ -214,8 +199,8 @@ bool FramesPanel::prepareImages()
     qDebug() << "Prepare images";
     if (!_images)
     {
-        auto imagesDir = AppConfig::imagesDir();
-        //auto imagesDir = _context->images().current().imagesPath();
+        //auto imagesDir = AppConfig::imagesDir();
+        auto imagesDir = _context->images().current().imagesPath();
         _images = new ImagesBank(imagesDir);
     }
     if (_images->size() < 1)
@@ -251,11 +236,11 @@ QString FramesPanel::canStart()
     if (!_context->engines().hasCurrent())
         return tr("No engine selected");
 
-//    if (!_context->models().hasCurrent())
-//        return tr("No scenario selected");
+    if (!_context->models().hasCurrent())
+        return tr("No scenario selected");
 
-//    if (!_context->images().hasCurrent())
-//        return tr("No image source selected");
+    if (!_context->images().hasCurrent())
+        return tr("No image source selected");
 
     return QString();
 }

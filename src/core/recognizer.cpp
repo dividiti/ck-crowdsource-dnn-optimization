@@ -1,10 +1,13 @@
 #include "appconfig.h"
 #include "appevents.h"
 #include "recognizer.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLibrary>
 
 PredictionLabel::PredictionLabel(const QString& line)
@@ -117,8 +120,8 @@ void Recognizer::release()
         _lib = nullptr;
     }
 
-    if (!_backupPaths.isEmpty())
-        LibraryPaths::set(_backupPaths);
+    if (!_tmpModelFile.isEmpty())
+        QFile(_tmpModelFile).remove();
 }
 
 bool Recognizer::ready() const
@@ -143,11 +146,19 @@ char* makeLocalStr(const QString& s)
     return data;
 }
 
-void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
+bool Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
                          const QString &meanFile, const QString &labelsFile)
 {
+    if (!checkFileExists(modelFile)) return false;
+    if (!checkFileExists(weightsFile)) return false;
+    if (!checkFileExists(meanFile)) return false;
+    if (!checkFileExists(labelsFile)) return false;
+
+    _tmpModelFile = prepareModelFile(modelFile);
+    if (_tmpModelFile.isEmpty()) return false;
+
     ck_dnn_proxy__init_param p;
-    p.model_file = makeLocalStr(modelFile);
+    p.model_file = makeLocalStr(_tmpModelFile);
     p.trained_file = makeLocalStr(weightsFile);
     p.mean_file = makeLocalStr(meanFile);
 
@@ -170,6 +181,7 @@ void Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
         delete[] p.logs_path;
 
     loadLabels(labelsFile);
+    return true;
 }
 
 void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
@@ -211,4 +223,23 @@ void Recognizer::loadLabels(const QString& fileName)
             _labels << PredictionLabel(in.readLine());
        inputFile.close();
     }
+}
+
+bool Recognizer::checkFileExists(const QString& fileName)
+{
+    bool res = QFile(fileName).exists();
+    if (!res)
+        AppEvents::error("File not found: " + fileName);
+    return res;
+}
+
+QString Recognizer::prepareModelFile(const QString& fileName)
+{
+    qDebug() << "Prepare model file" << fileName;
+    auto text = Utils::loadTtextFromFile(fileName);
+    if (text.isEmpty()) return QString();
+    text = text.replace("$#batch_size#$", "1");
+    auto tmpFile = Utils::makePath({ AppConfig::tmpPath(), "tmp.caffemodel" });
+    if (!Utils::saveTextToFile(tmpFile, text)) return QString();
+    return tmpFile;
 }

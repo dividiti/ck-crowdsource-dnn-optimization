@@ -5,28 +5,13 @@
 #include <QList>
 #include <QVector>
 
-class CkEntry
-{
-public:
-    QString uid;
-    QString name;
-
-    QString title() const { return name; }
-
-    QString str() const;
-
-    bool isEmpty() const { return uid.isEmpty(); }
-};
-
-//-----------------------------------------------------------------------------
-
 class AppRunParams
 {
 public:
     enum RunMode { Normal, EditStyle };
 
-    QString engineUid;
     QString modelUid;
+    QString engineUid;
     QString imagesUid;
     bool startImmediately = false;
     RunMode runMode = Normal;
@@ -71,23 +56,18 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class ImagesDataset
+class DnnModel
 {
 public:
     QString title() const { return _title; }
-    QString imagesPath() const { return _imagesPath; }
+    QString modelFile() const { return _modelFile; }
+    QString weightsFile() const { return _weightsFile; }
 
-    QString str() const;
-    bool isEmpty() const { return _imagesPath.isEmpty(); }
-
-    bool hasCorrectnessMap() const { return _hasCorrectnessMap; }
-    void buildCorrectnessMap();
+    QString str() const { return _title + ": " + _weightsFile; }
+    bool isEmpty() const { return _modelFile.isEmpty() || _weightsFile.isEmpty(); }
 
 private:
-    QString _title, _imagesPath;
-
-    QString _valFile, _wordsFile;
-    bool _hasCorrectnessMap = false;
+    QString _title, _modelFile, _weightsFile;
 
     friend class CK;
 };
@@ -101,12 +81,36 @@ public:
     QString library() const { return _library; }
     QStringList paths() const { return _paths; }
 
-    QString str() const;
+    QString str() const { return _title + ": " + _library; }
     bool isEmpty() const { return _library.isEmpty(); }
 
 private:
     QString _title, _library;
     QStringList _paths;
+
+    friend class CK;
+};
+
+//-----------------------------------------------------------------------------
+
+class ImagesDataset
+{
+public:
+    QString title() const { return _title; }
+    QString imagesPath() const { return _imagesPath; }
+    QString meanFile() const { return _meanFile; }
+    QString labelsFile() const { return _labelsFile; }
+
+    QString str() const { return _title + ": " + _imagesPath; }
+    bool isEmpty() const { return _imagesPath.isEmpty(); }
+
+    bool hasCorrectnessMap() const { return _hasCorrectnessMap; }
+    void buildCorrectnessMap();
+
+private:
+    QString _title, _imagesPath;
+    QString _valFile, _meanFile, _labelsFile;
+    bool _hasCorrectnessMap = false;
 
     friend class CK;
 };

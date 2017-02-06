@@ -32,7 +32,8 @@ public:
 
     static QString styleSheetFileName();
 
-    static QString logPath();
+    static QString logPath() { return localSubdir("logs_path", "logs"); }
+    static QString tmpPath() { return localSubdir("tmp_path", "tmp"); }
 
 private:
     static QString configFileName();
@@ -42,6 +43,8 @@ private:
     static QString configValueStr(const QString& key, const QString& defaultValue);
 
     static QString experimentKey(const QString& baseKey, int experimentIndex);
+
+    static QString localSubdir(const QString& key, const QString& defaultDir);
 };
 
 

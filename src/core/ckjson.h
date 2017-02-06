@@ -37,6 +37,7 @@ public:
     QString envVar(const QString& name) const;
     QStringList tags() const;
     QString packageUoa() const { return valueStr("package_uoa"); }
+    QString fullPath() const { return valueStr({"customize", "full_path"}); }
     QString pathLib() const { return valueStr({"customize", "path_lib"}); }
     QString dynamicLib() const { return valueStr({"customize", "dynamic_lib"}); }
     QVector<QPair<QString, QString> > setupEnvs() const;

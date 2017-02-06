@@ -114,10 +114,10 @@ QStringList AppConfig::ckArgs()
     return config().value("ck_args").toString().split(' ', QString::SkipEmptyParts);
 }
 
-QString AppConfig::logPath()
+QString AppConfig::localSubdir(const QString& key, const QString& defaultDir)
 {
-    auto defaultPath = qApp->applicationDirPath() + QDir::separator() + "logs";
-    auto path = configValueStr("logs_path", defaultPath);
+    auto defaultPath = qApp->applicationDirPath() + QDir::separator() + defaultDir;
+    auto path = configValueStr(key, defaultPath);
     QDir d(path);
     if (!d.exists())
         d.mkpath(path);

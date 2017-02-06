@@ -1,12 +1,5 @@
 #include "appmodels.h"
 
-QString CkEntry::str() const
-{
-    return QString("%1: %2").arg(uid, name);
-}
-
-//-----------------------------------------------------------------------------
-
 void ExperimentResult::reset()
 {
     imagesCount = 0;
@@ -27,19 +20,7 @@ void ExperimentResult::accumulate(const ExperimentProbe* p)
 
 //-----------------------------------------------------------------------------
 
-QString ImagesDataset::str() const
-{
-    return _title;
-}
-
 void ImagesDataset::buildCorrectnessMap()
 {
     // TODO
-}
-
-//-----------------------------------------------------------------------------
-
-QString DnnEngine::str() const
-{
-    return QString("%1: %2").arg(_title, _library);
 }

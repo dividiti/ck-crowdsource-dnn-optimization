@@ -34,7 +34,7 @@ class BatchItem : public QThread
 {
     Q_OBJECT
 public:
-    BatchItem(int index, int imageOffset, Recognizer *recognizer, ImagesBank* images);
+    BatchItem(int index, Recognizer *recognizer, ImagesBank* images);
     ~BatchItem();
 
     FrameWidget* frame() const { return _frame; }
@@ -51,8 +51,7 @@ private:
     Recognizer* _recognizer;
     FrameWidget* _frame;
     ExperimentProbe _probe;
-    int _index, _imageIndex;
-
+    int _index;
 };
 
 //-----------------------------------------------------------------------------
@@ -65,7 +64,7 @@ public:
 
     void run() override;
 
-    void setItem(QList<BatchItem*> items) { _batchItems = items; }
+    void setItems(QList<BatchItem*> items) { _batchItems = items; }
 
 signals:
     void finished();
@@ -104,6 +103,7 @@ private:
     void prepareBatch();
     bool prepareImages();
     QString canStart();
+    void abortExperiment(const QString &errorMsg = QString());
 };
 
 #endif // FRAMESPANEL_H

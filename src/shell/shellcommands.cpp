@@ -17,14 +17,14 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     cmdLine.addHelpOption();
     cmdLine.addVersionOption();
 
-    QCommandLineOption option_caffeModels("1", "Enumerate caffe models.");
-    cmdLine.addOption(option_caffeModels);
+    QCommandLineOption option_models("1", "Enumerate dnn models.");
+    cmdLine.addOption(option_models);
 
-    QCommandLineOption option_engines("2", "Enumerate caffe libs.");
+    QCommandLineOption option_engines("2", "Enumerate dnn libs.");
     cmdLine.addOption(option_engines);
 
-    QCommandLineOption option_imageSources("3", "Enumerate image datasets.");
-    cmdLine.addOption(option_imageSources);
+    QCommandLineOption option_images("3", "Enumerate image datasets.");
+    cmdLine.addOption(option_images);
 
     QCommandLineOption option_runRecognition("4", "Run recognition with specified model.");
     cmdLine.addOption(option_runRecognition);
@@ -32,13 +32,13 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
     QCommandLineOption option_editStyle("5", "Edit application style.");
     cmdLine.addOption(option_editStyle);
 
-    QCommandLineOption option_recognitionEngine("engine", QString("caffe-lib uid to run recognition (for command %1).")
-                                               .arg(option_runRecognition.names().first()), "uid");
-    cmdLine.addOption(option_recognitionEngine);
-
     QCommandLineOption option_recognitionModel("model", QString("caffe-model uid to run recognition (for command %1).")
                                                .arg(option_runRecognition.names().first()), "uid");
     cmdLine.addOption(option_recognitionModel);
+
+    QCommandLineOption option_recognitionEngine("engine", QString("caffe-lib uid to run recognition (for command %1).")
+                                               .arg(option_runRecognition.names().first()), "uid");
+    cmdLine.addOption(option_recognitionEngine);
 
     QCommandLineOption option_recognitionImages("images", QString("imagenet dataset uid to run recognition (for command %1).")
                                                .arg(option_runRecognition.names().first()), "uid");
@@ -50,9 +50,9 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
 
     cmdLine.process(app);
 
-    if (cmdLine.isSet(option_caffeModels))
+    if (cmdLine.isSet(option_models))
     {
-        command_caffeModels();
+        command_models();
         return CommandFinished;
     }
 
@@ -62,9 +62,9 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
         return CommandFinished;
     }
 
-    if (cmdLine.isSet(option_imageSources))
+    if (cmdLine.isSet(option_images))
     {
-        command_imageSources();
+        command_images();
         return CommandFinished;
     }
 
@@ -76,8 +76,8 @@ ShellCommands::Result ShellCommands::process(const QApplication &app)
 
     if (cmdLine.isSet(option_runRecognition))
     {
-        _appParams.engineUid = cmdLine.value(option_recognitionEngine);
         _appParams.modelUid = cmdLine.value(option_recognitionModel);
+        _appParams.engineUid = cmdLine.value(option_recognitionEngine);
         _appParams.imagesUid = cmdLine.value(option_recognitionImages);
         _appParams.startImmediately = true;
         return ParamsAcquired;
@@ -98,21 +98,21 @@ QTextStream& ShellCommands::cout()
     return s;
 }
 
+void ShellCommands::command_models()
+{
+    for (auto model: CK().queryModels())
+        cout() << model.str() << endl;
+}
+
 void ShellCommands::command_engines()
 {
     for (auto lib: CK().queryEngines())
         cout() << lib.str() << endl;
 }
 
-void ShellCommands::command_caffeModels()
+void ShellCommands::command_images()
 {
-    for (auto model: CK().queryCaffeModels())
-        cout() << model.str() << endl;
-}
-
-void ShellCommands::command_imageSources()
-{
-    for (auto dataset: CK().queryCaffeImages())
+    for (auto dataset: CK().queryImages())
         cout() << dataset.str() << endl;
 }
 

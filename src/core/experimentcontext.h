@@ -38,8 +38,8 @@ class ExperimentContext : public QObject
 public:
     int experimentIndex() const { return _experimentIndex; }
 
+    ListContainer<DnnModel>& models() { return _models; }
     ListContainer<DnnEngine>& engines() { return _engines; }
-    ListContainer<CkEntry>& models() { return _models; }
     ListContainer<ImagesDataset>& images() { return _images; }
 
     int batchSize() const { return _batchSize; }
@@ -68,7 +68,7 @@ private:
     bool _isExperimentStarted = false;
     int _batchSize = 2;
     ExperimentResult _result;
-    ListContainer<CkEntry> _models;
+    ListContainer<DnnModel> _models;
     ListContainer<DnnEngine> _engines;
     ListContainer<ImagesDataset> _images;
 
