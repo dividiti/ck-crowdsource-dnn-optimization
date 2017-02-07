@@ -2,7 +2,6 @@
 #define RECOGNIZER_H
 
 #include <QString>
-#include <QVector>
 
 QT_BEGIN_NAMESPACE
 class QLibrary;
@@ -13,7 +12,6 @@ QT_END_NAMESPACE
 //-----------------------------------------------------------------------------
 
 #define PREDICTIONS_COUNT 5
-
 
 struct ck_dnn_proxy__init_param {
     const char *model_file;
@@ -45,16 +43,6 @@ typedef void (*DnnRelease)(void*);
 
 //-----------------------------------------------------------------------------
 
-class PredictionLabel
-{
-public:
-    PredictionLabel(const QString& line);
-
-    QString label;
-};
-
-//-----------------------------------------------------------------------------
-
 class Recognizer
 {
 public:
@@ -66,9 +54,11 @@ public:
 
     void recognize(const QString& imageFile, ExperimentProbe& probe);
 
-    bool ready() const;
+    bool ready() const { return _ready; }
 
-    int predictionsCount() const { return PREDICTIONS_COUNT; }
+    static int predictionsCount() { return PREDICTIONS_COUNT; }
+
+    QString predictionLabel(int predictionIndex) const;
 
 private:
     QLibrary* _lib = nullptr;
@@ -77,14 +67,18 @@ private:
     DnnRecognize dnnRecognize;
     DnnRelease dnnRelease;
     void* _dnnHandle = nullptr;
-    QList<PredictionLabel> _labels;
+    QStringList _labels;
     QString _tmpModelFile;
+    bool _ready = false;
 
     void release();
-    QFunctionPointer resolve(const char* symbol);
-    void loadLabels(const QString& fileName);
-    bool checkFileExists(const QString& fileName);
-    QString prepareModelFile(const QString& fileName);
+    QString loadDeps(const QStringList &depLibs);
+    bool loadLabels(const QString &labelsFile);
+
+    static char* makeLocalStr(const QString& s);
+    static bool checkFileExists(const QString& fileName);
+    static QString prepareModelFile(const QString& fileName);
+    static char* prepareLogging();
 };
 
 #endif // RECOGNIZER_H

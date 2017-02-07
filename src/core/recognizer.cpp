@@ -6,17 +6,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QLibrary>
-
-PredictionLabel::PredictionLabel(const QString& line)
-{
-    int pos = line.indexOf(' ');
-    label = line.right(line.length()-pos-1);
-}
-
-//-----------------------------------------------------------------------------
 
 namespace LibraryPaths
 {
@@ -57,37 +47,31 @@ void set(const QByteArray& paths)
 Recognizer::Recognizer(const QString& proxyLib, const QStringList &depLibs)
 {
     qDebug() << "Loading library" << proxyLib;
-
-    // Settings LD_LIBRARY_PATH inside of app does not help to search all dependencies
-    // (although when we set LD_LIBRARY_PATH in console before app is run, it helps).
-    // At least on Ubuntu. So we have to load all deps directly.
-    for (int i = depLibs.size()-1; i >= 0; i--)
+    try
     {
-        auto depLib = depLibs.at(i);
-        if (!QFile(depLib).exists())
-            continue;
-        qDebug() << "Load dep lib" << depLib;
-        auto lib = new QLibrary(depLib);
-        if (!lib->load())
-        {
-            AppEvents::error(lib->errorString());
-            release();
-            return;
-        }
-        _deps << lib;
+        auto res = loadDeps(depLibs);
+        if (!res.isEmpty()) throw res;
+
+        _lib = new QLibrary(proxyLib);
+        if (!_lib->load()) throw _lib->errorString();
+
+        dnnPrepare = (DnnPrepare)_lib->resolve("ck_dnn_proxy__prepare");
+        if (!dnnPrepare) throw _lib->errorString();
+
+        dnnRecognize = (DnnRecognize)_lib->resolve("ck_dnn_proxy__recognize");
+        if (!dnnRecognize) throw _lib->errorString();
+
+        dnnRelease = (DnnRelease)_lib->resolve("ck_dnn_proxy__release");
+        if (!dnnRelease) throw _lib->errorString();
+
+        _ready = true;
+        qDebug() << "OK";
     }
-
-    _lib = new QLibrary(proxyLib);
-    if (!_lib->load())
+    catch (QString error)
     {
-        AppEvents::error(_lib->errorString());
+        AppEvents::error(error);
         release();
-        return;
     }
-    dnnPrepare = (DnnPrepare)resolve("ck_dnn_proxy__prepare");
-    dnnRecognize = (DnnRecognize)resolve("ck_dnn_proxy__recognize");
-    dnnRelease = (DnnRelease)resolve("ck_dnn_proxy__release");
-    qDebug() << "OK";
 }
 
 Recognizer::~Recognizer()
@@ -122,20 +106,26 @@ void Recognizer::release()
         QFile(_tmpModelFile).remove();
 }
 
-bool Recognizer::ready() const
+QString Recognizer::loadDeps(const QStringList &depLibs)
 {
-    return _lib && _lib->isLoaded() && dnnPrepare && dnnRecognize && dnnRelease;
+    // Settings LD_LIBRARY_PATH inside of app does not help to search all dependencies
+    // (although when we set LD_LIBRARY_PATH in console before app is run, it helps).
+    // At least on Ubuntu. So we have to load all deps directly.
+    for (int i = depLibs.size()-1; i >= 0; i--)
+    {
+        auto depLib = depLibs.at(i);
+        if (!QFile(depLib).exists())
+            continue;
+        qDebug() << "Load dep lib" << depLib;
+        auto lib = new QLibrary(depLib);
+        if (!lib->load())
+            return lib->errorString();
+        _deps << lib;
+    }
+    return QString();
 }
 
-QFunctionPointer Recognizer::resolve(const char* symbol)
-{
-    auto func = _lib->resolve(symbol);
-    if (!func)
-        AppEvents::error(_lib->errorString());
-    return func;
-}
-
-char* makeLocalStr(const QString& s)
+char* Recognizer::makeLocalStr(const QString& s)
 {
     auto bytes = s.toUtf8();
     char* data = new char[bytes.length()+1];
@@ -150,7 +140,7 @@ bool Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
     if (!checkFileExists(modelFile)) return false;
     if (!checkFileExists(weightsFile)) return false;
     if (!checkFileExists(meanFile)) return false;
-    if (!checkFileExists(labelsFile)) return false;
+    if (!loadLabels(labelsFile)) return false;
 
     _tmpModelFile = prepareModelFile(modelFile);
     if (_tmpModelFile.isEmpty()) return false;
@@ -159,27 +149,30 @@ bool Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
     p.model_file = makeLocalStr(_tmpModelFile);
     p.trained_file = makeLocalStr(weightsFile);
     p.mean_file = makeLocalStr(meanFile);
-
-    // TODO: caffe uses glog, but it seems that we can't ask it if it's initialized or not
-    // (https://github.com/baysao/google-glog/issues/113) but second initialization leads to fail
-    static bool nasty_hack_for_if_glog_initialized = false;
-    if (!nasty_hack_for_if_glog_initialized)
-    {
-        p.logs_path = makeLocalStr(AppConfig::logPath());
-        nasty_hack_for_if_glog_initialized = true;
-    }
-    else p.logs_path = nullptr;
-
+    p.logs_path = prepareLogging();
     _dnnHandle = dnnPrepare(&p);
     // TODO: process errors
+
     delete[] p.model_file;
     delete[] p.trained_file;
     delete[] p.mean_file;
     if (p.logs_path)
         delete[] p.logs_path;
 
-    loadLabels(labelsFile);
     return true;
+}
+
+char* Recognizer::prepareLogging()
+{
+    // TODO: caffe uses glog, but it seems that we can't ask it if it's initialized or not
+    // (https://github.com/baysao/google-glog/issues/113) but second initialization leads to fail
+    static bool nasty_hack_for_if_glog_initialized = false;
+    if (!nasty_hack_for_if_glog_initialized)
+    {
+        nasty_hack_for_if_glog_initialized = true;
+        return makeLocalStr(AppConfig::logPath());
+    }
+    return nullptr;
 }
 
 void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
@@ -195,28 +188,13 @@ void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
     probe.image = imageFile;
     probe.time = result.duration;
     probe.memory = result.memory_usage;
-    if (probe.predictions.capacity() < PREDICTIONS_COUNT)
-        probe.predictions.resize(PREDICTIONS_COUNT);
-    for (int i = 0; i < PREDICTIONS_COUNT; i++)
+    if (probe.predictions.capacity() < predictionsCount())
+        probe.predictions.resize(predictionsCount());
+    for (int i = 0; i < predictionsCount(); i++)
     {
         probe.predictions[i].accuracy = result.predictions[i].accuracy;
-        int index = result.predictions[i].index;
-        if (index >= 0 && index < _labels.size())
-            probe.predictions[i].labels = _labels.at(index).label;
-        else probe.predictions[i].labels.clear();
-        probe.predictions[i].index = index;
-    }
-}
-
-void Recognizer::loadLabels(const QString& fileName)
-{
-    QFile inputFile(fileName);
-    if (inputFile.open(QIODevice::ReadOnly))
-    {
-        QTextStream in(&inputFile);
-        while (!in.atEnd())
-            _labels << PredictionLabel(in.readLine());
-       inputFile.close();
+        probe.predictions[i].index = result.predictions[i].index;
+        probe.predictions[i].labels = predictionLabel(result.predictions[i].index);
     }
 }
 
@@ -233,8 +211,33 @@ QString Recognizer::prepareModelFile(const QString& fileName)
     qDebug() << "Prepare model file" << fileName;
     auto text = Utils::loadTextFromFile(fileName);
     if (text.isEmpty()) return QString();
-    text = text.replace("$#batch_size#$", "1");
+    text = text.replace("$#batch_size#$", "2");
     auto tmpFile = Utils::makePath({ AppConfig::tmpPath(), "tmp.caffemodel" });
     if (!Utils::saveTextToFile(tmpFile, text)) return QString();
     return tmpFile;
+}
+
+bool Recognizer::loadLabels(const QString& labelsFile)
+{
+    QFile file(labelsFile);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        AppEvents::error(QString("Unable load labels from %1: %2")
+                         .arg(labelsFile).arg(file.errorString()));
+        return false;
+    }
+    QTextStream stream(&file);
+    while (!stream.atEnd())
+    {
+        auto s = stream.readLine(); // trim nXXXXX indices:
+        _labels << s.right(s.length() - s.indexOf(' ') - 1);
+    }
+    return true;
+}
+
+QString Recognizer::predictionLabel(int predictionIndex) const
+{
+    if (predictionIndex >= 0 && predictionIndex < _labels.size())
+        return _labels.at(predictionIndex);
+    return QString();
 }

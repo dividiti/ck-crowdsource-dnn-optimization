@@ -155,10 +155,11 @@ FrameWidget::FrameWidget(QWidget *parent) : QFrame(parent)
     setLayout(Ori::Gui::layoutV(0, 8, { _imageView, layoutInfo }));
 }
 
-void FrameWidget::loadImage(const QString& path, int imageCorrectIndex)
+void FrameWidget::loadImage(const QString& path, int correctIndex, const QString& correctLabel)
 {
     _imageView->loadImage(path);
-    _imageView->setToolTip(QString(QStringLiteral("%1 (%2)")).arg(path).arg(imageCorrectIndex));
+    _imageView->setToolTip(QString(QStringLiteral("%1\n%2 (%3)"))
+                           .arg(path).arg(correctLabel).arg(correctIndex));
 }
 
 void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions, int correctIndex)
@@ -170,9 +171,9 @@ void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions, 
             const PredictionResult& p = predictions.at(i);
             pv->setProb(p.accuracy, p.index == correctIndex);
             pv->setDescr(p.labels);
-            pv->setToolTip(QString(QStringLiteral("%1 - %2 (%3) %4"))
+            pv->setToolTip(QString(QStringLiteral("%1 - %2 (%3)%4"))
                 .arg(p.accuracy).arg(p.labels).arg(p.index)
-                .arg(p.index == correctIndex? "CORRECT": ""));
+                .arg(p.index == correctIndex? QString(QStringLiteral(" CORRECT")): QString()));
         }
         else _predictions.at(i)->clear();
 }
