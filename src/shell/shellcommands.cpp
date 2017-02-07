@@ -128,7 +128,7 @@ void ShellCommands::command_recognize()
     if (!r.ready()) return;
     r.prepare(model, weights, mean, labels);
     ExperimentProbe probe;
-    r.recognize(image, probe);
+    r.recognize(ImageEntry{image, -1}, probe);
     cout() << "time: " << QString::number(probe.time) << endl;
     cout() << "memory: " << QString::number(probe.memory) << endl;
     for (auto p: probe.predictions)

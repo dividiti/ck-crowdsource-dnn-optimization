@@ -15,8 +15,8 @@ class FrameWidget : public QFrame
 public:
     explicit FrameWidget(QWidget *parent = 0);
 
-    void loadImage(const QString& path, int correctIndex, const QString &correctLabel);
-    void showPredictions(const QVector<PredictionResult> &predictions, int correctIndex);
+    void loadImage(const QString &imageFile, PredictionResult& correctInfo);
+    void showPredictions(const QVector<PredictionResult> &predictions);
 
 private:
     ImageView *_imageView;

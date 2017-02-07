@@ -55,5 +55,12 @@ void ResultsPanel::experimentResultReady()
     auto r = _context->experimentResult();
     _infoTimePerImage->setText(QString::number(r.timePerImage, 'f', 2));
     _infoImagesPerSec->setText(QString(QStringLiteral("(%1)")).arg(r.imagesPerSecond, 0, 'f', 2));
-    _worstPredictedImage->loadImage(r.worstPredictedImage);
+    if (r.worstPredictionFlag)
+    {
+        _worstPredictedImage->loadImage(r.worstPredictedImage);
+        _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
+                                         .arg(r.worstPredictedImage)
+                                         .arg(r.worstPredictionTop1.str())
+                                         .arg(r.worstPredictionCorrect.str()));
+    }
 }

@@ -25,6 +25,9 @@ public:
     double accuracy = 0;
     QString labels;
     int index;
+    bool isCorrect;
+
+    QString str() const;
 };
 
 //-----------------------------------------------------------------------------
@@ -33,9 +36,11 @@ class ExperimentProbe
 {
 public:
     QString image;
-    double time = 0;
-    double memory = 0;
+    double time;
+    double memory;
     QVector<PredictionResult> predictions;
+    PredictionResult correctInfo;
+    bool isTop1;
 };
 
 //-----------------------------------------------------------------------------
@@ -49,6 +54,11 @@ public:
     double imagesPerSecond;
     double timePerBatch;
     double memoryPerImage;
+
+    bool worstPredictionFlag;
+    double worstPredictionMarker;
+    PredictionResult worstPredictionCorrect;
+    PredictionResult worstPredictionTop1;
     QString worstPredictedImage;
 
     void reset();

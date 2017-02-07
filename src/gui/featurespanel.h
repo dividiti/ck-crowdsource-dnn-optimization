@@ -33,6 +33,7 @@ private:
     QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSelectImages, *_linkSetBatchSize;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
+    QLabel* makeInfoLabel();
     void enableControls(bool on);
 };
 

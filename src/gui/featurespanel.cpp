@@ -18,9 +18,9 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
 
-    _infoEngine = new QLabel; _infoEngine->setProperty("qss-role", "info-label");
-    _infoModel = new QLabel; _infoModel->setProperty("qss-role", "info-label");
-    _infoImages = new QLabel; _infoImages->setProperty("qss-role", "info-label");
+    _infoEngine = makeInfoLabel();
+    _infoModel = makeInfoLabel();
+    _infoImages = makeInfoLabel();
 
     _linkSelectEngine = makeLink("Select", "Select another engine", SLOT(selectEngine()));
     _linkSelectModel = makeLink("Select", "Select another scenario", SLOT(selectModel()));
@@ -67,6 +67,14 @@ QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, co
     return link;
 }
 
+QLabel* FeaturesPanel::makeInfoLabel()
+{
+    auto label = new QLabel;
+    label->setWordWrap(true);
+    label->setProperty("qss-role", "info-label");
+    return label;
+}
+
 void FeaturesPanel::selectEngine()
 {
     if (_context->engines().isEmpty())
@@ -108,15 +116,15 @@ void FeaturesPanel::updateExperimentConditions()
     static QString NA("N/A");
 
     _infoEngine->setText(_context->engines().hasCurrent()
-        ? _context->engines().current().title().replace("(", "\n(")
+        ? _context->engines().current().title()//.replace("(", "\n(")
         : NA);
 
     _infoModel->setText(_context->models().hasCurrent()
-        ? _context->models().current().title().replace("(", "\n(")
+        ? _context->models().current().title()//.replace("(", "\n(")
         : NA);
 
     _infoImages->setText(_context->images().hasCurrent()
-        ? _context->images().current().title().replace("(", "\n(")
+        ? _context->images().current().title()//.replace("(", "\n(")
         : NA);
 
 //    _infoBatchSize->setInfo(QString::number(_context->batchSize()));

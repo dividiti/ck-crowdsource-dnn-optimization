@@ -5,6 +5,15 @@
 #include <QDir>
 #include <QFile>
 
+QString PredictionResult::str() const
+{
+    return QString(QStringLiteral("%1 - %2 (%3)%4"))
+        .arg(accuracy).arg(labels).arg(index)
+        .arg(isCorrect? QString(QStringLiteral(" CORRECT")): QString());
+}
+
+//-----------------------------------------------------------------------------
+
 void ExperimentResult::reset()
 {
     imagesCount = 0;
@@ -13,6 +22,10 @@ void ExperimentResult::reset()
     imagesPerSecond = 0;
     timePerBatch = 0;
     memoryPerImage = 0;
+
+    worstPredictedImage.clear();
+    worstPredictionMarker = 0;
+    worstPredictionFlag = false;
 }
 
 void ExperimentResult::accumulate(const ExperimentProbe* p)
@@ -21,7 +34,25 @@ void ExperimentResult::accumulate(const ExperimentProbe* p)
     totalTime += p->time;
     timePerImage = totalTime/imagesCount;
     imagesPerSecond = (timePerImage > 0)? 1/timePerImage: 0;
-    worstPredictedImage = p->image; // TODO
+
+    if (!p->isTop1)
+    {
+        auto correctToHighest = p->predictions.at(0).accuracy - p->correctInfo.accuracy;
+        worstPredictionFlag = correctToHighest >= worstPredictionMarker;
+        if (worstPredictionFlag)
+        {
+            worstPredictionMarker = correctToHighest;
+            worstPredictedImage = p->image;
+            worstPredictionCorrect = p->correctInfo;
+            worstPredictionTop1 = p->predictions.at(0);
+
+            qDebug() << "Worst prediction found with marker value" << worstPredictionMarker;
+            qDebug() << "Image:" << worstPredictedImage;
+            qDebug() << "Top-1:" << worstPredictionTop1.str();
+            qDebug() << "Correct:" << worstPredictionCorrect.str();
+        }
+    }
+    else worstPredictionFlag = false;
 }
 
 //-----------------------------------------------------------------------------

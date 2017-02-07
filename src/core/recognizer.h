@@ -52,7 +52,7 @@ public:
     bool prepare(const QString &modelFile, const QString &weightsFile,
                  const QString &meanFile, const QString &labelsFile);
 
-    void recognize(const QString& imageFile, ExperimentProbe& probe);
+    void recognize(const ImageEntry &image, ExperimentProbe& probe);
 
     bool ready() const { return _ready; }
 

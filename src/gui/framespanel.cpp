@@ -42,10 +42,9 @@ void BatchItem::runIteration()
 {
     int imageIndex = qrand() % _images->images().size();
     auto image = _images->images().at(imageIndex);
-    _recognizer->recognize(image.fileName, _probe);
-    _frame->loadImage(image.fileName, image.correctIndex,
-                      _recognizer->predictionLabel(image.correctIndex));
-    _frame->showPredictions(_probe.predictions, image.correctIndex);
+    _recognizer->recognize(image, _probe);
+    _frame->loadImage(image.fileName, _probe.correctInfo);
+    _frame->showPredictions(_probe.predictions);
     emit finished(&_probe);
 }
 

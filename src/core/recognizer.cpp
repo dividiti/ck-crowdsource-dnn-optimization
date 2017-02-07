@@ -175,26 +175,47 @@ char* Recognizer::prepareLogging()
     return nullptr;
 }
 
-void Recognizer::recognize(const QString& imageFile, ExperimentProbe& probe)
+void Recognizer::recognize(const ImageEntry& image, ExperimentProbe& probe)
 {
     ck_dnn_proxy__recognition_param param;
     param.proxy_handle = _dnnHandle;
-    param.image_file = makeLocalStr(imageFile);
+    param.image_file = makeLocalStr(image.fileName);
 
     ck_dnn_proxy__recognition_result result;
     dnnRecognize(&param, &result);
     delete[] param.image_file;
 
-    probe.image = imageFile;
+    probe.image = image.fileName;
     probe.time = result.duration;
     probe.memory = result.memory_usage;
+
+    probe.correctInfo.index = image.correctIndex;
+    probe.correctInfo.labels = predictionLabel(image.correctIndex);
+
     if (probe.predictions.capacity() < predictionsCount())
         probe.predictions.resize(predictionsCount());
+
+    bool correctFound = false;
     for (int i = 0; i < predictionsCount(); i++)
     {
-        probe.predictions[i].accuracy = result.predictions[i].accuracy;
-        probe.predictions[i].index = result.predictions[i].index;
-        probe.predictions[i].labels = predictionLabel(result.predictions[i].index);
+        PredictionResult& res = probe.predictions[i];
+        res.index = result.predictions[i].index;
+        res.labels = predictionLabel(res.index);
+        res.isCorrect = res.index == image.correctIndex;
+        res.accuracy = result.predictions[i].accuracy;
+        if (res.isCorrect)
+        {
+            correctFound = true;
+            probe.isTop1 = i == 0;
+            probe.correctInfo.isCorrect = true; // in top-5
+            probe.correctInfo.accuracy = res.accuracy;
+        }
+    }
+    if (!correctFound)
+    {
+        probe.isTop1 = false;
+        probe.correctInfo.isCorrect = false; // not in top-5
+        probe.correctInfo.accuracy = 0;
     }
 }
 
