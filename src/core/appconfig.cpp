@@ -21,17 +21,6 @@ QString AppConfig::styleSheetFileName()
     return qApp->applicationDirPath() + QDir::separator() + "app.qss";
 }
 
-QString AppConfig::imagesDir()
-{
-    return QDir(qApp->applicationDirPath() + QDir::separator() +
-                configValueStr("images_dir", "images")).absolutePath();
-}
-
-QStringList AppConfig::imagesFilter()
-{
-    return configValueStr("images_filter", "*.jpg,*.jpeg").split(",", QString::SkipEmptyParts);
-}
-
 int AppConfig::selectedEngineIndex(int experimentIndex)
 {
     return configValueInt(experimentKey("selected_engine", experimentIndex), -1);
@@ -107,11 +96,6 @@ QString AppConfig::configValueStr(const QString& key, const QString& defaultValu
 QString AppConfig::experimentKey(const QString& baseKey, int experimentIndex)
 {
     return baseKey + "_" + QString::number(experimentIndex);
-}
-
-QStringList AppConfig::ckArgs()
-{
-    return config().value("ck_args").toString().split(' ', QString::SkipEmptyParts);
 }
 
 QString AppConfig::localSubdir(const QString& key, const QString& defaultDir)

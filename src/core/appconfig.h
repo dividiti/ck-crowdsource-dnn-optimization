@@ -10,9 +10,6 @@ QT_END_NAMESPACE
 class AppConfig
 {
 public:
-    static QString imagesDir();
-    static QStringList imagesFilter();
-
     static int selectedModelIndex(int experimentIndex);
     static void setSelectedModelIndex(int experimentIndex, int modelIndex);
 
@@ -28,7 +25,6 @@ public:
     static QString ckPath();
     static QString ckBinPath();
     static QString ckExeName();
-    static QStringList ckArgs();
 
     static QString styleSheetFileName();
 
