@@ -40,7 +40,8 @@ public:
     double memory;
     QVector<PredictionResult> predictions;
     PredictionResult correctInfo;
-    bool isTop1;
+    bool correctAsTop1;
+    bool correctAsTop5;
 };
 
 //-----------------------------------------------------------------------------
@@ -55,6 +56,11 @@ public:
     double timePerBatch;
     double memoryPerImage;
 
+    double top1Metric;
+    double top5Metric;
+    int top1Count;
+    int top5Count;
+
     bool worstPredictionFlag;
     double worstPredictionMarker;
     PredictionResult worstPredictionCorrect;
@@ -63,6 +69,7 @@ public:
 
     void reset();
     void accumulate(const ExperimentProbe *p);
+    void calculateWorstPrediction(const ExperimentProbe *p);
 };
 
 //-----------------------------------------------------------------------------

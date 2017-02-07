@@ -206,17 +206,18 @@ void Recognizer::recognize(const ImageEntry& image, ExperimentProbe& probe)
         if (res.isCorrect)
         {
             correctFound = true;
-            probe.isTop1 = i == 0;
-            probe.correctInfo.isCorrect = true; // in top-5
+            probe.correctAsTop1 = i == 0;
+            probe.correctAsTop5 = true;
             probe.correctInfo.accuracy = res.accuracy;
         }
     }
     if (!correctFound)
     {
-        probe.isTop1 = false;
-        probe.correctInfo.isCorrect = false; // not in top-5
+        probe.correctAsTop1 = false;
+        probe.correctAsTop5 = false;
         probe.correctInfo.accuracy = 0;
     }
+    probe.correctInfo.isCorrect = probe.correctAsTop5;
 }
 
 bool Recognizer::checkFileExists(const QString& fileName)

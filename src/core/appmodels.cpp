@@ -23,6 +23,11 @@ void ExperimentResult::reset()
     timePerBatch = 0;
     memoryPerImage = 0;
 
+    top1Metric = 0;
+    top5Metric = 0;
+    top1Count = 0;
+    top5Count = 0;
+
     worstPredictedImage.clear();
     worstPredictionMarker = 0;
     worstPredictionFlag = false;
@@ -35,7 +40,23 @@ void ExperimentResult::accumulate(const ExperimentProbe* p)
     timePerImage = totalTime/imagesCount;
     imagesPerSecond = (timePerImage > 0)? 1/timePerImage: 0;
 
-    if (!p->isTop1)
+    if (p->correctAsTop1)
+    {
+        top1Count++;
+        top1Metric = top1Count / double(imagesCount);
+    }
+    if (p->correctAsTop5)
+    {
+        top5Count++;
+        top5Metric = top5Count / double(imagesCount);
+    }
+
+    calculateWorstPrediction(p);
+}
+
+void ExperimentResult::calculateWorstPrediction(const ExperimentProbe *p)
+{
+    if (!p->correctAsTop1)
     {
         auto correctToHighest = p->predictions.at(0).accuracy - p->correctInfo.accuracy;
         worstPredictionFlag = correctToHighest >= worstPredictionMarker;
