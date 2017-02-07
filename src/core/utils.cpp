@@ -7,6 +7,7 @@
 #include <QDesktopWidget>
 #include <QDir>
 #include <QFile>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPalette>
 #include <QPointer>
@@ -134,12 +135,17 @@ QWidget* makeDivider()
     auto divider = new QFrame;
     divider->setProperty("qss-role", "divider");
     divider->setFrameShape(QFrame::HLine);
-//    divider->setStyleSheet(QString("border-top-width: 1px;"
-//                                   "border-top-style: solid;"
-//                                   "border-top-color: %1;")
-//                           .arg(divider->palette().color(QPalette::Dark).name()));
     return divider;
 }
 
+QLabel* makeTitle(const QString& title)
+{
+    auto label = new QLabel(title);
+    label->setProperty("qss-role", "panel-title");
+    auto f = label->font();
+    f.setLetterSpacing(QFont::AbsoluteSpacing, 0.8);
+    label->setFont(f);
+    return label;
+}
 
 } // namespace Utils

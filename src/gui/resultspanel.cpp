@@ -1,10 +1,15 @@
-#include "infolabel.h"
+#include "imageview.h"
 #include "experimentcontext.h"
 #include "resultspanel.h"
 #include "utils.h"
 #include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>
+#include <QLabel>
+#include <QVariant>
+
+#define WORST_PREDICTED_IMAGE_W 180
+#define WORST_PREDICTED_IMAGE_H 135
 
 ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
 {
@@ -14,33 +19,41 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::experimentResultReady, this, &ResultsPanel::experimentResultReady);
 
-    _infoTimePerFrame = new InfoLabel(tr("TIME PER\nIMAGE (FPS)"));
-//    _infoTimePerBatch = new InfoLabel(tr("Time per batch:"));
-//    _infoMemoryUsage = new InfoLabel(tr("Memory usage\nper image:"));
+    _infoTimePerImage = new QLabel;
+    _infoTimePerImage->setProperty("qss-role", "info-label");
 
-    setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
-    {
-        _infoTimePerFrame,
-        /*Utils::makeDivider(),
-        _infoTimePerBatch,
-        Utils::makeDivider(),
-        _infoMemoryUsage,*/
-        0,
+    _infoImagesPerSec = new QLabel;
+    _infoImagesPerSec->setProperty("qss-role", "info-label-small");
+
+    auto panelCounters = new QFrame;
+    panelCounters->setProperty("qss-role", "results-panel");
+    panelCounters->setLayout(Ori::Gui::layoutV(0, 0, {
+        Utils::makeTitle("TIME PER\nIMAGE (FPS)"), _infoTimePerImage, _infoImagesPerSec }));
+
+    _worstPredictedImage = new ImageView(WORST_PREDICTED_IMAGE_W, WORST_PREDICTED_IMAGE_H);
+
+    auto panelWorstPrediction = new QFrame;
+    panelWorstPrediction->setObjectName("worstPredictionPanel");
+    panelWorstPrediction->setProperty("qss-role", "results-panel");
+    panelWorstPrediction->setLayout(Ori::Gui::layoutV(0, 0, {
+        Utils::makeTitle("WORST PREDICTION"),
+        Ori::Gui::layoutH(0, 0, { 0, _worstPredictedImage, 0}),
     }));
+
+    setLayout(Ori::Gui::layoutV(0, 0,
+        { panelCounters, panelWorstPrediction, 0 }));
 }
 
 void ResultsPanel::experimentStarted()
 {
-    _infoTimePerFrame->setInfo("N/A");
-//    _infoTimePerBatch->setInfo("N/A");
-//    _infoMemoryUsage->setInfo("N/A");
+    _infoTimePerImage->setText("N/A");
+    _infoImagesPerSec->clear();
 }
 
 void ResultsPanel::experimentResultReady()
 {
     auto r = _context->experimentResult();
-    _infoTimePerFrame->setInfo(QString::number(r.timePerImage, 'f', 2),
-                               QString("(%1)").arg(r.imagesPerSecond, 0, 'f', 2));
-//    _infoTimePerBatch->setInfo(QString::number(r.timePerBatch));
-//    _infoMemoryUsage->setInfo(QString::number(r.memoryPerImage));
+    _infoTimePerImage->setText(QString::number(r.timePerImage, 'f', 2));
+    _infoImagesPerSec->setText(QString(QStringLiteral("(%1)")).arg(r.imagesPerSecond, 0, 'f', 2));
+    _worstPredictedImage->loadImage(r.worstPredictedImage);
 }

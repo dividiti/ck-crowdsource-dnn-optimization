@@ -32,7 +32,6 @@ SOURCES += \
     src/gui/framespanel.cpp \
     src/gui/featurespanel.cpp \
     src/gui/resultspanel.cpp \
-    src/gui/infolabel.cpp \
     src/gui/framewidget.cpp \
     src/shell/shellcommands.cpp \
     src/core/appconfig.cpp \
@@ -45,7 +44,8 @@ SOURCES += \
     src/core/ck.cpp \
     src/gui/stylesheeteditor.cpp \
     src/core/recognizer.cpp \
-    src/core/ckjson.cpp
+    src/core/ckjson.cpp \
+    src/gui/imageview.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -53,7 +53,6 @@ HEADERS += \
     src/gui/framespanel.h \
     src/gui/featurespanel.h \
     src/gui/resultspanel.h \
-    src/gui/infolabel.h \
     src/gui/framewidget.h \
     src/shell/shellcommands.h \
     src/core/appconfig.h \
@@ -66,7 +65,8 @@ HEADERS += \
     src/core/ck.h \
     src/gui/stylesheeteditor.h \
     src/core/recognizer.h \
-    src/core/ckjson.h
+    src/core/ckjson.h \
+    src/gui/imageview.h
 
 RESOURCES += \
     src/resources.qrc

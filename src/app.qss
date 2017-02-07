@@ -1,24 +1,21 @@
-QLabel#infoLabelTitle {
+QLabel[qss-role="panel-title"] {
 	font-size: 11px;
 	font-weight: bold;
 	color: #64ffda;
 	font-family: Verdana;
+	margin-bottom: 8px;
+	margin-left: -4px;
 }
-QLabel#infoLabelValue {
+QLabel[qss-role="info-label"] {
 	font-size: 13px;
 	color: #ffffff;
 	font-family: Verdana;
-	margin: 4px 0 0 -4px;
 }
-ResultsPanel QLabel#infoLabelValue {
+ResultsPanel QLabel[qss-role="info-label"] {
 	font-size: 18px;
-	color: #ffffff;
-	line-height: 18px;
-	font-family: Verdana;
 	font-weight: bold;
-	margin: 4px 0 0 -4px;
 }
-ResultsPanel QLabel#infoLabelValueAux {
+ResultsPanel QLabel[qss-role="info-label-small"] {
 	font-size: 13px;
 	color: #969C9E;
 	font-family: Verdana;
@@ -41,15 +38,19 @@ QFrame#framesPanel {
 }
 QFrame#featuresPanel {
 	background: #313c42;
-	margin: 0px;
-	padding: 16px;
-	border-bottom: 1px solid #21292C;
 }
 QFrame#resultsPanel {
 	background: #313c42;
+	border-bottom: 1px solid #21292C;
+}
+QFrame[qss-role="features-panel"] {
 	margin: 0px;
 	padding: 16px;
-	border-bottom: 1px solid #21292C;
+}
+QFrame[qss-role="results-panel"] {
+	margin: 0px;
+	padding: 16px;
+	border-top: 1px solid #21292C;
 }
 QFrame#buttonsPanel {
 	background: #313c42;
@@ -90,6 +91,8 @@ QPushButton#buttonPublish {
 }
 QFrame[qss-role="divider"] {
 	border-top: 1px solid #21292C;
+	margin-left: 16px;
+	margin-right: 16px;
 }
 QLabel[qss-role="link"] {
 	font-size: 11px;

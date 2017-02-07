@@ -2,7 +2,6 @@
 #include "appmodels.h"
 #include "experimentcontext.h"
 #include "featurespanel.h"
-#include "infolabel.h"
 #include "utils.h"
 #include "../ori/OriWidgets.h"
 
@@ -19,48 +18,49 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
 
-    _infoEngine = new InfoLabel("CAFFE ENGINE");
-    _infoModel = new InfoLabel("CAFFE MODEL");
-    _infoImages = new InfoLabel("IMAGE SOURCE");
-//    _infoBatchSize = new InfoLabel("FRAMES COUNT");
+    _infoEngine = new QLabel; _infoEngine->setProperty("qss-role", "info-label");
+    _infoModel = new QLabel; _infoModel->setProperty("qss-role", "info-label");
+    _infoImages = new QLabel; _infoImages->setProperty("qss-role", "info-label");
 
     _linkSelectEngine = makeLink("Select", "Select another engine", SLOT(selectEngine()));
     _linkSelectModel = makeLink("Select", "Select another scenario", SLOT(selectModel()));
     _linkSelectImages = makeLink("Select", "Select image source", SLOT(selectImages()));
-//    _linkSetBatchSize = makeLink("Change", "Change batch size", SLOT(setBatchSize()));
 
-    setLayout(Ori::Gui::layoutV(0, 3*Ori::Gui::layoutSpacing(),
+    auto panelEngine = new QFrame;
+    panelEngine->setProperty("qss-role", "features-panel");
+    panelEngine->setLayout(Ori::Gui::layoutV(0, 0, {
+        Ori::Gui::layoutH({ Utils::makeTitle("CAFFE ENGINE"), 0, _linkSelectEngine }),
+        _infoEngine,
+    }));
+
+    auto panelModel = new QFrame;
+    panelModel->setProperty("qss-role", "features-panel");
+    panelModel->setLayout(Ori::Gui::layoutV(0, 0, {
+        Ori::Gui::layoutH({ Utils::makeTitle("CAFFE MODEL"), 0, _linkSelectModel }),
+        _infoModel,
+    }));
+
+    auto panelImages = new QFrame;
+    panelImages->setProperty("qss-role", "features-panel");
+    panelImages->setLayout(Ori::Gui::layoutV(0, 0, {
+        Ori::Gui::layoutH({ Utils::makeTitle("IMAGE SOURCE"), 0, _linkSelectImages }),
+        _infoImages,
+    }));
+
+    setLayout(Ori::Gui::layoutV(0, 0,
     {
-        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
-        {
-            _infoEngine,
-            Ori::Gui::layoutH({ _linkSelectEngine, 0 })
-        }),
+        panelEngine,
         Utils::makeDivider(),
-        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
-        {
-            _infoModel,
-            Ori::Gui::layoutH({ _linkSelectModel, 0 })
-        }),
+        panelModel,
         Utils::makeDivider(),
-        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
-        {
-            _infoImages,
-            Ori::Gui::layoutH({ _linkSelectImages, 0 })
-        }),
-//        Utils::makeDivider(),
-//        Ori::Gui::layoutV(0, Ori::Gui::layoutSpacing(),
-//        {
-//            _infoBatchSize,
-//            Ori::Gui::layoutH({ _linkSetBatchSize, 0 })
-//        }),
-        0,
+        panelImages,
     }));
 }
 
 QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, const char* slot)
 {
     auto link = new QLabel(QString("<a href='dummy'><span style='color:#969C9E'>%1</span></a>").arg(text));
+    link->setAlignment(Qt::AlignTop | Qt::AlignRight);
     link->setProperty("qss-role", "link");
     link->setToolTip(tooltip);
     connect(link, SIGNAL(linkActivated(QString)), this, slot);
@@ -107,15 +107,15 @@ void FeaturesPanel::updateExperimentConditions()
 {
     static QString NA("N/A");
 
-    _infoEngine->setInfo(_context->engines().hasCurrent()
+    _infoEngine->setText(_context->engines().hasCurrent()
         ? _context->engines().current().title().replace("(", "\n(")
         : NA);
 
-    _infoModel->setInfo(_context->models().hasCurrent()
+    _infoModel->setText(_context->models().hasCurrent()
         ? _context->models().current().title().replace("(", "\n(")
         : NA);
 
-    _infoImages->setInfo(_context->images().hasCurrent()
+    _infoImages->setText(_context->images().hasCurrent()
         ? _context->images().current().title().replace("(", "\n(")
         : NA);
 

@@ -3,7 +3,12 @@
 
 #include <QFrame>
 
+QT_BEGIN_NAMESPACE
+class QLabel;
+QT_END_NAMESPACE
+
 class ExperimentContext;
+class ImageView;
 class InfoLabel;
 
 class ResultsPanel : public QFrame
@@ -18,7 +23,8 @@ private slots:
 
 private:
     ExperimentContext* _context;
-    InfoLabel *_infoTimePerFrame, *_infoTimePerBatch, *_infoMemoryUsage;
+    QLabel *_infoTimePerImage, *_infoImagesPerSec;
+    ImageView *_worstPredictedImage;
 };
 
 #endif // RESULTSPANEL_H

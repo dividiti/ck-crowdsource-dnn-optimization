@@ -4,6 +4,10 @@
 #include <QFrame>
 #include <QPointer>
 
+QT_BEGIN_NAMESPACE
+class QLabel;
+QT_END_NAMESPACE
+
 class ExperimentContext;
 class InfoLabel;
 
@@ -25,7 +29,7 @@ private slots:
 
 private:
     ExperimentContext* _context;
-    InfoLabel *_infoEngine, *_infoModel, *_infoImages, *_infoBatchSize;
+    QLabel *_infoEngine, *_infoModel, *_infoImages;
     QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSelectImages, *_linkSetBatchSize;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);

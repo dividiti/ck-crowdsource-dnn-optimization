@@ -21,6 +21,7 @@ void ExperimentResult::accumulate(const ExperimentProbe* p)
     totalTime += p->time;
     timePerImage = totalTime/imagesCount;
     imagesPerSecond = (timePerImage > 0)? 1/timePerImage: 0;
+    worstPredictedImage = p->image; // TODO
 }
 
 //-----------------------------------------------------------------------------

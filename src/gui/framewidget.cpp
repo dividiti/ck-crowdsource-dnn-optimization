@@ -1,13 +1,12 @@
 #include "framewidget.h"
+#include "imageview.h"
 #include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>
 #include <QDebug>
-#include <QImage>
 #include <QLabel>
 #include <QPainter>
 #include <QPaintEvent>
-#include <QResizeEvent>
 
 #define FRAME_CONTENT_W 220
 #define FRAME_CONTENT_H 165
@@ -15,34 +14,6 @@
 #define PROB_LABEL_W 45
 #define PROB_LABEL_H 18
 #define PROB_CORRECT_COLOR "#009688"
-
-//-----------------------------------------------------------------------------
-
-class ImageView : public QFrame
-{
-public:
-    void loadImage(const QString& file)
-    {
-        _image.load(file);
-        repaint();
-    }
-
-protected:
-    void paintEvent(QPaintEvent *event) override
-    {
-        double aspect = _image.width() / double(_image.height());
-        int targetH = event->rect().height();
-        int targetW = targetH * aspect;
-        int fullW = event->rect().width();
-        QPainter p(this);
-        p.drawImage(QRect((fullW - targetW)/2, 0, targetW, targetH), _image, _image.rect());
-    }
-
-private:
-    QImage _image;
-};
-
-//-----------------------------------------------------------------------------
 
 class PredictionProbLabel : public QLabel
 {
@@ -137,9 +108,7 @@ FrameWidget::FrameWidget(QWidget *parent) : QFrame(parent)
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     setFixedWidth(FRAME_CONTENT_W);
 
-    _imageView = new ImageView;
-    _imageView->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _imageView->setFixedSize(FRAME_CONTENT_W, FRAME_CONTENT_H);
+    _imageView = new ImageView(FRAME_CONTENT_W, FRAME_CONTENT_H);
     _imageView->setObjectName("frameImage");
 
     auto layoutInfo = new QVBoxLayout;
@@ -152,7 +121,7 @@ FrameWidget::FrameWidget(QWidget *parent) : QFrame(parent)
         _predictions << view;
     }
 
-    setLayout(Ori::Gui::layoutV(0, 8, { _imageView, layoutInfo }));
+    setLayout(Ori::Gui::layoutV(0, 8, { _imageView, layoutInfo, 0 }));
 }
 
 void FrameWidget::loadImage(const QString& path, int correctIndex, const QString& correctLabel)

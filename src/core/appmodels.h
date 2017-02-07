@@ -49,6 +49,7 @@ public:
     double imagesPerSecond;
     double timePerBatch;
     double memoryPerImage;
+    QString worstPredictedImage;
 
     void reset();
     void accumulate(const ExperimentProbe *p);

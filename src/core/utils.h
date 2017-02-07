@@ -6,6 +6,7 @@
 QT_BEGIN_NAMESPACE
 class QFile;
 class QIODevice;
+class QLabel;
 class QWidget;
 QT_END_NAMESPACE
 
@@ -29,6 +30,7 @@ bool confirmDlg(const QString& text);
 void errorDlg(const QString& text);
 
 QWidget* makeDivider();
+QLabel* makeTitle(const QString &title);
 }
 
 #endif // UTILS_H
