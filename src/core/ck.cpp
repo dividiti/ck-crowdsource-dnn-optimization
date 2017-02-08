@@ -274,10 +274,15 @@ DnnEngine CK::loadEngine(const CkEntry& env)
     auto packageLib = libPath + QDir::separator() + libFile;
     qDebug() << "Engine lib:" << packageLib;
 
+    QMap<QString, QString> deps;
+    loadDepLibs(meta, deps);
+    QStringList libs(deps.values());
+    libs.removeDuplicates();
+
     DnnEngine engine;
     engine._title = packageName;
     engine._library = packageLib;
-    engine._paths = loadDepLibs(meta);
+    engine._deps = libs;
     qDebug() << "OK. Engine loaded:" << env.uid << engine.title();
     return engine;
 }
@@ -297,26 +302,33 @@ QString CK::findPackage(const QString& uoa)
     return paths.first();
 }
 
-QStringList CK::loadDepLibs(const CkEnvMeta& meta)
+void CK::loadDepLibs(const CkEnvMeta& meta, QMap<QString, QString>& libs)
 {
-    QStringList libs;
     auto setupEnvs = meta.setupEnvs();
     for (auto setupEnv: setupEnvs)
         if (setupEnv.first.contains("lib"))
         {
             auto envUid = setupEnv.second;
+            if (libs.contains(envUid)) continue;
+
+            qDebug() << "Dep found:" << setupEnv.first << setupEnv.second;
             auto envMeta = CkEnvMeta(envUid);
             auto libPath = envMeta.pathLib();
             auto libFile = envMeta.dynamicLib();
-            if (!libPath.isEmpty() && !libFile.isEmpty())
+            if (libPath.isEmpty() || libFile.isEmpty())
             {
-                auto lib = libPath + QDir::separator() + libFile;
-                qDebug() << "Lib path:" << lib;
-                libs << lib;
+                qWarning() << "    Skipped";
+                continue;
             }
-            // TODO: we need to go deeper! build full dependecies list
+            auto lib = libPath + QDir::separator() + libFile;
+            if (!libs.contains(lib))
+            {
+                qDebug() << "    Lib:" << lib;
+                libs.insert(envUid, lib);
+            }
+            // We need to go deeper! build full dependecies list
+            loadDepLibs(envMeta, libs);
         }
-    return libs;
 }
 
 QString CK::nearbyFile(const QString& fullFileName, const QString& nearFileName)

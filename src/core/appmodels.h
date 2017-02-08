@@ -97,14 +97,14 @@ class DnnEngine
 public:
     QString title() const { return _title; }
     QString library() const { return _library; }
-    QStringList paths() const { return _paths; }
+    QStringList deps() const { return _deps; }
 
     QString str() const { return _title + ": " + _library; }
     bool isEmpty() const { return _library.isEmpty(); }
 
 private:
     QString _title, _library;
-    QStringList _paths;
+    QStringList _deps;
 
     friend class CK;
 };

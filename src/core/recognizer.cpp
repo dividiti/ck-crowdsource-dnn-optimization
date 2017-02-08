@@ -46,12 +46,13 @@ void set(const QByteArray& paths)
 
 Recognizer::Recognizer(const QString& proxyLib, const QStringList &depLibs)
 {
-    qDebug() << "Loading library" << proxyLib;
     try
     {
+        qDebug() << "Loading dependencies. Count:" << depLibs.size();
         auto res = loadDeps(depLibs);
         if (!res.isEmpty()) throw res;
 
+        qDebug() << "Loading main library" << proxyLib;
         _lib = new QLibrary(proxyLib);
         if (!_lib->load()) throw _lib->errorString();
 
@@ -114,9 +115,12 @@ QString Recognizer::loadDeps(const QStringList &depLibs)
     for (int i = depLibs.size()-1; i >= 0; i--)
     {
         auto depLib = depLibs.at(i);
+        qDebug() << "Load dep lib" << i+1 << depLib;
         if (!QFile(depLib).exists())
+        {
+            qWarning() << "File not found";
             continue;
-        qDebug() << "Load dep lib" << depLib;
+        }
         auto lib = new QLibrary(depLib);
         if (!lib->load())
             return lib->errorString();

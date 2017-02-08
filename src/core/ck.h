@@ -46,7 +46,7 @@ private:
     QStringList ck(const QStringList &args);
     QList<CkEntry> queryEnvsByTags(const QString& tags);
     QString findPackage(const QString& uoa);
-    QStringList loadDepLibs(const class CkEnvMeta& meta);
+    void loadDepLibs(const class CkEnvMeta& meta, QMap<QString, QString> &libs);
     QString nearbyFile(const QString& fullFileName, const QString& nearFileName);
 
     template <typename TResult>

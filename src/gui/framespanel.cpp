@@ -107,10 +107,10 @@ void FramesPanel::experimentStarted()
 
     qDebug() << "----------------------------------------------";
     qDebug() << "Start experiment for" << engine.title()
-             << "on" << model.title()
+             << "with" << model.title()
              << "on" << images.title();
 
-    _recognizer = new Recognizer(engine.library(), engine.paths());
+    _recognizer = new Recognizer(engine.library(), engine.deps());
     if (!_recognizer->ready())
         return abortExperiment();
 
