@@ -9,14 +9,15 @@ export SRC="./src"
 export QT_DIR="${HOME}/Qt/5.7/gcc_64"
 export QT_LIBS="${QT_DIR}/lib"
 
+mkdir -p ${REDIST}
+
 echo "Copy app files..."
 cp -f ${BIN}/${APP_EXE} ${REDIST}
 cp -f ${BIN}/*.sh ${REDIST}
 cp -f ${BIN}/*.qss ${REDIST}
-cp -f ${SRC}/app.conf ${REDIST}
+cp -f ${SRC}/app.conf.example ${REDIST}/app.conf
 
 echo "Copy Qt libs..."
-cp -fL ${QT_LIBS}/libQt5Core.so.5 ${REDIST}
 cp -fL ${QT_LIBS}/libQt5Core.so.5 ${REDIST}
 cp -fL ${QT_LIBS}/libQt5DBus.so.5 ${REDIST}
 cp -fL ${QT_LIBS}/libQt5Gui.so.5 ${REDIST}
