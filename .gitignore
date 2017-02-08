@@ -1,4 +1,8 @@
-bin
+bin/crowdsource-video-experiments-on-desktop
+bin/*.exe
+bin/app.conf
+bin/tmp
+bin/logs
 tmp
 redist*
 *.user
