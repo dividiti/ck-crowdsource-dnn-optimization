@@ -35,7 +35,7 @@ Preparation to run
 ====================
 After source code built, executable file lays down into _bin_ directory inside the project directory.
 
-Create _app.conf_ file inside the _bin_ directory, which contains info about your local CK installation:
+Create _app.conf.example_ file inside the _bin_ directory, which contains info about your local CK installation:
 ```
 [General]
 ck_exe_name=./ck
