@@ -22,7 +22,7 @@ public:
     static int batchSize(int experimentIndex);
     static void setBatchSize(int experimentIndex, int batchSize);
 
-    static QString ckPath();
+    static QString ckReposPath();
     static QString ckBinPath();
     static QString ckExeName();
 

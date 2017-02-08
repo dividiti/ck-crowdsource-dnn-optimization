@@ -36,7 +36,7 @@ public:
 
 private:
     QProcess _ck;
-    QString _ckPath;
+    QString _reposPath;
     QStringList _args;
 
     DnnModel loadModel(const CkEntry& env);

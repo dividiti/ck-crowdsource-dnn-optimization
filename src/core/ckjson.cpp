@@ -73,7 +73,7 @@ QString CkJson::valueStr(const QJsonObject& json, const QString& key) const
 
 CkEnvMeta::CkEnvMeta(const QString& uid)
 {
-    open(Utils::makePath({ AppConfig::ckPath(), "local", "env", uid, ".cm", "meta.json" }));
+    open(Utils::makePath({ AppConfig::ckReposPath(), "local", "env", uid, ".cm", "meta.json" }));
 }
 
 QString CkEnvMeta::envVar(const QString& name) const
@@ -110,5 +110,12 @@ QVector<QPair<QString, QString> > CkEnvMeta::setupEnvs() const
 CkInfo::CkInfo(const QString& path)
 {
     open(Utils::makePath({path, ".cm", "info.json" }));
+}
+
+//-----------------------------------------------------------------------------
+
+CkEnvInfo::CkEnvInfo(const QString& uid) : CkInfo(
+    Utils::makePath({ AppConfig::ckReposPath(), "local", "env", uid }))
+{
 }
 

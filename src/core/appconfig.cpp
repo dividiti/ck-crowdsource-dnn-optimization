@@ -61,23 +61,19 @@ void AppConfig::setBatchSize(int experimentIndex, int batchSize)
     config().setValue(experimentKey("batch_size", experimentIndex), batchSize);
 }
 
-QString AppConfig::ckPath()
+QString AppConfig::ckReposPath()
 {
-    return configValueStr("ck_path", "~/CK"); // TODO: default value is platform specific
+    return config().value("ck_repos_path").toString();
 }
 
 QString AppConfig::ckBinPath()
 {
-    auto path = config().value("ck_bin_path").toString();
-    if (path.isEmpty())
-        qCritical() << "CK bin path not found in config";
-        // TODO: ask user where CK is installed
-    return path;
+    return config().value("ck_bin_path").toString();
 }
 
 QString AppConfig::ckExeName()
 {
-    return configValueStr("ck_exe_name", "./ck"); // TODO: default value is platform specific
+    return config().value("ck_exe_name").toString();
 }
 
 int AppConfig::configValueInt(const QString& key, int defaultValue)

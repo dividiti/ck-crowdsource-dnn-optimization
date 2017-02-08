@@ -67,6 +67,7 @@ void ExperimentResult::calculateWorstPrediction(const ExperimentProbe *p)
             worstPredictionCorrect = p->correctInfo;
             worstPredictionTop1 = p->predictions.at(0);
 
+            qDebug() << "----------------------------------------------";
             qDebug() << "Worst prediction found with marker value" << worstPredictionMarker;
             qDebug() << "Image:" << worstPredictedImage;
             qDebug() << "Top-1:" << worstPredictionTop1.str();

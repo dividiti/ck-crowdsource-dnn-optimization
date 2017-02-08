@@ -53,4 +53,10 @@ public:
     QString dataName() const { return valueStr("data_name"); }
 };
 
+class CkEnvInfo : public CkInfo
+{
+public:
+    CkEnvInfo(const QString& uid);
+};
+
 #endif // CKJSON_H

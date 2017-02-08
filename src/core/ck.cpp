@@ -7,26 +7,33 @@
 #include <QFile>
 #include <QDebug>
 #include <QDir>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 
 CK::CK()
 {
-    _ckPath = AppConfig::ckPath();
-    // TODO: same initialization as in ScenarioRuner, should be merged
+    _reposPath = AppConfig::ckReposPath();
+    if (_reposPath.isEmpty())
+        AppEvents::error("CK repository path not found in config");
+
+    auto ckExe = AppConfig::ckExeName();
+    if (ckExe.isEmpty())
+        AppEvents::error("CK bin path not found in config");
+
+    auto ckDir = AppConfig::ckBinPath();
+    if (ckDir.isEmpty())
+        AppEvents::error("CK exe name not found in config");
+
 #ifdef Q_OS_WIN32
     _ck.setProgram("python");
-    _args = QStringList { "-W", "ignore::DeprecationWarning", AppConfig::ckBinPath()+"\\..\\ck\\kernel.py" };
+    _args = QStringList { "-W", "ignore::DeprecationWarning", ckDir + "\\..\\ck\\kernel.py" };
 #else
-    _ck.setProgram(AppConfig::ckExeName());
-    _ck.setWorkingDirectory(AppConfig::ckBinPath());
+    _ck.setProgram(ckExe);
+    _ck.setWorkingDirectory(ckDir);
 #endif
 
-    qDebug() << "CK path:" << _ckPath;
+    qDebug() << "CK repos path:" << _reposPath;
     qDebug() << "CK bin path:" << _ck.workingDirectory();
     qDebug() << "CK executable:" << _ck.program();
-    qDebug() << "CK default args:" << _ck.arguments().join(" ");
+    qDebug() << "CK default args:" << _args.join(" ");
 }
 
 QList<DnnModel> CK::getModelsByUidOrAll(const QString& uid)
@@ -126,11 +133,12 @@ CkEntry CK::queryEnvByUid(const QString& uid)
         qCritical() << "No env uid found";
         return CkEntry();
     }
-    auto info = Utils::makePath({ _ckPath, "local", "env", uid, ".cm", "info.json" });
-    auto json = QJsonDocument::fromJson(Utils::loadTextFromFile(info));
-    auto name = json.object()["data_name"].toString();
-    if (name.isEmpty())
-        return CkEntry();
+    auto info = CkEnvInfo(uid);
+    if (!info.ok()) return CkEntry();
+
+    auto name = info.dataName();
+    if (name.isEmpty()) return CkEntry();
+
     CkEntry entry { uid, name };
     qDebug() << "Env found:" << entry.str();
     return entry;
