@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file alias="main">../images/icon.png</file>
+    </qresource>
+    <qresource prefix="/tools">
+        <file alias="info">../images/info.svg</file>
+        <file alias="delete">../images/trash_bin.svg</file>
+        <file alias="download">../images/download.svg</file>
+        <file alias="publish">../images/ico-publish.svg</file>
+    </qresource>
+    <qresource prefix="/sample">
+        <file alias="1">../images/sample1.jpg</file>
+        <file alias="2">../images/sample2.jpg</file>
+        <file alias="3">../images/sample3.jpg</file>
+        <file alias="4">../images/sample4.jpg</file>
+        <file alias="5">../images/sample5.jpg</file>
+        <file alias="6">../images/sample6.jpg</file>
+        <file alias="7">../images/sample7.jpg</file>
+        <file alias="8">../images/sample8.jpg</file>
+        <file alias="9">../images/sample9.jpg</file>
+        <file alias="10">../images/sample10.jpg</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file alias="frame">../images/film_frame.png</file>
+    </qresource>
+</RCC>
