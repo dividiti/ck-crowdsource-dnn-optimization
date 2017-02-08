@@ -29,7 +29,35 @@ License
 
 Minimal requirements
 ====================
-Linux, Windows or MacOS operation system 
+Linux, Windows or MacOS operation system
+
+Preparation to run
+====================
+After source code built, executable file lays down into _bin_ directory inside the project directory.
+
+Create _app.conf_ file inside the _bin_ directory, which contains info about your local CK installation:
+```
+[General]
+ck_exe_name=./ck
+ck_bin_path=/path/to/your/ck/bin
+ck_repos_path=~/CK
+```
+Or you can copy dummy file _src/app.conf_ into _bin_ and use it as template.
+
+To make application run you have to install at least one package from each of three categories: dnn-proxy, caffemodel, imagenet dataset.
+
+* dnn-proxy packages:
+`$ ck install package:dnn-proxy-caffe-cpu`
+`$ ck install package:dnn-proxy-caffe-opencl`
+`$ ck install package:dnn-proxy-caffe-cuda`
+
+* caffe models:
+`$ ck install package:caffemodel-bvlc-alexnet`
+`$ ck install package:caffemodel-bvlc-googlenet`
+
+* imagenet datasets:
+`$ ck install package:imagenet-2012-aux`
+`$ ck install package:imagenet-2012-val`
 
 Authors
 =======
