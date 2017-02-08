@@ -35,14 +35,14 @@ Preparation to run
 ====================
 After source code built, executable file lays down into _bin_ directory inside the project directory.
 
-Create _app.conf.example_ file inside the _bin_ directory, which contains info about your local CK installation:
+Create _app.conf_ file inside the _bin_ directory, which contains info about your local CK installation:
 ```
 [General]
 ck_exe_name=./ck
 ck_bin_path=/path/to/your/ck/bin
 ck_repos_path=~/CK
 ```
-Or you can copy dummy file _src/app.conf_ into _bin_ and use it as template.
+Or you can copy dummy file _src/app.conf.example_ into _bin_ and use it as template.
 
 To make application run you have to install at least one package from each of three categories: dnn-proxy, caffemodel, imagenet dataset.
 
