@@ -44,6 +44,8 @@ void WindowsLibLoader::loadDeps(const QStringList &deps)
     }
 }
 
+// We have to load DLL via WinAPI, because of QLibrary can't search
+// dependent libs in user specified paths (LOAD_LIBRARY_SEARCH_USER_DIRS)
 void WindowsLibLoader::loadLib(const QString& lib)
 {
     const char* libpath = Utils::makeLocalStr(lib);
@@ -129,9 +131,9 @@ void LinuxLibLoader::loadLib(const QString& lib)
 
 void* LinuxLibLoader::resolve(const char* symbol)
 {
-    void* func = _lib->resolve(symbol);
+    auto func = _lib->resolve(symbol);
     if (!func) throw _lib->errorString();
-    return func;
+    return (void*)func;
 }
 
 #endif
