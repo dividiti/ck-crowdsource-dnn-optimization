@@ -1,5 +1,6 @@
 bin/crowdsource-video-experiments-on-desktop
 bin/*.exe
+bin/*.dll
 bin/app.conf
 bin/tmp
 bin/logs

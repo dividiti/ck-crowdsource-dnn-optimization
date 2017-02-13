@@ -14,10 +14,6 @@ CK::CK()
     if (_reposPath.isEmpty())
         AppEvents::error("CK repository path not found in config");
 
-    auto ckExe = AppConfig::ckExeName();
-    if (ckExe.isEmpty())
-        AppEvents::error("CK bin path not found in config");
-
     auto ckDir = AppConfig::ckBinPath();
     if (ckDir.isEmpty())
         AppEvents::error("CK exe name not found in config");
@@ -26,6 +22,10 @@ CK::CK()
     _ck.setProgram("python");
     _args = QStringList { "-W", "ignore::DeprecationWarning", ckDir + "\\..\\ck\\kernel.py" };
 #else
+    auto ckExe = AppConfig::ckExeName();
+    if (ckExe.isEmpty())
+        AppEvents::error("CK bin path not found in config");
+
     _ck.setProgram(ckExe);
     _ck.setWorkingDirectory(ckDir);
 #endif

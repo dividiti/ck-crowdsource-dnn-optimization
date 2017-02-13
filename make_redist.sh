@@ -15,7 +15,7 @@ echo "Copy app files..."
 cp -f ${BIN}/${APP_EXE} ${REDIST}
 cp -f ${BIN}/*.sh ${REDIST}
 cp -f ${BIN}/*.qss ${REDIST}
-cp -f ${SRC}/app.conf.example ${REDIST}/app.conf
+cp -f ${SRC}/app.conf.example.linux ${REDIST}/app.conf
 
 echo "Copy Qt libs..."
 cp -fL ${QT_LIBS}/libQt5Core.so.5 ${REDIST}
