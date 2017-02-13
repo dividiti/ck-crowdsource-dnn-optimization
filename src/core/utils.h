@@ -34,6 +34,8 @@ QWidget* makeDivider();
 QLabel* makeTitle(const QString &title);
 
 QString EOL();
+
+char* makeLocalStr(const QString& s);
 }
 
 #endif // UTILS_H

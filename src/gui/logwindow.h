@@ -1,9 +1,9 @@
 #ifndef LOGWINDOW_H
 #define LOGWINDOW_H
 
-#include <QTextEdit>
+#include <QPlainTextEdit>
 
-class LogWindow : public QTextEdit
+class LogWindow : public QPlainTextEdit
 {
     Q_OBJECT
 public:
@@ -14,7 +14,6 @@ private:
     static QPointer<LogWindow> _instance;
     explicit LogWindow(QWidget *parent = 0);
     static QString sanitizeHtml(const QString& msg);
-    static QString messageType(QtMsgType type);
 };
 
 #endif // LOGWINDOW_H

@@ -2,7 +2,7 @@
 
 #include <QPointer>
 
-LogWindow::LogWindow(QWidget *parent) : QTextEdit(parent)
+LogWindow::LogWindow(QWidget *parent) : QPlainTextEdit(parent)
 {
 #ifdef Q_OS_WIN
     setFont(QFont("Courier", 9));
@@ -10,6 +10,7 @@ LogWindow::LogWindow(QWidget *parent) : QTextEdit(parent)
     setFont(QFont("Monospace", 10));
 #endif
     setGeometry(10, 30, 800, 500);
+    setReadOnly(true);
 }
 
 QPointer<LogWindow> LogWindow::_instance;
@@ -29,32 +30,11 @@ void LogWindow::destroyInstance()
 
 void LogWindow::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
-    QString msg = QString(QStringLiteral("<p><b>%1</b>: %2"))
-            .arg(messageType(type), sanitizeHtml(message));
-
-    if (context.file)
-        msg += QString(QStringLiteral("<br><font color=gray>(%2:%2, %4)</font>"))
-            .arg(context.file).arg(context.line).arg(context.function);
-
+    Q_UNUSED(type)
+    Q_UNUSED(context)
     auto w = instance();
-    w->append(msg);
+    w->appendPlainText(message);
     if (!w->isVisible())
         w->show();
 }
 
-QString LogWindow::sanitizeHtml(const QString& msg)
-{
-    return QString(msg).replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
-}
-
-QString LogWindow::messageType(QtMsgType type)
-{
-    switch (type)
-    {
-    case QtDebugMsg: return QStringLiteral("DEBUG");
-    case QtWarningMsg: return QStringLiteral("WARNING");
-    case QtCriticalMsg: return QStringLiteral("CRITICAL");
-    case QtFatalMsg: return QStringLiteral("FATAL");
-    default: return QString();
-    }
-}

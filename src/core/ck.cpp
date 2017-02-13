@@ -313,6 +313,38 @@ void CK::loadDepLibs(const CkEnvMeta& meta, QMap<QString, QString>& libs)
 
             qDebug() << "Dep found:" << setupEnv.first << setupEnv.second;
             auto envMeta = CkEnvMeta(envUid);
+#ifdef Q_OS_WIN
+            auto libPath = envMeta.pathLib();
+            auto binPath = envMeta.pathBin();
+            if (libPath.isEmpty() && binPath.isEmpty())
+            {
+                qWarning() << "    Skipped";
+                continue;
+            }
+            if (!libPath.isEmpty())
+            {
+                qDebug() << "    Lib:" << libPath;
+                libs.insert(envUid, libPath);
+            }
+            // meta.json of some libs (e.g. glog) has no key 'path_bin',
+            // but bin path really exists in CK_TOOLS and contains DLL
+            if (binPath.isEmpty() && !libPath.isEmpty())
+            {
+                auto parts = libPath.split(QDir::separator());
+                if (parts.length() > 0)
+                {
+                    parts[parts.size()-1] = "bin";
+                    binPath = parts.join(QDir::separator());
+                    if (!QDir(binPath).exists())
+                        binPath.clear();
+                }
+            }
+            if (!binPath.isEmpty())
+            {
+                qDebug() << "    Lib:" << binPath;
+                libs.insertMulti(envUid, binPath);
+            }
+#else
             auto libPath = envMeta.pathLib();
             auto libFile = envMeta.dynamicLib();
             if (libPath.isEmpty() || libFile.isEmpty())
@@ -321,11 +353,9 @@ void CK::loadDepLibs(const CkEnvMeta& meta, QMap<QString, QString>& libs)
                 continue;
             }
             auto lib = libPath + QDir::separator() + libFile;
-            if (!libs.contains(lib))
-            {
-                qDebug() << "    Lib:" << lib;
-                libs.insert(envUid, lib);
-            }
+            qDebug() << "    Lib:" << lib;
+            libs.insert(envUid, lib);
+#endif
             // We need to go deeper! build full dependecies list
             loadDepLibs(envMeta, libs);
         }

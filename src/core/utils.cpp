@@ -159,4 +159,13 @@ QString EOL()
     return QStringLiteral("\n");
 }
 
+char* makeLocalStr(const QString& s)
+{
+    auto bytes = s.toUtf8();
+    char* data = new char[bytes.length()+1];
+    memcpy(data, bytes.data(), bytes.length());
+    data[bytes.length()] = '\0';
+    return data;
+}
+
 } // namespace Utils
