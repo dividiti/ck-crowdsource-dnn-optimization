@@ -169,7 +169,7 @@ QStringList CK::ck(const QStringList& args)
             .arg(_ck.workingDirectory()).arg(_ck.program()).arg(error).arg(errors));
         return QStringList();
     }
-    auto lines = output.split("\n", QString::SkipEmptyParts);
+    auto lines = output.split(Utils::EOL(), QString::SkipEmptyParts);
     for (const QString& line: lines)
         if (line.startsWith(errorMarker))
         {

@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <QString>
+#include <QStringList>
 
 QT_BEGIN_NAMESPACE
 class QFile;
@@ -31,6 +32,8 @@ void errorDlg(const QString& text);
 
 QWidget* makeDivider();
 QLabel* makeTitle(const QString &title);
+
+QString EOL();
 }
 
 #endif // UTILS_H
