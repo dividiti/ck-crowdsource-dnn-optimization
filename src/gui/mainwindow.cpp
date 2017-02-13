@@ -1,6 +1,7 @@
 #include "appconfig.h"
 #include "appevents.h"
 #include "ck.h"
+#include "logwindow.h"
 #include "mainwindow.h"
 #include "experimentpanel.h"
 #include "utils.h"
@@ -10,6 +11,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QShortcut>
 
 #define EXPERIMENT_COUNT 1
 
@@ -49,6 +51,12 @@ MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWi
     Utils::moveToDesktopCenter(this);
 
     initialize(runParams);
+
+#ifdef Q_OS_WIN
+    auto shortcut = new QShortcut(QKeySequence(Qt::Key_F12), this);
+    shortcut->setContext(Qt::ApplicationShortcut);
+    connect(shortcut, SIGNAL(activated()), this, SLOT(showLog()));
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -56,6 +64,8 @@ MainWindow::~MainWindow()
     for (auto e: _experiments) delete e;
 
     Utils::closeAllInfoWindows();
+
+    LogWindow::destroyInstance();
 }
 
 void MainWindow::initialize(const AppRunParams &runParams)
@@ -84,4 +94,9 @@ void MainWindow::initialize(const AppRunParams &runParams)
 void MainWindow::onError(const QString& msg)
 {
     QMessageBox::critical(this, windowTitle(), msg);
+}
+
+void MainWindow::showLog()
+{
+    LogWindow::instance()->show();
 }

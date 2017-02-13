@@ -45,7 +45,8 @@ SOURCES += \
     src/gui/stylesheeteditor.cpp \
     src/core/recognizer.cpp \
     src/core/ckjson.cpp \
-    src/gui/imageview.cpp
+    src/gui/imageview.cpp \
+    src/gui/logwindow.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -66,7 +67,8 @@ HEADERS += \
     src/gui/stylesheeteditor.h \
     src/core/recognizer.h \
     src/core/ckjson.h \
-    src/gui/imageview.h
+    src/gui/imageview.h \
+    src/gui/logwindow.h
 
 RESOURCES += \
     src/resources.qrc

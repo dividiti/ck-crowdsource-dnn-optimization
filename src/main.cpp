@@ -1,5 +1,6 @@
 #include "core/appconfig.h"
 #include "core/utils.h"
+#include "gui/logwindow.h"
 #include "gui/mainwindow.h"
 #include "gui/stylesheeteditor.h"
 #include "shell/shellcommands.h"
@@ -8,6 +9,10 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_WIN32
+    qInstallMessageHandler(LogWindow::messageHandler);
+#endif
+
     QApplication app(argc, argv);
     app.addLibraryPath(app.applicationDirPath());
     app.setApplicationVersion("1.0.0.0");
@@ -34,5 +39,5 @@ int main(int argc, char *argv[])
     if (runParams.runMode == AppRunParams::EditStyle)
         (new StyleSheetEditor)->show();
 
-    return app.exec();
+     return app.exec();
 }
