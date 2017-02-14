@@ -3,11 +3,17 @@
 #include "utils.h"
 
 #include <QDebug>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 
 void CkJson::open(const QString& file)
 {
+    if (!QFile(file).exists())
+    {
+        qWarning() << "File not found:" << file;
+        return;
+    }
     auto doc = QJsonDocument::fromJson(Utils::loadTextFromFile(file));
     _json = doc.object();
     if (_json.isEmpty())

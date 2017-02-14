@@ -53,6 +53,10 @@ private:
     QList<TResult> getByUidOrAll(const QString& uid, TResult(CK::*loadResult)(const CkEntry&), QList<TResult>(CK::*getDefault)());
     template <typename TResult>
     QList<TResult> loadEntries(const QList<CkEntry>& envs, TResult (CK::*load)(const CkEntry&));
+
+//#ifdef Q_OS_WIN
+//    QString win_hack_searchAround(const QString& lib);
+//#endif
 };
 
 #endif // CK_H

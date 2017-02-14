@@ -1,5 +1,6 @@
 #include "appconfig.h"
 #include "appevents.h"
+#include "libloader.h"
 #include "recognizer.h"
 #include "utils.h"
 
@@ -48,22 +49,19 @@ Recognizer::Recognizer(const QString& proxyLib, const QStringList &depLibs)
 {
     try
     {
+        if (!QFile(proxyLib).exists())
+            throw "Lib not found: " + proxyLib;
+
+        _lib = LibLoader::create();
+
         qDebug() << "Loading dependencies. Count:" << depLibs.size();
-        auto res = loadDeps(depLibs);
-        if (!res.isEmpty()) throw res;
+        _lib->loadDeps(depLibs);
 
         qDebug() << "Loading main library" << proxyLib;
-        _lib = new QLibrary(proxyLib);
-        if (!_lib->load()) throw _lib->errorString();
-
+        _lib->loadLib(proxyLib);
         dnnPrepare = (DnnPrepare)_lib->resolve("ck_dnn_proxy__prepare");
-        if (!dnnPrepare) throw _lib->errorString();
-
         dnnRecognize = (DnnRecognize)_lib->resolve("ck_dnn_proxy__recognize");
-        if (!dnnRecognize) throw _lib->errorString();
-
         dnnRelease = (DnnRelease)_lib->resolve("ck_dnn_proxy__release");
-        if (!dnnRelease) throw _lib->errorString();
 
         _ready = true;
         qDebug() << "OK";
@@ -82,13 +80,6 @@ Recognizer::~Recognizer()
 
 void Recognizer::release()
 {
-    for (int i = _deps.size()-1; i >= 0; i--)
-    {
-        if (_deps.at(i)->isLoaded())
-            _deps.at(i)->unload();
-        delete _deps.at(i);
-    }
-    _deps.clear();
 
     if (_lib)
     {
@@ -97,45 +88,12 @@ void Recognizer::release()
             dnnRelease(_dnnHandle);
             _dnnHandle = nullptr;
         }
-        if (_lib->isLoaded())
-            _lib->unload();
         delete _lib;
         _lib = nullptr;
     }
 
     if (!_tmpModelFile.isEmpty())
         QFile(_tmpModelFile).remove();
-}
-
-QString Recognizer::loadDeps(const QStringList &depLibs)
-{
-    // Settings LD_LIBRARY_PATH inside of app does not help to search all dependencies
-    // (although when we set LD_LIBRARY_PATH in console before app is run, it helps).
-    // At least on Ubuntu. So we have to load all deps directly.
-    for (int i = depLibs.size()-1; i >= 0; i--)
-    {
-        auto depLib = depLibs.at(i);
-        qDebug() << "Load dep lib" << i+1 << depLib;
-        if (!QFile(depLib).exists())
-        {
-            qWarning() << "File not found";
-            continue;
-        }
-        auto lib = new QLibrary(depLib);
-        if (!lib->load())
-            return lib->errorString();
-        _deps << lib;
-    }
-    return QString();
-}
-
-char* Recognizer::makeLocalStr(const QString& s)
-{
-    auto bytes = s.toUtf8();
-    char* data = new char[bytes.length()+1];
-    memcpy(data, bytes.data(), bytes.length());
-    data[bytes.length()] = '\0';
-    return data;
 }
 
 bool Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
@@ -150,9 +108,9 @@ bool Recognizer::prepare(const QString &modelFile, const QString &weightsFile,
     if (_tmpModelFile.isEmpty()) return false;
 
     ck_dnn_proxy__init_param p;
-    p.model_file = makeLocalStr(_tmpModelFile);
-    p.trained_file = makeLocalStr(weightsFile);
-    p.mean_file = makeLocalStr(meanFile);
+    p.model_file = Utils::makeLocalStr(_tmpModelFile);
+    p.trained_file = Utils::makeLocalStr(weightsFile);
+    p.mean_file = Utils::makeLocalStr(meanFile);
     p.logs_path = prepareLogging();
     _dnnHandle = dnnPrepare(&p);
     // TODO: process errors
@@ -174,7 +132,7 @@ char* Recognizer::prepareLogging()
     if (!nasty_hack_for_if_glog_initialized)
     {
         nasty_hack_for_if_glog_initialized = true;
-        return makeLocalStr(AppConfig::logPath());
+        return Utils::makeLocalStr(AppConfig::logPath());
     }
     return nullptr;
 }
@@ -183,7 +141,7 @@ void Recognizer::recognize(const ImageEntry& image, ExperimentProbe& probe)
 {
     ck_dnn_proxy__recognition_param param;
     param.proxy_handle = _dnnHandle;
-    param.image_file = makeLocalStr(image.fileName);
+    param.image_file = Utils::makeLocalStr(image.fileName);
 
     ck_dnn_proxy__recognition_result result;
     dnnRecognize(&param, &result);
@@ -237,7 +195,7 @@ QString Recognizer::prepareModelFile(const QString& fileName)
     qDebug() << "Prepare model file" << fileName;
     auto text = Utils::loadTextFromFile(fileName);
     if (text.isEmpty()) return QString();
-    text = text.replace("$#batch_size#$", "2");
+    text = text.replace("$#batch_size#$", "1");
     auto tmpFile = Utils::makePath({ AppConfig::tmpPath(), "tmp.caffemodel" });
     if (!Utils::saveTextToFile(tmpFile, text)) return QString();
     return tmpFile;
@@ -267,3 +225,4 @@ QString Recognizer::predictionLabel(int predictionIndex) const
         return _labels.at(predictionIndex);
     return QString();
 }
+

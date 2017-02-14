@@ -30,6 +30,7 @@ private:
 
 private slots:
     void onError(const QString& msg);
+    void showLog();
 };
 
 #endif // MAINWINDOW_H

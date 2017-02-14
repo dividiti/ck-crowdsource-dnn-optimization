@@ -148,4 +148,24 @@ QLabel* makeTitle(const QString& title)
     return label;
 }
 
+QString EOL()
+{
+#ifdef Q_OS_WIN
+    return QStringLiteral("\r\n");
+#endif
+#ifdef Q_OS_MAC
+    return QStringLiteral("\r");
+#endif
+    return QStringLiteral("\n");
+}
+
+char* makeLocalStr(const QString& s)
+{
+    auto bytes = s.toUtf8();
+    char* data = new char[bytes.length()+1];
+    memcpy(data, bytes.data(), bytes.length());
+    data[bytes.length()] = '\0';
+    return data;
+}
+
 } // namespace Utils

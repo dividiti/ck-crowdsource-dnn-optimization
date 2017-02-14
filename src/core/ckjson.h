@@ -39,6 +39,7 @@ public:
     QString packageUoa() const { return valueStr("package_uoa"); }
     QString fullPath() const { return valueStr({"customize", "full_path"}); }
     QString pathLib() const { return valueStr({"customize", "path_lib"}); }
+    QString pathBin() const { return valueStr({"customize", "path_bin"}); }
     QString dynamicLib() const { return valueStr({"customize", "dynamic_lib"}); }
     QVector<QPair<QString, QString> > setupEnvs() const;
 };

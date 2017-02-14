@@ -3,10 +3,6 @@
 
 #include <QString>
 
-QT_BEGIN_NAMESPACE
-class QLibrary;
-QT_END_NAMESPACE
-
 #include "appmodels.h"
 
 //-----------------------------------------------------------------------------
@@ -61,21 +57,18 @@ public:
     QString predictionLabel(int predictionIndex) const;
 
 private:
-    QLibrary* _lib = nullptr;
-    QList<QLibrary*> _deps;
-    DnnPrepare dnnPrepare;
-    DnnRecognize dnnRecognize;
-    DnnRelease dnnRelease;
+    class LibLoader* _lib = nullptr;
+    DnnPrepare dnnPrepare = nullptr;
+    DnnRecognize dnnRecognize = nullptr;
+    DnnRelease dnnRelease = nullptr;
     void* _dnnHandle = nullptr;
     QStringList _labels;
     QString _tmpModelFile;
     bool _ready = false;
 
     void release();
-    QString loadDeps(const QStringList &depLibs);
     bool loadLabels(const QString &labelsFile);
 
-    static char* makeLocalStr(const QString& s);
     static bool checkFileExists(const QString& fileName);
     static QString prepareModelFile(const QString& fileName);
     static char* prepareLogging();

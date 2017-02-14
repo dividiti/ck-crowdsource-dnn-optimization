@@ -33,6 +33,31 @@ Linux, Windows or MacOS operation system
 
 Preparation to run
 ====================
+To make application run you have to install at least one package from each of three categories: dnn-proxy, caffemodel, imagenet dataset.
+
+* dnn-proxy packages:
+```
+$ ck install package:dnn-proxy-caffe-cpu
+$ ck install package:dnn-proxy-caffe-opencl
+$ ck install package:dnn-proxy-caffe-cuda
+```
+* caffe models:
+```
+$ ck install package:caffemodel-bvlc-alexnet
+$ ck install package:caffemodel-bvlc-googlenet
+```
+* imagenet datasets:
+```
+$ ck install package:imagenet-2012-aux
+$ ck install package:imagenet-2012-val
+```
+To make sure that all is ready, run program caffe-classification. It should compile and run without errors.
+```
+$ ck compile program:caffe-classification
+$ ck run program:caffe-classification
+```
+
+## Running the app
 After source code built, executable file lays down into _bin_ directory inside the project directory.
 
 Create _app.conf_ file inside the _bin_ directory, which contains info about your local CK installation:
@@ -44,20 +69,16 @@ ck_repos_path=~/CK
 ```
 Or you can copy dummy file _src/app.conf.example_ into _bin_ and use it as template.
 
-To make application run you have to install at least one package from each of three categories: dnn-proxy, caffemodel, imagenet dataset.
+### Windows note:
+Use linux-style paths or double slashes in Windows paths when write config file, e.g.: `ck_bin_path=c:/ck/bin` or `ck_bin_path=c:\\ck\\bin`.
 
-* dnn-proxy packages:
-`$ ck install package:dnn-proxy-caffe-cpu`
-`$ ck install package:dnn-proxy-caffe-opencl`
-`$ ck install package:dnn-proxy-caffe-cuda`
+*Don't forget about vc_redist.x64.exe or vc_redist.x86.exe!:*
+You have to force user to install VC-redist when build with MS-related version of Qt. Download installer from 
+[here](http://www.microsoft.com/en-us/download/details.aspx?id=48145) or google for 'visual studio 2015 runtime'.
 
-* caffe models:
-`$ ck install package:caffemodel-bvlc-alexnet`
-`$ ck install package:caffemodel-bvlc-googlenet`
-
-* imagenet datasets:
-`$ ck install package:imagenet-2012-aux`
-`$ ck install package:imagenet-2012-val`
+If program does not start from _bin_ folder and claims something about *dll* or *plugin*, 
+it may be because of Qt bin directory is not in your PATH. Add it to the PATH variable, 
+or run script `make_redist.bat` and copy all the dll files and pulgin folders from directory _redist_ to _bin_.
 
 Authors
 =======
