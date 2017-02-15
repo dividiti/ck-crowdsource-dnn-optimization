@@ -46,7 +46,7 @@ $ ck install package:dnn-proxy-caffe-cuda
 $ ck install package:caffemodel-bvlc-alexnet
 $ ck install package:caffemodel-bvlc-googlenet
 ```
-* imagenet datasets:
+* imagenet datasets. **Note:** one dataset consists of two packages: `aux` and `val`, you need to install both of them to use the dataset. More datasets may be added in the future:
 ```
 $ ck install package:imagenet-2012-aux
 $ ck install package:imagenet-2012-val
