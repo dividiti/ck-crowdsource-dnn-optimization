@@ -24,7 +24,7 @@ private slots:
 
 private:
     ExperimentContext* _context;
-    QLabel *_infoTimePerImage, *_infoImagesPerSec;
+    QLabel *_infoImagesPerSec;
     QLabel *_infoMetricTop1, *_infoMetricTop5;
     ImageView *_worstPredictedImage;
 
