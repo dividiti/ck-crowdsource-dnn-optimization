@@ -18,7 +18,7 @@ QString AppConfig::configFileName()
 
 QString AppConfig::styleSheetFileName()
 {
-    return qApp->applicationDirPath() + QDir::separator() + "app.qss";
+    return ":/qss/app.qss";
 }
 
 int AppConfig::selectedEngineIndex(int experimentIndex)
