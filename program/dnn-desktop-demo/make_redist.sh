@@ -6,7 +6,7 @@ export TARGET_DIR="./tmp"
 export REDIST="./redist"
 export BIN="./bin"
 export SRC="./src"
-export QT_DIR="${HOME}/Qt/5.7/gcc_64"
+export QT_DIR="${HOME}/Qt/5.8/gcc_64"
 export QT_LIBS="${QT_DIR}/lib"
 
 mkdir -p ${REDIST}
@@ -14,7 +14,6 @@ mkdir -p ${REDIST}
 echo "Copy app files..."
 cp -f ${BIN}/${APP_EXE} ${REDIST}
 cp -f ${BIN}/*.sh ${REDIST}
-cp -f ${BIN}/*.qss ${REDIST}
 cp -f ${SRC}/app.conf.example.linux ${REDIST}/app.conf
 
 echo "Copy Qt libs..."
