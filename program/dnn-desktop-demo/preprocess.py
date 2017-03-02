@@ -15,24 +15,63 @@ def ck_preprocess(i):
 
     ck = i['ck_kernel']
 
-    # update the values
-    try:
-        bin_path, bin_name = os.path.split(which('ck'))
-
-        conf.set('General', 'ck_bin_path', bin_path)
-        conf.set('General', 'ck_exe_name', bin_name)
-    except WhichError:
-        return {'return':1, 'error': 'ck not found in the PATH'}
-
-    r = ck.access({'action': 'where', 'module_uoa': 'repo', 'data_uoa': 'local'})
+    r = fill_general(ck, conf)
     if r['return'] > 0: return r
 
-    conf.set('General', 'ck_repos_path', os.path.dirname(r['path']))
+    r = fill_models(ck, conf)
+    if r['return'] > 0: return r
+
+    r = fill_programs(ck, conf)
+    if r['return'] > 0: return r
 
     with open(APP_CONF_FILE, 'wb') as f:
         conf.write(f)
 
     return {'return':0, 'bat':'', 'new_env': i['env']}
+
+def ensure_section(conf, section, clean=False):
+    if clean:
+        conf.remove_section(section)
+    if not conf.has_section(section):
+        conf.add_section(section)
+
+def fill_general(ck, conf):
+    ensure_section(conf, 'General')
+    try:
+        bin_path, bin_name = os.path.split(which('ck'))
+        conf.set('General', 'ck_bin_path', bin_path)
+        conf.set('General', 'ck_exe_name', bin_name)
+    except WhichError:
+        return {'return':1, 'error': 'Path to ck not found'}
+
+    r = ck.access({'action': 'where', 'module_uoa': 'repo', 'data_uoa': 'local'})
+    if r['return'] > 0: return r
+
+    conf.set('General', 'ck_repos_path', os.path.dirname(r['path']))
+    return {'return':0}
+
+def fill_section(ck, conf, section, tags, repo=''):
+    ensure_section(conf, section, True)
+    r = ck.access(['search', repo, '--tags=' + tags])
+    if r['return'] > 0: return r
+    
+    lst = r['lst']
+    conf.set(section, 'count', len(lst))
+
+    for i, u in enumerate(lst):
+        module_uoa = u['module_uoa']
+        data_uoa = u['data_uoa']
+        r = ck.access(['load', module_uoa + ':' + data_uoa])
+        if r['return'] > 0: return r
+        conf.set(section, str(i) + '_uoa', data_uoa)
+        conf.set(section, str(i) + '_name', r.get('data_name', u))
+    return {'return':0}
+
+def fill_models(ck, conf):
+    return fill_section(ck, conf, section='Models', tags='caffemodel', repo='env')
+
+def fill_programs(ck, conf):
+    return fill_section(ck, conf, section='Programs', tags='caffe-classification,continuous')
 
 #
 # =============================================================================
