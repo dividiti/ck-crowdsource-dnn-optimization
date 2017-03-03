@@ -77,12 +77,11 @@ QLabel* FeaturesPanel::makeInfoLabel()
 
 void FeaturesPanel::selectEngine()
 {
-    if (_context->engines().isEmpty())
+    if (_context->engines().isEmpty()) {
         return Utils::infoDlg(tr("Recognition engines not found"));
+    }
 
-    if (_context->engines().selectCurrentViaDialog())
-    {
-        AppConfig::setSelectedEngineIndex(_context->experimentIndex(), _context->engines().currentIndex());
+    if (_context->engines().selectCurrentViaDialog()) {
         updateExperimentConditions();
     }
 }
@@ -92,9 +91,7 @@ void FeaturesPanel::selectModel()
     if (_context->models().isEmpty())
         return Utils::infoDlg(tr("Recognition models not found"));
 
-    if (_context->models().selectCurrentViaDialog())
-    {
-        AppConfig::setSelectedModelIndex(_context->experimentIndex(), _context->models().currentIndex());
+    if (_context->models().selectCurrentViaDialog()) {
         updateExperimentConditions();
     }
 }
@@ -104,9 +101,7 @@ void FeaturesPanel::selectImages()
     if (_context->images().isEmpty())
         return Utils::infoDlg(tr("Image datasets not found"));
 
-    if (_context->images().selectCurrentViaDialog())
-    {
-        AppConfig::setSelectedImagesIndex(_context->experimentIndex(), _context->images().currentIndex());
+    if (_context->images().selectCurrentViaDialog()) {
         updateExperimentConditions();
     }
 }
@@ -127,18 +122,6 @@ void FeaturesPanel::updateExperimentConditions()
         ? _context->images().current().title()//.replace("(", "\n(")
         : NA);
 
-//    _infoBatchSize->setInfo(QString::number(_context->batchSize()));
-}
-
-void FeaturesPanel::setBatchSize()
-{
-    int batchSize = QInputDialog::getInt(this, tr("Batch Size"), tr("Set batch size:"),
-        _context->batchSize(), _context->minBatchSize(), _context->maxBatchSize());
-    if (batchSize != _context->batchSize())
-    {
-        _context->setBatchSize(batchSize);
-        updateExperimentConditions();
-    }
 }
 
 void FeaturesPanel::enableControls(bool on)
@@ -146,7 +129,6 @@ void FeaturesPanel::enableControls(bool on)
     _linkSelectEngine->setVisible(on);
     _linkSelectModel->setVisible(on);
     _linkSelectImages->setVisible(on);
-//    _linkSetBatchSize->setVisible(on);
 }
 
 void FeaturesPanel::experimentStarted()

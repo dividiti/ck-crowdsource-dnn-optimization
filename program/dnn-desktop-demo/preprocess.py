@@ -24,6 +24,12 @@ def ck_preprocess(i):
     r = fill_programs(ck, conf)
     if r['return'] > 0: return r
 
+    r = fill_aux(ck, conf)
+    if r['return'] > 0: return r
+
+    r = fill_val(ck, conf)
+    if r['return'] > 0: return r
+
     with open(APP_CONF_FILE, 'wb') as f:
         conf.write(f)
 
@@ -72,6 +78,12 @@ def fill_models(ck, conf):
 
 def fill_programs(ck, conf):
     return fill_section(ck, conf, section='Programs', tags='caffe-classification,continuous')
+
+def fill_aux(ck, conf):
+    return fill_section(ck, conf, section='AUX', tags='imagenet,aux', repo='env')
+
+def fill_val(ck, conf):
+    return fill_section(ck, conf, section='VAL', tags='imagenet,val', repo='env')
 
 #
 # =============================================================================

@@ -10,17 +10,21 @@ QT_END_NAMESPACE
 class AppConfig
 {
 public:
-    static int selectedModelIndex(int experimentIndex);
-    static void setSelectedModelIndex(int experimentIndex, int modelIndex);
+    static int modelCount() { return sectionCount("Models"); }
+    static QString modelUOA(int index) { return sectionValue("Models", index, "uoa"); }
+    static QString modelName(int index) { return sectionValue("Models", index, "name"); }
 
-    static int selectedEngineIndex(int experimentIndex);
-    static void setSelectedEngineIndex(int experimentIndex, int engineIndex);
+    static int programCount() { return sectionCount("Programs"); }
+    static QString programUOA(int index) { return sectionValue("Programs", index, "uoa"); }
+    static QString programName(int index) { return sectionValue("Programs", index, "name"); }
 
-    static int selectedImagesIndex(int experimentIndex);
-    static void setSelectedImagesIndex(int experimentIndex, int imagesIndex);
+    static int auxCount() { return sectionCount("AUX"); }
+    static QString auxUOA(int index) { return sectionValue("AUX", index, "uoa"); }
+    static QString auxName(int index) { return sectionValue("AUX", index, "name"); }
 
-    static int batchSize(int experimentIndex);
-    static void setBatchSize(int experimentIndex, int batchSize);
+    static int valCount() { return sectionCount("VAL"); }
+    static QString valUOA(int index) { return sectionValue("VAL", index, "uoa"); }
+    static QString valName(int index) { return sectionValue("VAL", index, "name"); }
 
     static QString ckReposPath();
     static QString ckBinPath();
@@ -38,9 +42,10 @@ private:
     static int configValueInt(const QString& key, int defaultValue);
     static QString configValueStr(const QString& key, const QString& defaultValue);
 
-    static QString experimentKey(const QString& baseKey, int experimentIndex);
-
     static QString localSubdir(const QString& key, const QString& defaultDir);
+
+    static int sectionCount(const QString& sectionName);
+    static QString sectionValue(const QString& sectionName, int index, const QString& suffix);
 };
 
 

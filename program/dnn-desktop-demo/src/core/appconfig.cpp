@@ -21,46 +21,6 @@ QString AppConfig::styleSheetFileName()
     return ":/qss/app.qss";
 }
 
-int AppConfig::selectedEngineIndex(int experimentIndex)
-{
-    return configValueInt(experimentKey("selected_engine", experimentIndex), -1);
-}
-
-void AppConfig::setSelectedEngineIndex(int experimentIndex, int engineIndex)
-{
-    config().setValue(experimentKey("selected_engine", experimentIndex), engineIndex);
-}
-
-int AppConfig::selectedModelIndex(int experimentIndex)
-{
-    return configValueInt(experimentKey("selected_model", experimentIndex), -1);
-}
-
-void AppConfig::setSelectedModelIndex(int experimentIndex, int modelIndex)
-{
-    config().setValue(experimentKey("selected_model", experimentIndex), modelIndex);
-}
-
-int AppConfig::selectedImagesIndex(int experimentIndex)
-{
-    return configValueInt(experimentKey("selected_images", experimentIndex), -1);
-}
-
-void AppConfig::setSelectedImagesIndex(int experimentIndex, int imagesIndex)
-{
-    config().setValue(experimentKey("selected_images", experimentIndex), imagesIndex);
-}
-
-int AppConfig::batchSize(int experimentIndex)
-{
-    return configValueInt(experimentKey("batch_size", experimentIndex), 2);
-}
-
-void AppConfig::setBatchSize(int experimentIndex, int batchSize)
-{
-    config().setValue(experimentKey("batch_size", experimentIndex), batchSize);
-}
-
 QString AppConfig::ckReposPath()
 {
     return config().value("ck_repos_path").toString();
@@ -89,11 +49,6 @@ QString AppConfig::configValueStr(const QString& key, const QString& defaultValu
     return value.isEmpty()? defaultValue: value;
 }
 
-QString AppConfig::experimentKey(const QString& baseKey, int experimentIndex)
-{
-    return baseKey + "_" + QString::number(experimentIndex);
-}
-
 QString AppConfig::localSubdir(const QString& key, const QString& defaultDir)
 {
     auto defaultPath = qApp->applicationDirPath() + QDir::separator() + defaultDir;
@@ -102,4 +57,12 @@ QString AppConfig::localSubdir(const QString& key, const QString& defaultDir)
     if (!d.exists())
         d.mkpath(path);
     return d.absolutePath();
+}
+
+int AppConfig::sectionCount(const QString& sectionName) {
+    return configValueInt(sectionName + "/count", 0);
+}
+
+QString AppConfig::sectionValue(const QString& sectionName, int index, const QString& suffix) {
+    return configValueStr(sectionName + "/" + index + "_" + suffix, "");
 }

@@ -42,11 +42,6 @@ public:
     ListContainer<DnnEngine>& engines() { return _engines; }
     ListContainer<ImagesDataset>& images() { return _images; }
 
-    int batchSize() const { return _batchSize; }
-    void setBatchSize(int value);
-    int minBatchSize() const { return 1; }
-    int maxBatchSize() const { return 16; }
-
     void startExperiment();
     void stopExperiment();
     bool isExperimentStarted() const { return _isExperimentStarted; }
@@ -66,7 +61,6 @@ public slots:
 private:
     int _experimentIndex = -1;
     bool _isExperimentStarted = false;
-    int _batchSize = 2;
     ExperimentResult _result;
     ListContainer<DnnModel> _models;
     ListContainer<DnnEngine> _engines;

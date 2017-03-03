@@ -50,15 +50,6 @@ template class ListContainer<ImagesDataset>;
 
 //-----------------------------------------------------------------------------
 
-void ExperimentContext::setBatchSize(int value)
-{
-    if (value >= minBatchSize() && value <= maxBatchSize())
-    {
-        _batchSize = value;
-        AppConfig::setBatchSize(_experimentIndex, value);
-    }
-}
-
 void ExperimentContext::startExperiment()
 {
     _isExperimentStarted = true;
@@ -74,11 +65,9 @@ void ExperimentContext::stopExperiment()
 
 void ExperimentContext::loadFromConfig()
 {
-    _models.setCurrentIndexOrDefault(AppConfig::selectedModelIndex(_experimentIndex));
-    _engines.setCurrentIndexOrDefault(AppConfig::selectedEngineIndex(_experimentIndex));
-    _images.setCurrentIndexOrDefault(AppConfig::selectedImagesIndex(_experimentIndex));
-
-    setBatchSize(AppConfig::batchSize(_experimentIndex));
+    _models.setCurrentIndexOrDefault(0);
+    _engines.setCurrentIndexOrDefault(0);
+    _images.setCurrentIndexOrDefault(0);
 }
 
 void ExperimentContext::recognitionFinished(const ExperimentProbe *p)
