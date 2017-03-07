@@ -49,7 +49,8 @@ SOURCES += \
     src/core/ckjson.cpp \
     src/gui/imageview.cpp \
     src/gui/logwindow.cpp \
-    src/core/libloader.cpp
+    src/core/libloader.cpp \
+    src/core/workerthread.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -72,7 +73,8 @@ HEADERS += \
     src/core/ckjson.h \
     src/gui/imageview.h \
     src/gui/logwindow.h \
-    src/core/libloader.h
+    src/core/libloader.h \
+    src/core/workerthread.h
 
 RESOURCES += \
     src/resources.qrc

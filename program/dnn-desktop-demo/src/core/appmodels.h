@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QVector>
+#include <QMetaType>
 
 class AppRunParams
 {
@@ -29,6 +30,38 @@ public:
 
     QString str() const;
 };
+
+Q_DECLARE_METATYPE(PredictionResult)
+
+//-----------------------------------------------------------------------------
+
+class ImageResult
+{
+public:
+    QString imageFile;
+    double duration;
+    QVector<PredictionResult> predictions;
+    QString correctLabels;
+
+    bool correctAsTop1() {
+        return !predictions.isEmpty() && predictions[0].labels == correctLabels;
+    }
+
+    bool correctAsTop5() {
+        for (int i = 0; i < predictions.size(); ++i) {
+            if (predictions[i].labels == correctLabels) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool isEmpty() {
+        return predictions.isEmpty();
+    }
+};
+
+Q_DECLARE_METATYPE(ImageResult)
 
 //-----------------------------------------------------------------------------
 
