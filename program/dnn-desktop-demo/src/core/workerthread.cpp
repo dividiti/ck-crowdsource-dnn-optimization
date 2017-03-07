@@ -1,8 +1,11 @@
 #include "workerthread.h"
+#include "appconfig.h"
+#include "appevents.h"
 
 #include <QProcess>
 #include <QTextStream>
 #include <QRegExp>
+#include <QDebug>
 
 static QString getExe() {
 #ifdef Q_OS_WIN32
@@ -40,7 +43,7 @@ void WorkerThread::run() {
     fullArgs.append(args);
     ck.setArguments(fullArgs);
 
-    qDebug() << "Run CK command:" << ck.program() + ' ' +  ck.arguments().join(" ");
+    qDebug() << "Run CK command:" << ck.program() << " " <<  ck.arguments().join(" ");
 
     ck.start();
 
@@ -50,14 +53,14 @@ void WorkerThread::run() {
     const QString predictionsLinePrefix = "Predictions: ";
     const QRegExp predictionRegExp("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
-    QTextStream stream(ck);
+    QTextStream stream(&ck);
     QString line;
     ImageResult ir;
     int predictionCount = 0;
     while (!(line = stream.readLine()).isNull() && !isInterruptionRequested()) {
         line = line.trimmed();
         if (line.isEmpty()) {
-            processPredictedResults(ImageResult);
+            processPredictedResults(ir);
             ir = ImageResult();
 
         } else if (line.startsWith(fileLinePrefix)) {
@@ -67,10 +70,10 @@ void WorkerThread::run() {
             ir.duration = line.mid(durationLinePrefix.size()).toDouble();
 
         } else if (line.startsWith(correctLabelLinePrefix)) {
-            ir.correctLabels = line.mid(correctLabels.size()).trimmed();
+            ir.correctLabels = line.mid(correctLabelLinePrefix.size()).trimmed();
 
         } else if (line.startsWith(predictionsLinePrefix)) {
-            predictionCount = line.mid(predictionsLinePrefix.simplified()).toInt();
+            predictionCount = line.mid(predictionsLinePrefix.size()).toInt();
 
         } else if (predictionCount > 0) {
             // parsing a prediction line
@@ -80,7 +83,7 @@ void WorkerThread::run() {
                 pr.accuracy = predictionRegExp.cap(1).toDouble();
                 pr.index = 0;
                 pr.labels = predictionRegExp.cap(2).trimmed();
-                pr.isCorrect = pr.labels == correctLabels;
+                pr.isCorrect = pr.labels == ir.correctLabels;
                 ir.predictions.append(pr);
             } else {
                 qWarning() << "Failed to parse prediction result line: " << line;
@@ -91,7 +94,6 @@ void WorkerThread::run() {
     if (isInterruptionRequested()) {
         ck.terminate();
     }
-    qDebug() << "Batch item stopped" << _index;
     emit stopped();
 }
 

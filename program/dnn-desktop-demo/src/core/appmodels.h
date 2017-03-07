@@ -43,11 +43,11 @@ public:
     QVector<PredictionResult> predictions;
     QString correctLabels;
 
-    bool correctAsTop1() {
+    bool correctAsTop1() const {
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;
     }
 
-    bool correctAsTop5() {
+    bool correctAsTop5() const {
         for (int i = 0; i < predictions.size(); ++i) {
             if (predictions[i].labels == correctLabels) {
                 return true;
@@ -56,7 +56,7 @@ public:
         return false;
     }
 
-    bool isEmpty() {
+    bool isEmpty() const {
         return predictions.isEmpty();
     }
 };
