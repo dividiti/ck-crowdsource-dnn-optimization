@@ -144,3 +144,20 @@ void FrameWidget::showPredictions(const QVector<PredictionResult>& predictions)
         }
         else _predictions.at(i)->clear();
 }
+
+void FrameWidget::load(const ImageResult& ir) {
+    _imageView->loadImage(ir.imageFile);
+    _imageView->setToolTip(QString(QStringLiteral("%1\n%2")).arg(ir.imageFile).arg(ir.correctLabels));
+
+    for (int i = 0; i < _predictions.size(); i++) {
+        if (i < ir.predictions.size()) {
+            PredictionView* pv = _predictions.at(i);
+            const PredictionResult& p = ir.predictions.at(i);
+            pv->setProb(p.accuracy, p.isCorrect);
+            pv->setDescr(p.labels);
+            pv->setToolTip(p.str());
+        } else {
+            _predictions.at(i)->clear();
+        }
+    }
+}

@@ -56,9 +56,12 @@ def fill_general(ck, conf):
     conf.set('General', 'ck_repos_path', os.path.dirname(r['path']))
     return {'return':0}
 
-def fill_section(ck, conf, section, tags, repo=''):
+def fill_section(ck, conf, section, tags, module=''):
     ensure_section(conf, section, True)
-    r = ck.access(['search', repo, '--tags=' + tags])
+    search_dict = {'action': 'search', 'tags': tags}
+    if module != '':
+        search_dict['module_uoa'] = module
+    r = ck.access(search_dict)
     if r['return'] > 0: return r
     
     lst = r['lst']
@@ -67,23 +70,38 @@ def fill_section(ck, conf, section, tags, repo=''):
     for i, u in enumerate(lst):
         module_uoa = u['module_uoa']
         data_uoa = u['data_uoa']
-        r = ck.access(['load', module_uoa + ':' + data_uoa])
+        r = ck.access({'action': 'load', 'module_uoa': module_uoa, 'data_uoa': data_uoa})
         if r['return'] > 0: return r
+        u['meta'] = r['dict']
         conf.set(section, str(i) + '_uoa', data_uoa)
         conf.set(section, str(i) + '_name', r.get('data_name', u))
-    return {'return':0}
+
+    return {'return':0, 'lst': lst}
 
 def fill_models(ck, conf):
-    return fill_section(ck, conf, section='Models', tags='caffemodel', repo='env')
+    return fill_section(ck, conf, section='Models', tags='caffemodel', module='env')
 
 def fill_programs(ck, conf):
-    return fill_section(ck, conf, section='Programs', tags='caffe-classification,continuous')
+    section = 'Programs'
+    r = fill_section(ck, conf, section=section, tags='caffe-classification,continuous')
+    if r['return'] > 0: return r
+    lst = r['lst']
+    for i, u in enumerate(lst):
+        output_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#run_cmds#use_continuous#run_time#run_cmd_out1'}).get('value', None)
+        if None == output_file:
+            return {'return': 1, 'error': 'Could not find output file for ' + u['data_uoa']}
+        r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
+        if r['return'] > 0: return r
+        output_file = os.path.join(r['path'], 'tmp', output_file)
+        conf.set(section, str(i) + '_output_file', output_file)
+
+    return {'return': 0}
 
 def fill_aux(ck, conf):
-    return fill_section(ck, conf, section='AUX', tags='imagenet,aux', repo='env')
+    return fill_section(ck, conf, section='AUX', tags='imagenet,aux', module='env')
 
 def fill_val(ck, conf):
-    return fill_section(ck, conf, section='VAL', tags='imagenet,val', repo='env')
+    return fill_section(ck, conf, section='VAL', tags='imagenet,val', module='env')
 
 #
 # =============================================================================

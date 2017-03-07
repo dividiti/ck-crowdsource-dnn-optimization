@@ -6,6 +6,7 @@
 #include <QThread>
 
 #include "appmodels.h"
+#include "workerthread.h"
 
 QT_BEGIN_NAMESPACE
 class QGridLayout;
@@ -74,24 +75,34 @@ public:
 private slots:
     void experimentStarted();
     void experimentStopping();
-    void batchStopped();
-    void experimentFinished();
+//    void batchStopped();
+//    void experimentFinished();
+
+    void newImageResult(ImageResult);
+    void workerStopped();
 
 private:
-    Recognizer* _recognizer = nullptr;
+//    Recognizer* _recognizer = nullptr;
     ExperimentContext* _context;
-    QList<BatchItem*> _batchItems;
-    bool _experimentFinished = true;
-    bool _runInParallel = false;
-    BatchSeries* _series = nullptr;
+//    QList<BatchItem*> _batchItems;
+//    bool _runInParallel = false;
+//    BatchSeries* _series = nullptr;
     QGridLayout* _layout;
-    ImagesBank* _images = nullptr;
+//    ImagesBank* _images = nullptr;
+    WorkerThread* _worker = nullptr;
 
-    void clearBatch();
-    void prepareBatch();
+    QList<FrameWidget*> _frames;
+    const int _frame_count = 8;
+    int _current_frame = 0;
+
+//    void clearBatch();
+//    void prepareBatch();
     QString canStart();
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();
+
+    void initWorker();
+    void clearWorker();
 };
 
 #endif // FRAMESPANEL_H

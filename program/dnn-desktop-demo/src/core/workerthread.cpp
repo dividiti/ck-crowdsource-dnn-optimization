@@ -6,6 +6,7 @@
 #include <QTextStream>
 #include <QRegExp>
 #include <QDebug>
+#include <QFile>
 
 static QString getExe() {
 #ifdef Q_OS_WIN32
@@ -37,13 +38,17 @@ static QString getBinPath() {
 
 void WorkerThread::run() {
     QProcess ck;
+    ck.setWorkingDirectory(getBinPath());
     ck.setProgram(getExe());
     QStringList fullArgs = getDefaultArgs();
-    auto args = QStringList{ "run", "program:caffe-classification", "--cmd_key=use_continuous", "--deps.caffemodel=6b8dde7134ceb818" };
+    auto args = QStringList { "run", "program:caffe-classification", "--cmd_key=use_continuous", "--deps.caffemodel=6b8dde7134ceb818" };
     fullArgs.append(args);
     ck.setArguments(fullArgs);
 
     qDebug() << "Run CK command:" << ck.program() << " " <<  ck.arguments().join(" ");
+
+    QFile outputFile("/home/dsavenko/CK/ck-caffe/program/caffe-classification/tmp/tmp-output1.tmp");
+    outputFile.remove();
 
     ck.start();
 
@@ -53,11 +58,26 @@ void WorkerThread::run() {
     const QString predictionsLinePrefix = "Predictions: ";
     const QRegExp predictionRegExp("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
-    QTextStream stream(&ck);
+    while (!outputFile.exists() && !isInterruptionRequested()) {
+        msleep(100);
+    }
+
+    outputFile.open(QIODevice::ReadOnly);
+
+    QTextStream stream(&outputFile);
     QString line;
     ImageResult ir;
     int predictionCount = 0;
-    while (!(line = stream.readLine()).isNull() && !isInterruptionRequested()) {
+    bool finished = false;
+    while (!isInterruptionRequested()) {
+        line = stream.readLine();
+        if (line.isNull()) {
+            if (finished) {
+                break;
+            }
+            finished = ck.waitForFinished(50);
+            continue;
+        }
         line = line.trimmed();
         if (line.isEmpty()) {
             processPredictedResults(ir);
@@ -92,8 +112,13 @@ void WorkerThread::run() {
     }
     processPredictedResults(ir);
     if (isInterruptionRequested()) {
+        qDebug() << "Worker process interrupted by user request";
         ck.terminate();
+        ck.waitForFinished();
+    } else {
+        qDebug() << "Worker process finished";
     }
+    outputFile.close();
     emit stopped();
 }
 

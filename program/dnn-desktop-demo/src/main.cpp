@@ -1,4 +1,5 @@
 #include "core/appconfig.h"
+#include "core/appmodels.h"
 #include "core/utils.h"
 #include "gui/logwindow.h"
 #include "gui/mainwindow.h"
@@ -12,6 +13,9 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN
     qInstallMessageHandler(LogWindow::messageHandler);
 #endif
+
+    qRegisterMetaType<PredictionResult>("PredictionResult");
+    qRegisterMetaType<ImageResult>("ImageResult");
 
     QApplication app(argc, argv);
     app.addLibraryPath(app.applicationDirPath());
