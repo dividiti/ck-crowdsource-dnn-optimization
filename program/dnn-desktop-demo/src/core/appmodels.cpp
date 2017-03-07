@@ -9,7 +9,7 @@ QString PredictionResult::str() const
 {
     return QString(QStringLiteral("%1 - %2 (%3)%4"))
         .arg(accuracy).arg(labels).arg(index)
-        .arg(isCorrect? QString(QStringLiteral(" CORRECT")): QString());
+        .arg(isCorrect ? QString(QStringLiteral(" CORRECT")) : QString());
 }
 
 //-----------------------------------------------------------------------------
@@ -108,5 +108,5 @@ ImagesBank::ImagesBank(const QString& imagesDir, const QString& valFile)
         }
         _images << ImageEntry { fileName, index };
     }
-    qDebug() << "Images prepared:" << _images.size();
+    qDebug() << "Images prepared: " << _images.size();
 }

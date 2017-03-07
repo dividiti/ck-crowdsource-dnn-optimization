@@ -54,6 +54,7 @@ void WorkerThread::run() {
 
     const QString fileLinePrefix = "File: ";
     const QString durationLinePrefix = "Duration: ";
+    const QString durationLineSuffix = " sec";
     const QString correctLabelLinePrefix = "Correct label: ";
     const QString predictionsLinePrefix = "Predictions: ";
     const QRegExp predictionRegExp("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
@@ -87,7 +88,9 @@ void WorkerThread::run() {
             ir.imageFile = line.mid(fileLinePrefix.size());
 
         } else if (line.startsWith(durationLinePrefix)) {
-            ir.duration = line.mid(durationLinePrefix.size()).toDouble();
+            QStringRef t = line.midRef(durationLinePrefix.size());
+            t = t.left(t.size() - durationLineSuffix.size());
+            ir.duration = t.toDouble();
 
         } else if (line.startsWith(correctLabelLinePrefix)) {
             ir.correctLabels = line.mid(correctLabelLinePrefix.size()).trimmed();

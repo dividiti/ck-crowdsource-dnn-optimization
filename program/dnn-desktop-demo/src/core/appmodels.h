@@ -59,6 +59,10 @@ public:
     bool isEmpty() const {
         return predictions.isEmpty();
     }
+
+    double imagesPerSecond() {
+        return 1.0 / duration;
+    }
 };
 
 Q_DECLARE_METATYPE(ImageResult)

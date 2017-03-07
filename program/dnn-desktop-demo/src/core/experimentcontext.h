@@ -54,6 +54,7 @@ signals:
     void experimentStopping();
     void experimentFinished();
     void experimentResultReady();
+    void newImageResult(ImageResult);
 
 public slots:
     void recognitionFinished(const ExperimentProbe* p);

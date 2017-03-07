@@ -1,6 +1,7 @@
 #ifndef RESULTSPANEL_H
 #define RESULTSPANEL_H
 
+#include "appmodels.h"
 #include <QFrame>
 
 QT_BEGIN_NAMESPACE
@@ -21,6 +22,7 @@ public:
 private slots:
     void experimentStarted();
     void experimentResultReady();
+    void newImageResult(ImageResult);
 
 private:
     ExperimentContext* _context;

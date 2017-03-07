@@ -7,6 +7,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QVariant>
+#include <QDebug>
 
 #define WORST_PREDICTED_IMAGE_W 160
 #define WORST_PREDICTED_IMAGE_H 120
@@ -18,6 +19,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::experimentResultReady, this, &ResultsPanel::experimentResultReady);
+    connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
 
     _infoImagesPerSec = makeInfoLabel();
     _infoMetricTop1 = makeInfoLabel();
@@ -75,6 +77,10 @@ void ResultsPanel::experimentResultReady()
                                          .arg(r.worstPredictionTop1.str())
                                          .arg(r.worstPredictionCorrect.str()));
     }
+}
+
+void ResultsPanel::newImageResult(ImageResult ir) {
+    _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
 }
 
 void ResultsPanel::resetInfo()

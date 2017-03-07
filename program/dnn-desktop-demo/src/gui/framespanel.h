@@ -13,56 +13,7 @@ class QGridLayout;
 QT_END_NAMESPACE
 
 class ExperimentContext;
-class ExperimentProbe;
 class FrameWidget;
-class Recognizer;
-
-//-----------------------------------------------------------------------------
-
-class BatchItem : public QThread
-{
-    Q_OBJECT
-public:
-    BatchItem(int index, Recognizer *recognizer, ImagesBank* images);
-    ~BatchItem();
-
-    FrameWidget* frame() const { return _frame; }
-
-    void run() override;
-    void runIteration();
-
-signals:
-    void finished(const ExperimentProbe* probe);
-    void stopped();
-
-private:
-    Recognizer* _recognizer;
-    FrameWidget* _frame;
-    ExperimentProbe _probe;
-    ImagesBank* _images;
-    int _index;
-};
-
-//-----------------------------------------------------------------------------
-
-class BatchSeries : public QThread
-{
-    Q_OBJECT
-public:
-    BatchSeries(QObject* parent) : QThread(parent) {}
-
-    void run() override;
-
-    void setItems(QList<BatchItem*> items) { _batchItems = items; }
-
-signals:
-    void finished();
-
-private:
-    QList<BatchItem*> _batchItems;
-};
-
-//-----------------------------------------------------------------------------
 
 class FramesPanel : public QFrame
 {
@@ -75,28 +26,19 @@ public:
 private slots:
     void experimentStarted();
     void experimentStopping();
-//    void batchStopped();
-//    void experimentFinished();
 
     void newImageResult(ImageResult);
     void workerStopped();
 
 private:
-//    Recognizer* _recognizer = nullptr;
     ExperimentContext* _context;
-//    QList<BatchItem*> _batchItems;
-//    bool _runInParallel = false;
-//    BatchSeries* _series = nullptr;
     QGridLayout* _layout;
-//    ImagesBank* _images = nullptr;
     WorkerThread* _worker = nullptr;
 
     QList<FrameWidget*> _frames;
     const int _frame_count = 8;
     int _current_frame = 0;
 
-//    void clearBatch();
-//    void prepareBatch();
     QString canStart();
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();
