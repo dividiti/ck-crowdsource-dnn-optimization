@@ -21,7 +21,6 @@ public:
 
 private slots:
     void experimentStarted();
-    void experimentResultReady();
     void newImageResult(ImageResult);
 
 private:

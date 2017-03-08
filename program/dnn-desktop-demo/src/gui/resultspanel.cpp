@@ -18,7 +18,6 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
 
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
-    connect(_context, &ExperimentContext::experimentResultReady, this, &ResultsPanel::experimentResultReady);
     connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
 
     _infoImagesPerSec = makeInfoLabel();
@@ -61,22 +60,6 @@ QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, c
 void ResultsPanel::experimentStarted()
 {
     resetInfo();
-}
-
-void ResultsPanel::experimentResultReady()
-{
-    auto r = _context->experimentResult();
-    _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(r.imagesPerSecond, 0, 'f', 2));
-    _infoMetricTop1->setText(QString::number(r.top1Metric, 'f', 2));
-    _infoMetricTop5->setText(QString::number(r.top5Metric, 'f', 2));
-    if (r.worstPredictionFlag)
-    {
-        _worstPredictedImage->loadImage(r.worstPredictedImage);
-        _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
-                                         .arg(r.worstPredictedImage)
-                                         .arg(r.worstPredictionTop1.str())
-                                         .arg(r.worstPredictionCorrect.str()));
-    }
 }
 
 void ResultsPanel::newImageResult(ImageResult ir) {
