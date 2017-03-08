@@ -80,7 +80,26 @@ void ResultsPanel::experimentResultReady()
 }
 
 void ResultsPanel::newImageResult(ImageResult ir) {
+    ++_imageCount;
+    if (ir.correctAsTop1()) {
+        ++_top1Count;
+    }
+    if (ir.correctAsTop5()) {
+        ++_top5Count;
+    }
     _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
+    _infoMetricTop1->setText(QString::number((double)_top1Count / _imageCount, 'f', 2));
+    _infoMetricTop5->setText(QString::number((double)_top5Count / _imageCount, 'f', 2));
+
+    double accuracyDelta = ir.accuracyDelta();
+    if (accuracyDelta > _worstAccuracyDelta) {
+        _worstAccuracyDelta = accuracyDelta;
+        _worstPredictedImage->loadImage(ir.imageFile);
+        _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
+                                         .arg(ir.imageFile)
+                                         .arg(ir.predictions[0].str())
+                                         .arg(ir.findCorrect()->str()));
+    }
 }
 
 void ResultsPanel::resetInfo()
@@ -88,4 +107,8 @@ void ResultsPanel::resetInfo()
     _infoImagesPerSec->setText("N/A");
     _infoMetricTop1->setText("N/A");
     _infoMetricTop5->setText("N/A");
+    _top1Count = 0;
+    _top5Count = 0;
+    _imageCount = 0;
+    _worstAccuracyDelta = 0;
 }

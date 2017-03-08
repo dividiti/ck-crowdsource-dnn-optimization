@@ -47,13 +47,17 @@ public:
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;
     }
 
-    bool correctAsTop5() const {
+    const PredictionResult* findCorrect() const {
         for (int i = 0; i < predictions.size(); ++i) {
             if (predictions[i].labels == correctLabels) {
-                return true;
+                return &predictions[i];
             }
         }
-        return false;
+        return nullptr;
+    }
+
+    bool correctAsTop5() const {
+        return nullptr != findCorrect();
     }
 
     bool isEmpty() const {
@@ -62,6 +66,11 @@ public:
 
     double imagesPerSecond() {
         return 1.0 / duration;
+    }
+
+    double accuracyDelta() {
+        const PredictionResult* c = findCorrect();
+        return nullptr != c ? predictions[0].accuracy - c->accuracy : 0;
     }
 };
 

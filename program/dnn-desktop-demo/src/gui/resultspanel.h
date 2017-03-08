@@ -30,6 +30,11 @@ private:
     QLabel *_infoMetricTop1, *_infoMetricTop5;
     ImageView *_worstPredictedImage;
 
+    int _top1Count;
+    int _top5Count;
+    int _imageCount;
+    double _worstAccuracyDelta;
+
     QLabel* makeInfoLabel(const QString& role = QString());
     QFrame* makePanel(const std::initializer_list<QObject*>& items, const QString& objectName = QString());
     void resetInfo();
