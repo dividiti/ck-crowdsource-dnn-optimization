@@ -3,7 +3,6 @@
 #include "experimentcontext.h"
 #include "framespanel.h"
 #include "framewidget.h"
-#include "recognizer.h"
 
 #include <QApplication>
 #include <QBoxLayout>

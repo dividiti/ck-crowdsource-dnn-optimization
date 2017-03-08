@@ -9,13 +9,10 @@
 class AppRunParams
 {
 public:
-    enum RunMode { Normal, EditStyle };
-
     QString modelUid;
     QString engineUid;
     QString imagesUid;
     bool startImmediately = false;
-    RunMode runMode = Normal;
 };
 
 //-----------------------------------------------------------------------------
@@ -146,26 +143,6 @@ private:
     QString _valFile, _meanFile, _labelsFile;
 
     friend class CK;
-};
-
-//-----------------------------------------------------------------------------
-
-class ImageEntry
-{
-public:
-    QString fileName;
-    int correctIndex;
-};
-
-class ImagesBank
-{
-public:
-    ImagesBank(const QString& imagesDir, const QString& valFile);
-
-    const QList<ImageEntry>& images() const { return _images; }
-    bool isEmpty() const { return _images.isEmpty(); }
-private:
-    QList<ImageEntry> _images;
 };
 
 #endif // APPMODELS_H

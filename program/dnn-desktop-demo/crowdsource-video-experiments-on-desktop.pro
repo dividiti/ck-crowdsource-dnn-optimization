@@ -44,12 +44,9 @@ SOURCES += \
     src/core/experimentcontext.cpp \
     src/core/jsonformat.cpp \
     src/core/ck.cpp \
-    src/gui/stylesheeteditor.cpp \
-    src/core/recognizer.cpp \
     src/core/ckjson.cpp \
     src/gui/imageview.cpp \
     src/gui/logwindow.cpp \
-    src/core/libloader.cpp \
     src/core/workerthread.cpp
 
 HEADERS += \
@@ -68,12 +65,9 @@ HEADERS += \
     src/core/experimentcontext.h \
     src/core/jsonformat.h \
     src/core/ck.h \
-    src/gui/stylesheeteditor.h \
-    src/core/recognizer.h \
     src/core/ckjson.h \
     src/gui/imageview.h \
     src/gui/logwindow.h \
-    src/core/libloader.h \
     src/core/workerthread.h
 
 RESOURCES += \
