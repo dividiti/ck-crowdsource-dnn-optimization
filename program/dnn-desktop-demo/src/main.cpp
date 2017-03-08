@@ -1,3 +1,4 @@
+#include "core/appevents.h"
 #include "core/appconfig.h"
 #include "core/appmodels.h"
 #include "core/utils.h"
@@ -36,6 +37,8 @@ int main(int argc, char *argv[])
         break;
     }
 
+    AppEvents::instance()->init();
+
     qApp->setStyleSheet(Utils::loadTextFromFile(AppConfig::styleSheetFileName()));
 
     (new MainWindow(runParams))->show();
@@ -43,5 +46,5 @@ int main(int argc, char *argv[])
     if (runParams.runMode == AppRunParams::EditStyle)
         (new StyleSheetEditor)->show();
 
-     return app.exec();
+    return app.exec();
 }

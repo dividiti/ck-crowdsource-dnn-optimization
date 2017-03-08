@@ -122,6 +122,7 @@ void WorkerThread::run() {
         qDebug() << "Worker process finished";
     }
     outputFile.close();
+    AppEvents::instance()->killChildProcesses();
     emit stopped();
 }
 
