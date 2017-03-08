@@ -53,7 +53,6 @@ template class ListContainer<ImagesDataset>;
 void ExperimentContext::startExperiment()
 {
     _isExperimentStarted = true;
-    _result.reset();
     emit experimentStarted();
 }
 
@@ -68,11 +67,5 @@ void ExperimentContext::loadFromConfig()
     _models.setCurrentIndexOrDefault(0);
     _engines.setCurrentIndexOrDefault(0);
     _images.setCurrentIndexOrDefault(0);
-}
-
-void ExperimentContext::recognitionFinished(const ExperimentProbe *p)
-{
-    _result.accumulate(p);
-    emit experimentResultReady();
 }
 

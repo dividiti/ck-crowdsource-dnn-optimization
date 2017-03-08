@@ -36,8 +36,6 @@ class ExperimentContext : public QObject
     Q_OBJECT
 
 public:
-    int experimentIndex() const { return _experimentIndex; }
-
     ListContainer<DnnModel>& models() { return _models; }
     ListContainer<DnnEngine>& engines() { return _engines; }
     ListContainer<ImagesDataset>& images() { return _images; }
@@ -45,7 +43,6 @@ public:
     void startExperiment();
     void stopExperiment();
     bool isExperimentStarted() const { return _isExperimentStarted; }
-    const ExperimentResult& experimentResult() const { return _result; }
 
     void loadFromConfig();
 
@@ -53,16 +50,10 @@ signals:
     void experimentStarted();
     void experimentStopping();
     void experimentFinished();
-    void experimentResultReady();
     void newImageResult(ImageResult);
 
-public slots:
-    void recognitionFinished(const ExperimentProbe* p);
-
 private:
-    int _experimentIndex = -1;
     bool _isExperimentStarted = false;
-    ExperimentResult _result;
     ListContainer<DnnModel> _models;
     ListContainer<DnnEngine> _engines;
     ListContainer<ImagesDataset> _images;

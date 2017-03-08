@@ -92,34 +92,6 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class ExperimentResult
-{
-public:
-    int imagesCount;
-    double totalTime;
-    double timePerImage;
-    double imagesPerSecond;
-    double timePerBatch;
-    double memoryPerImage;
-
-    double top1Metric;
-    double top5Metric;
-    int top1Count;
-    int top5Count;
-
-    bool worstPredictionFlag;
-    double worstPredictionMarker;
-    PredictionResult worstPredictionCorrect;
-    PredictionResult worstPredictionTop1;
-    QString worstPredictedImage;
-
-    void reset();
-    void accumulate(const ExperimentProbe *p);
-    void calculateWorstPrediction(const ExperimentProbe *p);
-};
-
-//-----------------------------------------------------------------------------
-
 class DnnModel
 {
 public:

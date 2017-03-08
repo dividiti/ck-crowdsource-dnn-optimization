@@ -39,7 +39,6 @@ MainWindow::MainWindow(const AppRunParams &runParams, QWidget *parent) : QMainWi
     for (int i = 0; i < EXPERIMENT_COUNT; i++)
     {
         auto e = new Experiment;
-        e->context._experimentIndex = i;
         e->panel = new ExperimentPanel(&e->context);
         _experiments.append(e);
 
