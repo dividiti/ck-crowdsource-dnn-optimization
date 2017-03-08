@@ -64,5 +64,113 @@ int AppConfig::sectionCount(const QString& sectionName) {
 }
 
 QString AppConfig::sectionValue(const QString& sectionName, int index, const QString& suffix) {
-    return configValueStr(sectionName + "/" + index + "_" + suffix, "");
+    return configValueStr(sectionName + "/" + QString::number(index) + "_" + suffix, "");
+}
+
+QList<Program> AppConfig::programs() {
+    int programCount = sectionCount("Programs");
+    QList<Program> ret;
+    for (int i = 0; i < programCount; ++i) {
+        Program p;
+        p.uoa = sectionValue("Programs", i, "uoa");
+        p.name = sectionValue("Programs", i, "name");
+        p.outputFile = sectionValue("Programs", i, "output_file");
+        ret.append(p);
+    }
+    return ret;
+}
+
+QVariant AppConfig::currentProgram() {
+    QString uoa = configValueStr("program_uoa", "");
+    QList<Program> progs = programs();
+    QVariant ret;
+    for (auto i : progs) {
+        if (!ret.isValid()) {
+            ret.setValue(i);
+        }
+        if (i.uoa == uoa) {
+            ret.setValue(i);
+            break;
+        }
+    }
+    return ret;
+}
+
+void AppConfig::setCurrentProgram(QString uoa) {
+    config().setValue("program_uoa", uoa);
+    config().sync();
+}
+
+QList<Model> AppConfig::models() {
+    int count = sectionCount("Models");
+    QList<Model> ret;
+    for (int i = 0; i < count; ++i) {
+        Model m;
+        m.uoa = sectionValue("Models", i, "uoa");
+        m.name = sectionValue("Models", i, "name");
+        ret.append(m);
+    }
+    return ret;
+}
+
+QVariant AppConfig::currentModel() {
+    QString uoa = configValueStr("model_uoa", "");
+    QVariant ret;
+    for (auto i : models()) {
+        if (!ret.isValid()) {
+            ret.setValue(i);
+        }
+        if (i.uoa == uoa) {
+            ret.setValue(i);
+            break;
+        }
+    }
+    return ret;
+}
+
+void AppConfig::setCurrentModel(QString uoa) {
+    config().setValue("model_uoa", uoa);
+    config().sync();
+}
+
+QList<Dataset> AppConfig::datasets() {
+    int valCount = sectionCount("VAL");
+    if (0 >= valCount) {
+        return QList<Dataset>();
+    }
+    // for now, we always use the first VAL
+    QString valUoa = sectionValue("VAL", 0, "uoa");
+    QString valName = sectionValue("VAL", 0, "name");
+
+    int count = sectionCount("AUX");
+    QList<Dataset> ret;
+    for (int i = 0; i < count; ++i) {
+        Dataset m;
+        m.auxUoa = sectionValue("AUX", i, "uoa");
+        m.auxName = sectionValue("AUX", i, "name");
+        m.valUoa = valUoa;
+        m.valName = valName;
+        ret.append(m);
+    }
+    return ret;
+}
+
+QVariant AppConfig::currentDataset() {
+    QString uoa = configValueStr("aux_uoa", "");
+    QVariant ret;
+    for (auto i : datasets()) {
+        if (!ret.isValid()) {
+            ret.setValue(i);
+        }
+        if (i.auxUoa == uoa) {
+            ret.setValue(i);
+            break;
+        }
+    }
+    return ret;
+}
+
+void AppConfig::setCurrentDataset(QString uoa) {
+    config().setValue("aux_uoa", uoa);
+    config().sync();
 }

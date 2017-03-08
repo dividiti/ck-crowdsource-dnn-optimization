@@ -35,6 +35,10 @@ def ck_preprocess(i):
 
     return {'return':0, 'bat':'', 'new_env': i['env']}
 
+def setstr(conf, section, key, value):
+    # string values must be enquoted for Qt to read them correctly
+    conf.set(section, key, '"' + value + '"')
+
 def ensure_section(conf, section, clean=False):
     if clean:
         conf.remove_section(section)
@@ -53,7 +57,7 @@ def fill_general(ck, conf):
     r = ck.access({'action': 'where', 'module_uoa': 'repo', 'data_uoa': 'local'})
     if r['return'] > 0: return r
 
-    conf.set('General', 'ck_repos_path', os.path.dirname(r['path']))
+    setstr(conf, 'General', 'ck_repos_path', os.path.dirname(r['path']))
     return {'return':0}
 
 def fill_section(ck, conf, section, tags, module=''):
@@ -74,7 +78,7 @@ def fill_section(ck, conf, section, tags, module=''):
         if r['return'] > 0: return r
         u['meta'] = r['dict']
         conf.set(section, str(i) + '_uoa', data_uoa)
-        conf.set(section, str(i) + '_name', r.get('data_name', u))
+        setstr(conf, section, str(i) + '_name', r.get('data_name', u))
 
     return {'return':0, 'lst': lst}
 
@@ -93,7 +97,7 @@ def fill_programs(ck, conf):
         r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
         if r['return'] > 0: return r
         output_file = os.path.join(r['path'], 'tmp', output_file)
-        conf.set(section, str(i) + '_output_file', output_file)
+        setstr(conf, section, str(i) + '_output_file', output_file)
 
     return {'return': 0}
 

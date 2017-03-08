@@ -79,6 +79,57 @@ Q_DECLARE_METATYPE(ImageResult)
 
 //-----------------------------------------------------------------------------
 
+struct Program {
+    QString uoa;
+    QString name;
+    QString outputFile;
+
+    QString title() const {
+        return name;
+    }
+
+    bool operator==(const Program& o) const {
+        return uoa == o.uoa;
+    }
+};
+Q_DECLARE_METATYPE(Program)
+
+//-----------------------------------------------------------------------------
+
+struct Model {
+    QString uoa;
+    QString name;
+
+    QString title() const {
+        return name;
+    }
+
+    bool operator==(const Model& o) const {
+        return uoa == o.uoa;
+    }
+};
+Q_DECLARE_METATYPE(Model)
+
+//-----------------------------------------------------------------------------
+
+struct Dataset {
+    QString auxUoa;
+    QString auxName;
+    QString valUoa;
+    QString valName;
+
+    QString title() const {
+        return auxName;
+    }
+
+    bool operator==(const Dataset& o) const {
+        return auxUoa == o.auxUoa;
+    }
+};
+Q_DECLARE_METATYPE(Dataset)
+
+//-----------------------------------------------------------------------------
+
 class DnnModel
 {
 public:
