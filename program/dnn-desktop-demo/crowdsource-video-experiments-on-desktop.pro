@@ -39,7 +39,6 @@ SOURCES += \
     src/core/appconfig.cpp \
     src/core/utils.cpp \
     src/core/appevents.cpp \
-    src/core/appmodels.cpp \
     src/ori/OriWidgets.cpp \
     src/core/experimentcontext.cpp \
     src/core/jsonformat.cpp \

@@ -25,7 +25,11 @@ public:
     int index;
     bool isCorrect;
 
-    QString str() const;
+    QString str() const {
+        return QString(QStringLiteral("%1 - %2 %3"))
+            .arg(accuracy).arg(labels)
+            .arg(isCorrect ? QString(QStringLiteral(" CORRECT")) : QString());
+    }
 };
 
 Q_DECLARE_METATYPE(PredictionResult)
@@ -72,20 +76,6 @@ public:
 };
 
 Q_DECLARE_METATYPE(ImageResult)
-
-//-----------------------------------------------------------------------------
-
-class ExperimentProbe
-{
-public:
-    QString image;
-    double time;
-    double memory;
-    QVector<PredictionResult> predictions;
-    PredictionResult correctInfo;
-    bool correctAsTop1;
-    bool correctAsTop5;
-};
 
 //-----------------------------------------------------------------------------
 
