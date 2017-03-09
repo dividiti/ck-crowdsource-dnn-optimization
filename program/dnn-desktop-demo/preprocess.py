@@ -15,13 +15,19 @@ def ck_preprocess(i):
 
     ck = i['ck_kernel']
 
+    print(i.keys())
+    ck.out(ck.dump_json({'dict':i['misc']})['string'])
+
     r = fill_general(ck, conf)
     if r['return'] > 0: return r
 
     r = fill_models(ck, conf)
     if r['return'] > 0: return r
 
-    exe_extension = ck.get_by_flat_key({'dict': i, 'key': '##host_os_dict#file_extensions#exe'}).get('value', '')
+    host_os = ck.get_by_flat_key({'dict': i, 'key': '##host_os_dict#ck_name'}).get('value', '')
+    exe_extension = ''
+    if 'win' == host_os:
+        exe_extension = '.exe'
 
     r = fill_programs(ck, conf, exe_extension)
     if r['return'] > 0: return r
@@ -35,7 +41,16 @@ def ck_preprocess(i):
     with open(APP_CONF_FILE, 'wb') as f:
         conf.write(f)
 
-    return {'return':0, 'bat':'', 'new_env': i['env']}
+    bat = ''
+    if 'win' != host_os:
+        misc = i.get('misc', {})
+        path = misc.get('path', '')
+        tmp_dir = misc.get('tmp_dir', '')
+        if '' != path:
+            ld_path = os.path.join(path, tmp_dir)
+            bat ='export LD_LIBRARY_PATH="' + ld_path + '"'
+
+    return {'return':0, 'bat': bat, 'new_env': i['env']}
 
 def setstr(conf, section, key, value):
     # string values must be enquoted for Qt to read them correctly

@@ -87,7 +87,11 @@ void AppEvents::killChildProcesses() {
 #endif
 }
 
-void AppEvents::registerProcess(const QString &processName) {
+void AppEvents::registerProcess(const QString&
+                                #ifdef Q_OS_WIN
+                                processName
+                                #endif
+                                ) {
 #ifdef Q_OS_WIN
     PROCESSES_MUTEX.lock();
     PROCESSES.append(processName);
