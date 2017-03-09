@@ -39,7 +39,6 @@ private:
     const int _frame_count = 8;
     int _current_frame = 0;
 
-    QString canStart();
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();
 

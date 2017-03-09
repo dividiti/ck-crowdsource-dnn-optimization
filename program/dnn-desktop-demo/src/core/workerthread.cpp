@@ -62,7 +62,7 @@ void WorkerThread::run() {
     fullArgs.append(args);
     ck.setArguments(fullArgs);
 
-    qDebug() << "Run CK command:" << ck.program() << " " <<  ck.arguments().join(" ");
+    qDebug() << "Run CK command:" << ck.program() + " " +  ck.arguments().join(" ");
 
     QFile outputFile(program.outputFile);
     outputFile.remove();

@@ -11,8 +11,7 @@
 #include <QGridLayout>
 #include <QTimer>
 
-FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
-{
+FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent) {
     setObjectName("framesPanel");
 
     _context = context;
@@ -34,23 +33,14 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
     }
 }
 
-FramesPanel::~FramesPanel()
-{
+FramesPanel::~FramesPanel() {
     clearWorker();
 }
 
-void FramesPanel::experimentStarted()
-{
-    auto res = canStart();
-    if (!res.isEmpty()) {
-        return abortExperiment(res);
-    }
-
+void FramesPanel::experimentStarted() {
     if (Q_NULLPTR != _worker) {
-        AppEvents::error("Another experiment is already running");
-        return;
+        return abortExperiment("Another experiment is already running");
     }
-
     QVariant program = AppConfig::currentProgram();
     QVariant model = AppConfig::currentModel();
     QVariant dataset = AppConfig::currentDataset();
@@ -63,12 +53,11 @@ void FramesPanel::experimentStarted()
         _worker->start();
     } else {
         AppEvents::error("Please select engine, model and dataset first");
-        return;
+        return abortExperiment("Please select engine, model and dataset first");
     }
 }
 
-void FramesPanel::experimentStopping()
-{
+void FramesPanel::experimentStopping() {
     qDebug() << "Stopping batch processing";
     if (Q_NULLPTR != _worker) {
         _worker->requestInterruption();
@@ -92,20 +81,6 @@ void FramesPanel::abortExperiment(const QString& errorMsg) {
         AppEvents::error(errorMsg);
     }
     QTimer::singleShot(200, _context, SIGNAL(experimentFinished()));
-}
-
-QString FramesPanel::canStart()
-{
-    if (!_context->engines().hasCurrent())
-        return tr("No engine selected");
-
-    if (!_context->models().hasCurrent())
-        return tr("No scenario selected");
-
-    if (!_context->images().hasCurrent())
-        return tr("No image source selected");
-
-    return QString();
 }
 
 void FramesPanel::clearWorker() {

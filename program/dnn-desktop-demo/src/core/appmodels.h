@@ -6,17 +6,6 @@
 #include <QVector>
 #include <QMetaType>
 
-class AppRunParams
-{
-public:
-    QString modelUid;
-    QString engineUid;
-    QString imagesUid;
-    bool startImmediately = false;
-};
-
-//-----------------------------------------------------------------------------
-
 class PredictionResult
 {
 public:
@@ -127,63 +116,5 @@ struct Dataset {
     }
 };
 Q_DECLARE_METATYPE(Dataset)
-
-//-----------------------------------------------------------------------------
-
-class DnnModel
-{
-public:
-    QString title() const { return _title; }
-    QString modelFile() const { return _modelFile; }
-    QString weightsFile() const { return _weightsFile; }
-
-    QString str() const { return _title + ": " + _weightsFile; }
-    bool isEmpty() const { return _modelFile.isEmpty() || _weightsFile.isEmpty(); }
-
-private:
-    QString _title, _modelFile, _weightsFile;
-
-    friend class CK;
-};
-
-//-----------------------------------------------------------------------------
-
-class DnnEngine
-{
-public:
-    QString title() const { return _title; }
-    QString library() const { return _library; }
-    QStringList deps() const { return _deps; }
-
-    QString str() const { return _title + ": " + _library; }
-    bool isEmpty() const { return _library.isEmpty(); }
-
-private:
-    QString _title, _library;
-    QStringList _deps;
-
-    friend class CK;
-};
-
-//-----------------------------------------------------------------------------
-
-class ImagesDataset
-{
-public:
-    QString title() const { return _title; }
-    QString imagesPath() const { return _imagesPath; }
-    QString meanFile() const { return _meanFile; }
-    QString labelsFile() const { return _labelsFile; }
-    QString valFile() const { return _valFile; }
-
-    QString str() const { return _title + ": " + _imagesPath; }
-    bool isEmpty() const { return _imagesPath.isEmpty(); }
-
-private:
-    QString _title, _imagesPath;
-    QString _valFile, _meanFile, _labelsFile;
-
-    friend class CK;
-};
 
 #endif // APPMODELS_H

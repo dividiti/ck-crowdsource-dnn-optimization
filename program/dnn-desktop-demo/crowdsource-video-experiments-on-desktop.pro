@@ -35,15 +35,11 @@ SOURCES += \
     src/gui/featurespanel.cpp \
     src/gui/resultspanel.cpp \
     src/gui/framewidget.cpp \
-    src/shell/shellcommands.cpp \
     src/core/appconfig.cpp \
     src/core/utils.cpp \
     src/core/appevents.cpp \
     src/ori/OriWidgets.cpp \
     src/core/experimentcontext.cpp \
-    src/core/jsonformat.cpp \
-    src/core/ck.cpp \
-    src/core/ckjson.cpp \
     src/gui/imageview.cpp \
     src/gui/logwindow.cpp \
     src/core/workerthread.cpp
@@ -55,16 +51,12 @@ HEADERS += \
     src/gui/featurespanel.h \
     src/gui/resultspanel.h \
     src/gui/framewidget.h \
-    src/shell/shellcommands.h \
     src/core/appconfig.h \
     src/core/utils.h \
     src/core/appevents.h \
     src/core/appmodels.h \
     src/ori/OriWidgets.h \
     src/core/experimentcontext.h \
-    src/core/jsonformat.h \
-    src/core/ck.h \
-    src/core/ckjson.h \
     src/gui/imageview.h \
     src/gui/logwindow.h \
     src/core/workerthread.h

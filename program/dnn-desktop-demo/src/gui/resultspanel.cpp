@@ -12,8 +12,7 @@
 #define WORST_PREDICTED_IMAGE_W 160
 #define WORST_PREDICTED_IMAGE_H 120
 
-ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
-{
+ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent) {
     setObjectName("resultsPanel");
 
     _context = context;
@@ -41,15 +40,13 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
     resetInfo();
 }
 
-QLabel* ResultsPanel::makeInfoLabel(const QString &role)
-{
+QLabel* ResultsPanel::makeInfoLabel(const QString &role) {
     auto label = new QLabel;
     label->setProperty("qss-role", role.isEmpty()? QString("info-label"): role);
     return label;
 }
 
-QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, const QString &objectName)
-{
+QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, const QString &objectName) {
     auto panel = new QFrame;
     panel->setProperty("qss-role", "results-panel");
     panel->setObjectName(objectName);
@@ -57,8 +54,7 @@ QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, c
     return panel;
 }
 
-void ResultsPanel::experimentStarted()
-{
+void ResultsPanel::experimentStarted() {
     resetInfo();
 }
 
@@ -85,8 +81,7 @@ void ResultsPanel::newImageResult(ImageResult ir) {
     }
 }
 
-void ResultsPanel::resetInfo()
-{
+void ResultsPanel::resetInfo() {
     _infoImagesPerSec->setText("N/A");
     _infoMetricTop1->setText("N/A");
     _infoMetricTop5->setText("N/A");
