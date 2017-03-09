@@ -15,16 +15,14 @@ def ck_preprocess(i):
 
     ck = i['ck_kernel']
 
-    print(i.keys())
-    ck.out(ck.dump_json({'dict':i['misc']})['string'])
-
     r = fill_general(ck, conf)
     if r['return'] > 0: return r
 
     r = fill_models(ck, conf)
     if r['return'] > 0: return r
 
-    host_os = ck.get_by_flat_key({'dict': i, 'key': '##host_os_dict#ck_name'}).get('value', '')
+    host_os_dict = i.get('host_os_dict', {})
+    host_os = host_os_dict.get('ck_name', '')
     exe_extension = ''
     if 'win' == host_os:
         exe_extension = '.exe'
@@ -48,7 +46,7 @@ def ck_preprocess(i):
         tmp_dir = misc.get('tmp_dir', '')
         if '' != path:
             ld_path = os.path.join(path, tmp_dir)
-            bat ='export LD_LIBRARY_PATH="' + ld_path + '"'
+            bat ='export ' + host_os_dict.get('env_ld_library_path', 'LD_LIBRARY_PATH') +'="' + ld_path + '"'
 
     return {'return':0, 'bat': bat, 'new_env': i['env']}
 
