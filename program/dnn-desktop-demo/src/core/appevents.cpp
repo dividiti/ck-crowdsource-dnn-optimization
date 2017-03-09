@@ -3,6 +3,13 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QProcess>
+#include <QList>
+#include <QMutex>
+
+#ifdef Q_OS_WIN
+static QList<QString> PROCESSES;
+static QMutex PROCESSES_MUTEX;
+#endif
 
 // On Linux, child processes are not killed by default, when the parent is done.
 // This is why we need top explicitly kill process group. Otherwise, 'classification' processes may live forever, consuming resources.
@@ -46,8 +53,8 @@ void AppEvents::init() {
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
     signal(SIGHUP, signalHandler);
-    connect(qApp, &QCoreApplication::aboutToQuit, this, &AppEvents::killChildProcesses);
 #endif
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &AppEvents::killChildProcesses);
 }
 
 void AppEvents::info(const QString& msg)
@@ -68,7 +75,22 @@ void AppEvents::error(const QString& msg)
 }
 
 void AppEvents::killChildProcesses() {
-#ifndef Q_OS_WIN
+#ifdef Q_OS_WIN
+    PROCESSES_MUTEX.lock();
+    for (auto p : PROCESSES) {
+        QProcess::execute("taskkill /im " + p + " /f");
+    }
+    PROCESSES.clear();
+    PROCESSES_MUTEX.unlock();
+#else
     killGroup();
+#endif
+}
+
+void AppEvents::registerProcess(const QString &processName) {
+#ifdef Q_OS_WIN
+    PROCESSES_MUTEX.lock();
+    PROCESSES.append(processName);
+    PROCESSES_MUTEX.unlock();
 #endif
 }

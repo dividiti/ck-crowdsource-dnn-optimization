@@ -21,7 +21,9 @@ def ck_preprocess(i):
     r = fill_models(ck, conf)
     if r['return'] > 0: return r
 
-    r = fill_programs(ck, conf)
+    exe_extension = ck.get_by_flat_key({'dict': i, 'key': '##host_os_dict#file_extensions#exe'}).get('value', '')
+
+    r = fill_programs(ck, conf, exe_extension)
     if r['return'] > 0: return r
 
     r = fill_aux(ck, conf)
@@ -85,7 +87,7 @@ def fill_section(ck, conf, section, tags, module=''):
 def fill_models(ck, conf):
     return fill_section(ck, conf, section='Models', tags='caffemodel', module='env')
 
-def fill_programs(ck, conf):
+def fill_programs(ck, conf, exe_extension):
     section = 'Programs'
     r = fill_section(ck, conf, section=section, tags='caffe-classification,continuous')
     if r['return'] > 0: return r
@@ -98,6 +100,13 @@ def fill_programs(ck, conf):
         if r['return'] > 0: return r
         output_file = os.path.join(r['path'], 'tmp', output_file)
         setstr(conf, section, str(i) + '_output_file', output_file)
+
+        target_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#target_file'}).get('value', None)
+        if None == target_file:
+            return {'return': 1, 'error': 'Could not find target file for ' + u['data_uoa']}
+        if not target_file.startswith(exe_extension):
+            target_file = target_file + exe_extension
+        setstr(conf, section, str(i) + '_exe', target_file)
 
     return {'return': 0}
 

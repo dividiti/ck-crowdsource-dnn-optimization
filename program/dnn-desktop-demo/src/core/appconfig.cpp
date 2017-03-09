@@ -79,6 +79,7 @@ QList<Program> AppConfig::programs() {
         p.uoa = sectionValue("Programs", i, "uoa");
         p.name = sectionValue("Programs", i, "name");
         p.outputFile = sectionValue("Programs", i, "output_file");
+        p.exe = sectionValue("Programs", i, "exe");
         ret.append(p);
     }
     return ret;

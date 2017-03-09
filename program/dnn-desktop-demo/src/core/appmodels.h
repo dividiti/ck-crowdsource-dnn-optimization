@@ -72,6 +72,7 @@ struct Program {
     QString uoa;
     QString name;
     QString outputFile;
+    QString exe;
 
     QString title() const {
         return name;

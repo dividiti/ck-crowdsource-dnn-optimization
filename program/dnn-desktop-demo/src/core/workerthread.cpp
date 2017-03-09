@@ -68,6 +68,7 @@ void WorkerThread::run() {
     outputFile.remove();
 
     ck.start();
+    AppEvents::registerProcess(program.exe);
 
     while (!outputFile.exists() && !isInterruptionRequested()) {
         msleep(100);
