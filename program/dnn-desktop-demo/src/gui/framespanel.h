@@ -33,7 +33,7 @@ private slots:
 private:
     ExperimentContext* _context;
     QGridLayout* _layout;
-    WorkerThread* _worker = nullptr;
+    WorkerThread* _worker = Q_NULLPTR;
 
     QList<FrameWidget*> _frames;
     const int _frame_count = 8;
@@ -43,7 +43,6 @@ private:
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();
 
-    void initWorker();
     void clearWorker();
 };
 

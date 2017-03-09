@@ -8,6 +8,7 @@ class WorkerThread : public QThread
 {
     Q_OBJECT
 public:
+    WorkerThread(const Program& program, const Model& model, const Dataset& dataset, QObject* parent = Q_NULLPTR);
 
     void run() override;
 
@@ -17,6 +18,10 @@ signals:
 
 private:
     void processPredictedResults(const ImageResult& imageResult);
+
+    Program program;
+    Model model;
+    Dataset dataset;
 };
 
 #endif // WORKERTHREAD_H

@@ -46,20 +46,31 @@ void FramesPanel::experimentStarted()
         return abortExperiment(res);
     }
 
-    if (nullptr != _worker) {
+    if (Q_NULLPTR != _worker) {
         AppEvents::error("Another experiment is already running");
         return;
     }
 
-    initWorker();
-    _current_frame = 0;
-    _worker->start();
+    QVariant program = AppConfig::currentProgram();
+    QVariant model = AppConfig::currentModel();
+    QVariant dataset = AppConfig::currentDataset();
+    if (program.isValid() && model.isValid() && dataset.isValid()) {
+        _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>());
+        connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
+        connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
+        connect(_worker, &WorkerThread::stopped, this, &FramesPanel::workerStopped);
+        _current_frame = 0;
+        _worker->start();
+    } else {
+        AppEvents::error("Please select engine, model and dataset first");
+        return;
+    }
 }
 
 void FramesPanel::experimentStopping()
 {
     qDebug() << "Stopping batch processing";
-    if (nullptr != _worker) {
+    if (Q_NULLPTR != _worker) {
         _worker->requestInterruption();
     }
 }
@@ -97,18 +108,8 @@ QString FramesPanel::canStart()
     return QString();
 }
 
-void FramesPanel::initWorker() {
-    if (nullptr != _worker) {
-        return;
-    }
-    _worker = new WorkerThread();
-    connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
-    connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
-    connect(_worker, &WorkerThread::stopped, this, &FramesPanel::workerStopped);
-}
-
 void FramesPanel::clearWorker() {
-    if (nullptr == _worker) {
+    if (Q_NULLPTR == _worker) {
         return;
     }
     disconnect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
@@ -116,5 +117,5 @@ void FramesPanel::clearWorker() {
     _worker->terminate();
     _worker->wait();
     delete _worker;
-    _worker = nullptr;
+    _worker = Q_NULLPTR;
 }

@@ -36,28 +36,38 @@ static QString getBinPath() {
     return ckDir;
 }
 
+static const QString FILE_PREFIX = "File: ";
+static const QString DURATION_PREFIX = "Duration: ";
+static const QString DURATION_SUFFIX = " sec";
+static const QString CORRECT_LABEL_PREFIX = "Correct label: ";
+static const QString PREDICTION_PREFIX = "Predictions: ";
+static const QRegExp PREDICTION_REGEX("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
+
+WorkerThread::WorkerThread(const Program& program, const Model& model, const Dataset& dataset, QObject* parent)
+    : QThread(parent), program(program), model(model), dataset(dataset) {}
+
 void WorkerThread::run() {
     QProcess ck;
     ck.setWorkingDirectory(getBinPath());
     ck.setProgram(getExe());
     QStringList fullArgs = getDefaultArgs();
-    auto args = QStringList { "run", "program:caffe-classification", "--cmd_key=use_continuous", "--deps.caffemodel=6b8dde7134ceb818" };
+    auto args = QStringList {
+            "run",
+            "program:" + program.uoa,
+            "--cmd_key=use_continuous",
+            "--deps.caffemodel=" + model.uoa,
+            "--deps.imagenet-aux=" + dataset.auxUoa,
+            "--deps.imagenet-val=" + dataset.valUoa
+            };
     fullArgs.append(args);
     ck.setArguments(fullArgs);
 
     qDebug() << "Run CK command:" << ck.program() << " " <<  ck.arguments().join(" ");
 
-    QFile outputFile("/home/dsavenko/CK/ck-caffe/program/caffe-classification/tmp/tmp-output1.tmp");
+    QFile outputFile(program.outputFile);
     outputFile.remove();
 
     ck.start();
-
-    const QString fileLinePrefix = "File: ";
-    const QString durationLinePrefix = "Duration: ";
-    const QString durationLineSuffix = " sec";
-    const QString correctLabelLinePrefix = "Correct label: ";
-    const QString predictionsLinePrefix = "Predictions: ";
-    const QRegExp predictionRegExp("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
     while (!outputFile.exists() && !isInterruptionRequested()) {
         msleep(100);
@@ -84,28 +94,28 @@ void WorkerThread::run() {
             processPredictedResults(ir);
             ir = ImageResult();
 
-        } else if (line.startsWith(fileLinePrefix)) {
-            ir.imageFile = line.mid(fileLinePrefix.size());
+        } else if (line.startsWith(FILE_PREFIX)) {
+            ir.imageFile = line.mid(FILE_PREFIX.size());
 
-        } else if (line.startsWith(durationLinePrefix)) {
-            QStringRef t = line.midRef(durationLinePrefix.size());
-            t = t.left(t.size() - durationLineSuffix.size());
+        } else if (line.startsWith(DURATION_PREFIX)) {
+            QStringRef t = line.midRef(DURATION_PREFIX.size());
+            t = t.left(t.size() - DURATION_SUFFIX.size());
             ir.duration = t.toDouble();
 
-        } else if (line.startsWith(correctLabelLinePrefix)) {
-            ir.correctLabels = line.mid(correctLabelLinePrefix.size()).trimmed();
+        } else if (line.startsWith(CORRECT_LABEL_PREFIX)) {
+            ir.correctLabels = line.mid(CORRECT_LABEL_PREFIX.size()).trimmed();
 
-        } else if (line.startsWith(predictionsLinePrefix)) {
-            predictionCount = line.mid(predictionsLinePrefix.size()).toInt();
+        } else if (line.startsWith(PREDICTION_PREFIX)) {
+            predictionCount = line.mid(PREDICTION_PREFIX.size()).toInt();
 
         } else if (predictionCount > 0) {
             // parsing a prediction line
             --predictionCount;
             PredictionResult pr;
-            if (predictionRegExp.exactMatch(line)) {
-                pr.accuracy = predictionRegExp.cap(1).toDouble();
+            if (PREDICTION_REGEX.exactMatch(line)) {
+                pr.accuracy = PREDICTION_REGEX.cap(1).toDouble();
                 pr.index = 0;
-                pr.labels = predictionRegExp.cap(2).trimmed();
+                pr.labels = PREDICTION_REGEX.cap(2).trimmed();
                 pr.isCorrect = pr.labels == ir.correctLabels;
                 ir.predictions.append(pr);
             } else {
