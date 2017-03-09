@@ -3,7 +3,6 @@
 #include "appevents.h"
 #include "experimentcontext.h"
 #include "featurespanel.h"
-#include "utils.h"
 #include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>

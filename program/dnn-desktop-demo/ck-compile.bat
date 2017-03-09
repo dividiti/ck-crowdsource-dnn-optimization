@@ -1,3 +1,7 @@
 
-echo Automatic compilation is not supported yet! Please, use pre-compiled binaries
-exit /b 1
+set NAME="crowdsource-video-experiments-on-desktop-windows"
+
+rm -rf *
+unzip "../prebuilt/%NAME%.zip"
+
+exit /b 0

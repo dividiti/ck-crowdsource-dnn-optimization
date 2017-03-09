@@ -3,7 +3,6 @@
 #include "logwindow.h"
 #include "mainwindow.h"
 #include "experimentpanel.h"
-#include "utils.h"
 
 #include <QApplication>
 #include <QBoxLayout>

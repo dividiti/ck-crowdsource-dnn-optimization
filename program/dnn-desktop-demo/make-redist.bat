@@ -1,6 +1,7 @@
 @echo off
 
 set APP_EXE=crowdsource-video-experiments-on-desktop.exe
+set APP_BAT=crowdsource-video-experiments-on-desktop.bat
 set TARGET_FILE=crowdsource-video-experiments-on-desktop-windows.zip
 
 :: All dirs relative to location of this batch file:
@@ -13,7 +14,7 @@ set SRC=.\src
 :: Search in default installation paths for different Qt versions.
 :: It assumes that only one version is installed on build machine.
 set QT_MINGW_5_8_32=c:\Qt\5.8\mingw53_32
-set QT_MSVC_5_7_2015=c:\Qt\Qt5.7.0\5.7\msvc2015
+set QT_MSVC_5_7_2015=c:\Qt\5.8\msvc2015_64
 if exist %QT_MINGW_5_8_32% (
 	set QT_DIR=QT_MINGW_5_8_32
 	set QT_TYPE="mingw"
@@ -35,6 +36,7 @@ mkdir %REDIST%
 @echo.
 @echo Copy app files...
 copy /Y %BIN%\%APP_EXE% %REDIST%
+copy /Y %APP_BAT% %REDIST%
 copy /Y %SRC%\app.conf.example.win %REDIST%\app.conf
 copy /Y "%BIN%\*.README.md" %REDIST%
 

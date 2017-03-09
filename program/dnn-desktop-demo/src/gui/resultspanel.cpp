@@ -1,7 +1,6 @@
 #include "imageview.h"
 #include "experimentcontext.h"
 #include "resultspanel.h"
-#include "utils.h"
 #include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>

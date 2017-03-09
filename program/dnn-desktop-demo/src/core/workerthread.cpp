@@ -22,7 +22,7 @@ static QString getExe() {
 
 static QStringList getDefaultArgs() {
 #ifdef Q_OS_WIN32
-    return QStringList { "-W", "ignore::DeprecationWarning", ckDir + "\\..\\ck\\kernel.py" };
+    return QStringList { "-W", "ignore::DeprecationWarning", AppConfig::ckBinPath() + "\\..\\ck\\kernel.py" };
 #else
     return QStringList();
 #endif
@@ -126,7 +126,7 @@ void WorkerThread::run() {
     processPredictedResults(ir);
     if (isInterruptionRequested()) {
         qDebug() << "Worker process interrupted by user request";
-        ck.terminate();
+        ck.kill();
         ck.waitForFinished();
     } else {
         qDebug() << "Worker process finished";

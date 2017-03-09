@@ -37,7 +37,7 @@ def ck_preprocess(i):
 
 def setstr(conf, section, key, value):
     # string values must be enquoted for Qt to read them correctly
-    conf.set(section, key, '"' + value + '"')
+    conf.set(section, key, '"' + value.replace('\\', '\\\\') + '"')
 
 def ensure_section(conf, section, clean=False):
     if clean:
@@ -49,8 +49,8 @@ def fill_general(ck, conf):
     ensure_section(conf, 'General')
     try:
         bin_path, bin_name = os.path.split(which('ck'))
-        conf.set('General', 'ck_bin_path', bin_path)
-        conf.set('General', 'ck_exe_name', bin_name)
+        setstr(conf, 'General', 'ck_bin_path', bin_path)
+        setstr(conf, 'General', 'ck_exe_name', bin_name)
     except WhichError:
         return {'return':1, 'error': 'Path to ck not found'}
 
@@ -77,7 +77,7 @@ def fill_section(ck, conf, section, tags, module=''):
         r = ck.access({'action': 'load', 'module_uoa': module_uoa, 'data_uoa': data_uoa})
         if r['return'] > 0: return r
         u['meta'] = r['dict']
-        conf.set(section, str(i) + '_uoa', data_uoa)
+        setstr(conf, section, str(i) + '_uoa', data_uoa)
         setstr(conf, section, str(i) + '_name', r.get('data_name', u))
 
     return {'return':0, 'lst': lst}

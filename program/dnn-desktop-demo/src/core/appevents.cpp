@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QCoreApplication>
+#include <QProcess>
 
 // On Linux, child processes are not killed by default, when the parent is done.
 // This is why we need top explicitly kill process group. Otherwise, 'classification' processes may live forever, consuming resources.
