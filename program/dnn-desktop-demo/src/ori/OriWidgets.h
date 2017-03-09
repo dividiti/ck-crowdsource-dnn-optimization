@@ -25,6 +25,8 @@ QT_END_NAMESPACE
 namespace Ori {
 namespace Gui {
 
+QLabel* makeTitle(const QString &title);
+QWidget* makeDivider();
 void adjustFont(QWidget*);
 void setFontSizePt(QWidget *w, int sizePt);
 void setFontMonospace(QWidget *w, int sizePt = 0);

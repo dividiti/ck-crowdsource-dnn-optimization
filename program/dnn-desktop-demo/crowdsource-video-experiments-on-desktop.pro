@@ -36,7 +36,6 @@ SOURCES += \
     src/gui/resultspanel.cpp \
     src/gui/framewidget.cpp \
     src/core/appconfig.cpp \
-    src/core/utils.cpp \
     src/core/appevents.cpp \
     src/ori/OriWidgets.cpp \
     src/core/experimentcontext.cpp \
@@ -52,7 +51,6 @@ HEADERS += \
     src/gui/resultspanel.h \
     src/gui/framewidget.h \
     src/core/appconfig.h \
-    src/core/utils.h \
     src/core/appevents.h \
     src/core/appmodels.h \
     src/ori/OriWidgets.h \

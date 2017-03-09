@@ -5,6 +5,8 @@
 #include <QDir>
 #include <QDebug>
 
+static const QString STYLESHEET_PATH = ":/qss/app.qss";
+
 QSettings& AppConfig::config() {
     static QSettings cfg(configFileName(), QSettings::IniFormat);
     return cfg;
@@ -14,8 +16,18 @@ QString AppConfig::configFileName() {
     return qApp->applicationDirPath() + QDir::separator() + "app.conf";
 }
 
-QString AppConfig::styleSheetFileName() {
-    return ":/qss/app.qss";
+QString AppConfig::styleSheet() {
+    const QString path = STYLESHEET_PATH;
+    QFile file(path);
+    if (!file.exists()) {
+        qWarning() << "Stylesheet file not found: " << path;
+        return "";
+    }
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "unable to open stylesheet file: " << file.errorString();
+        return "";
+    }
+    return QTextStream(&file).readAll();
 }
 
 QString AppConfig::ckReposPath() {

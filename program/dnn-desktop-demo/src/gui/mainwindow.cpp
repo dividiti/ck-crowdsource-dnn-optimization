@@ -42,7 +42,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     setCentralWidget(experimentsWidget);
     setInitialWindowGeometry(this);
-    Utils::moveToDesktopCenter(this);
+
+    auto desktop = QApplication::desktop()->availableGeometry(this);
+    move(desktop.center() - rect().center());
 
     for (auto e: _experiments) {
         e->panel->updateExperimentConditions();
@@ -56,10 +58,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 
 MainWindow::~MainWindow() {
-    for (auto e: _experiments) delete e;
-
-    Utils::closeAllInfoWindows();
-
+    for (auto e: _experiments) {
+        delete e;
+    }
     LogWindow::destroyInstance();
 }
 

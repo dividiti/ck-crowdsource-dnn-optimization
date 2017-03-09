@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     AppEvents::instance()->init();
 
-    qApp->setStyleSheet(Utils::loadTextFromFile(AppConfig::styleSheetFileName()));
+    qApp->setStyleSheet(AppConfig::styleSheet());
 
     (new MainWindow())->show();
 

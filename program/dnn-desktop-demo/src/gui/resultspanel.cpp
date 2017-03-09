@@ -25,12 +25,12 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
 
     _worstPredictedImage = new ImageView(WORST_PREDICTED_IMAGE_W, WORST_PREDICTED_IMAGE_H);
 
-    auto panelCounters = makePanel({ Utils::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
-    auto panelMetricTop1 = makePanel({ Utils::makeTitle("TOP-1"), _infoMetricTop1 });
-    auto panelMetricTop5 = makePanel({ Utils::makeTitle("TOP-5"), _infoMetricTop5 });
+    auto panelCounters = makePanel({ Ori::Gui::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
+    auto panelMetricTop1 = makePanel({ Ori::Gui::makeTitle("TOP-1"), _infoMetricTop1 });
+    auto panelMetricTop5 = makePanel({ Ori::Gui::makeTitle("TOP-5"), _infoMetricTop5 });
     auto panelMetrics = Ori::Gui::layoutH(0, 0, { panelMetricTop1, panelMetricTop5 });
     auto panelWorstPrediction = makePanel({
-        Utils::makeTitle("WORST PREDICTION"),
+        Ori::Gui::makeTitle("WORST PREDICTION"),
         Ori::Gui::layoutH(0, 0, { 0, _worstPredictedImage, 0}),
     });
 

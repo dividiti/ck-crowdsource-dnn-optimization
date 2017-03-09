@@ -1,5 +1,6 @@
 #include "appconfig.h"
 #include "appmodels.h"
+#include "appevents.h"
 #include "experimentcontext.h"
 #include "featurespanel.h"
 #include "utils.h"
@@ -31,30 +32,30 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     auto panelEngine = new QFrame;
     panelEngine->setProperty("qss-role", "features-panel");
     panelEngine->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Utils::makeTitle("CAFFE ENGINE"), 0, _linkSelectEngine }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("CAFFE ENGINE"), 0, _linkSelectEngine }),
         _infoEngine,
     }));
 
     auto panelModel = new QFrame;
     panelModel->setProperty("qss-role", "features-panel");
     panelModel->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Utils::makeTitle("CAFFE MODEL"), 0, _linkSelectModel }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("CAFFE MODEL"), 0, _linkSelectModel }),
         _infoModel,
     }));
 
     auto panelImages = new QFrame;
     panelImages->setProperty("qss-role", "features-panel");
     panelImages->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Utils::makeTitle("IMAGE SOURCE"), 0, _linkSelectImages }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("IMAGE SOURCE"), 0, _linkSelectImages }),
         _infoImages,
     }));
 
     setLayout(Ori::Gui::layoutV(0, 0,
     {
         panelEngine,
-        Utils::makeDivider(),
+        Ori::Gui::makeDivider(),
         panelModel,
-        Utils::makeDivider(),
+        Ori::Gui::makeDivider(),
         panelImages,
     }));
 }
@@ -109,7 +110,7 @@ QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) {
 void FeaturesPanel::selectEngine() {
     auto list = AppConfig::programs();
     if (list.isEmpty()) {
-        return Utils::infoDlg(tr("Recognition engines not found"));
+        return AppEvents::info("Recognition engines not found");
     }
     QVariant v = selectCurrentViaDialog(list, AppConfig::currentProgram());
     if (v.isValid()) {
@@ -121,7 +122,7 @@ void FeaturesPanel::selectEngine() {
 void FeaturesPanel::selectModel() {
     auto list = AppConfig::models();
     if (list.isEmpty()) {
-        return Utils::infoDlg(tr("Models not found"));
+        return AppEvents::info("Models not found");
     }
     QVariant v = selectCurrentViaDialog(list, AppConfig::currentModel());
     if (v.isValid()) {
@@ -134,7 +135,7 @@ void FeaturesPanel::selectImages()
 {
     auto list = AppConfig::datasets();
     if (list.isEmpty()) {
-        return Utils::infoDlg(tr("Image datasets not found"));
+        return AppEvents::info("Image datasets not found");
     }
     QVariant v = selectCurrentViaDialog(list, AppConfig::currentDataset());
     if (v.isValid()) {

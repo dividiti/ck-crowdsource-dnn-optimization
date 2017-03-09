@@ -27,6 +27,24 @@ namespace Gui {
 
 //--------------------------------------------------------------------------------------------------
 
+QLabel* makeTitle(const QString& title)
+{
+    auto label = new QLabel(title);
+    label->setProperty("qss-role", "panel-title");
+    auto f = label->font();
+    f.setLetterSpacing(QFont::AbsoluteSpacing, 0.8);
+    label->setFont(f);
+    return label;
+}
+
+QWidget* makeDivider()
+{
+    auto divider = new QFrame;
+    divider->setProperty("qss-role", "divider");
+    divider->setFrameShape(QFrame::HLine);
+    return divider;
+}
+
 void adjustFont(QWidget *w)
 {
 #ifdef Q_OS_WIN

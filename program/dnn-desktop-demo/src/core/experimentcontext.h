@@ -23,8 +23,6 @@ signals:
 
 private:
     bool _isExperimentStarted = false;
-
-    friend class MainWindow;
 };
 
 #endif // EXPERIMENTCONTEXT_H
