@@ -123,3 +123,7 @@ QLabel[qss-prediction-line="4"] {
 QLabel[qss-prediction-line="5"] {
 	color: #505A5E;
 }
+QMessageBox {
+        /* makes QMessageBox selectable */
+        messagebox-text-interaction-flags: 5;
+}

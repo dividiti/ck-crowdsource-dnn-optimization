@@ -18,6 +18,7 @@ signals:
 
 private:
     void processPredictedResults(const ImageResult& imageResult);
+    void emitStopped();
 
     Program program;
     Model model;

@@ -62,7 +62,8 @@ void WorkerThread::run() {
     fullArgs.append(args);
     ck.setArguments(fullArgs);
 
-    qDebug() << "Run CK command:" << ck.program() + " " +  ck.arguments().join(" ");
+    const QString runCmd = ck.program() + " " +  ck.arguments().join(" ");
+    qDebug() << "Run CK command: " << runCmd;
 
     QFile outputFile(program.outputFile);
     outputFile.remove();
@@ -71,7 +72,13 @@ void WorkerThread::run() {
     AppEvents::registerProcess(program.exe);
 
     while (!outputFile.exists() && !isInterruptionRequested()) {
-        msleep(100);
+        if (ck.waitForFinished(100)) {
+            AppEvents::error("Classification program stopped prematurely. "
+                             "Please, select the command below, copy it and run manually from command line "
+                             "to investigate the issue:\n\n" + runCmd);
+            emitStopped();
+            return;
+        }
     }
 
     outputFile.open(QIODevice::ReadOnly);
@@ -133,6 +140,10 @@ void WorkerThread::run() {
         qDebug() << "Worker process finished";
     }
     outputFile.close();
+    emitStopped();
+}
+
+void WorkerThread::emitStopped() {
     AppEvents::instance()->killChildProcesses();
     emit stopped();
 }
