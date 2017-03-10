@@ -36,7 +36,7 @@ def ck_preprocess(i):
     r = fill_val(ck, conf)
     if r['return'] > 0: return r
 
-    with open(APP_CONF_FILE, 'wb') as f:
+    with open(APP_CONF_FILE, 'w') as f:
         conf.write(f)
 
     bat = ''
@@ -84,7 +84,7 @@ def fill_section(ck, conf, section, tags, module=''):
     if r['return'] > 0: return r
     
     lst = r['lst']
-    conf.set(section, 'count', len(lst))
+    conf.set(section, 'count', str(len(lst)))
 
     for i, u in enumerate(lst):
         module_uoa = u['module_uoa']
@@ -337,7 +337,7 @@ def which(command, path=None, verbose=0, exts=None):
     If no match is found for the command, a WhichError is raised.
     """
     try:
-        match = whichgen(command, path, verbose, exts).next()
+        match = next(whichgen(command, path, verbose, exts))
     except StopIteration:
         raise WhichError("Could not find '%s' on the path." % command)
     return match
