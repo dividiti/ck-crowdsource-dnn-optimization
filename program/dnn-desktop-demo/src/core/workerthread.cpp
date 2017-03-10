@@ -43,6 +43,9 @@ static const QString CORRECT_LABEL_PREFIX = "Correct label: ";
 static const QString PREDICTION_PREFIX = "Predictions: ";
 static const QRegExp PREDICTION_REGEX("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
+static const long NORMAL_WAIT_MS = 50;
+static const long KILL_WAIT_MS = 1000 * 10;
+
 WorkerThread::WorkerThread(const Program& program, const Model& model, const Dataset& dataset, QObject* parent)
     : QThread(parent), program(program), model(model), dataset(dataset) {}
 
@@ -71,9 +74,20 @@ void WorkerThread::run() {
     ck.start();
     AppEvents::registerProcess(program.exe);
 
+    long timout = 1000 * AppConfig::classificationStartupTimeoutSeconds();
     while (!outputFile.exists() && !isInterruptionRequested()) {
-        if (ck.waitForFinished(100)) {
+        if (ck.waitForFinished(NORMAL_WAIT_MS)) {
             AppEvents::error("Classification program stopped prematurely. "
+                             "Please, select the command below, copy it and run manually from command line "
+                             "to investigate the issue:\n\n" + runCmd);
+            emitStopped();
+            return;
+        }
+        timout -= NORMAL_WAIT_MS;
+        if (0 >= timout) {
+            ck.kill();
+            ck.waitForFinished(KILL_WAIT_MS);
+            AppEvents::error("Classification program startup takes too long. "
                              "Please, select the command below, copy it and run manually from command line "
                              "to investigate the issue:\n\n" + runCmd);
             emitStopped();
@@ -94,7 +108,7 @@ void WorkerThread::run() {
             if (finished) {
                 break;
             }
-            finished = ck.waitForFinished(50);
+            finished = ck.waitForFinished(NORMAL_WAIT_MS);
             continue;
         }
         line = line.trimmed();
@@ -135,7 +149,7 @@ void WorkerThread::run() {
     if (isInterruptionRequested()) {
         qDebug() << "Worker process interrupted by user request";
         ck.kill();
-        ck.waitForFinished();
+        ck.waitForFinished(KILL_WAIT_MS);
     } else {
         qDebug() << "Worker process finished";
     }

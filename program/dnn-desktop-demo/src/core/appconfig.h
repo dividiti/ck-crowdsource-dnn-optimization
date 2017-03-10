@@ -32,6 +32,8 @@ public:
     static QVariant currentDataset();
     static void setCurrentDataset(QString uoa);
 
+    static int classificationStartupTimeoutSeconds();
+
 private:
     static QString configFileName();
     static QSettings& config();

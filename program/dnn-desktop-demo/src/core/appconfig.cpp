@@ -179,3 +179,7 @@ void AppConfig::setCurrentDataset(QString uoa) {
     config().setValue("aux_uoa", uoa);
     config().sync();
 }
+
+int AppConfig::classificationStartupTimeoutSeconds() {
+    return config().value("startup_timeout_seconds", 20).toInt();
+}

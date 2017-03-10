@@ -5,7 +5,7 @@ set APP_BAT=crowdsource-video-experiments-on-desktop.bat
 set TARGET_FILE=crowdsource-video-experiments-on-desktop-windows.zip
 
 :: All dirs relative to location of this batch file:
-set TARGET_DIR=.\tmp
+set TARGET_DIR=.\prebuilt
 set REDIST=.\redist
 set BIN=.\bin
 set SRC=.\src
