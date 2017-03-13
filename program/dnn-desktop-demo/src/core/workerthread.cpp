@@ -162,7 +162,7 @@ void WorkerThread::run() {
 
 void WorkerThread::emitStopped() {
     AppEvents::instance()->killChildProcesses();
-    // do not actually emit anything, conserned parties must connect on QThread::finished
+    // do not actually emit anything, concerned parties must connect on QThread::finished
 }
 
 void WorkerThread::processPredictedResults(const ImageResult& imageResult) {
