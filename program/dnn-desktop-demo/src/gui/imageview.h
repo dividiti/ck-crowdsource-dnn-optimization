@@ -11,6 +11,7 @@ public:
     ImageView(int w, int h, QWidget* parent = 0);
 
     void loadImage(const QString& file);
+    void clearImage();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

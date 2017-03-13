@@ -88,4 +88,6 @@ void ResultsPanel::resetInfo() {
     _top5Count = 0;
     _imageCount = 0;
     _worstAccuracyDelta = 0;
+    _worstPredictedImage->clearImage();
+    _worstPredictedImage->setToolTip("");
 }
