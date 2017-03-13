@@ -48,7 +48,7 @@ void FramesPanel::experimentStarted() {
         _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>(), this);
         connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
         connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
-        connect(_worker, &WorkerThread::stopped, this, &FramesPanel::workerStopped);
+        connect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);
         _current_frame = 0;
         _worker->start();
     } else {
@@ -88,9 +88,8 @@ void FramesPanel::clearWorker() {
         return;
     }
     disconnect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
-    disconnect(_worker, &WorkerThread::stopped, this, &FramesPanel::workerStopped);
-    _worker->terminate();
-    _worker->wait();
-    delete _worker;
+    disconnect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
+    disconnect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);
+    _worker->deleteLater();
     _worker = Q_NULLPTR;
 }

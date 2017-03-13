@@ -75,16 +75,20 @@ void AppEvents::error(const QString& msg)
 }
 
 void AppEvents::killChildProcesses() {
+    qDebug() << "Cleaning spawned child processes...";
 #ifdef Q_OS_WIN
     PROCESSES_MUTEX.lock();
     for (auto p : PROCESSES) {
-        QProcess::execute("taskkill /im " + p + " /f");
+        QString killCmd = "taskkill /im " + p + " /f";
+        qDebug() << "  * running " << killCmd;
+        QProcess::execute(killCmd);
     }
     PROCESSES.clear();
     PROCESSES_MUTEX.unlock();
 #else
     killGroup();
 #endif
+    qDebug() << "  ...done";
 }
 
 void AppEvents::registerProcess(const QString&

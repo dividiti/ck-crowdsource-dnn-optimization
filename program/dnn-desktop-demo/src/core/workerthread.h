@@ -14,7 +14,6 @@ public:
 
 signals:
     void newImageResult(ImageResult result);
-    void stopped();
 
 private:
     void processPredictedResults(const ImageResult& imageResult);

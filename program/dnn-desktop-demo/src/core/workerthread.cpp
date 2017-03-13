@@ -75,6 +75,7 @@ void WorkerThread::run() {
     AppEvents::registerProcess(program.exe);
 
     long timout = 1000 * AppConfig::classificationStartupTimeoutSeconds();
+    qDebug() << "Waiting until the program starts writing classification data";
     while (!outputFile.exists() && !isInterruptionRequested()) {
         if (ck.waitForFinished(NORMAL_WAIT_MS)) {
             AppEvents::error("Classification program stopped prematurely. "
@@ -95,6 +96,7 @@ void WorkerThread::run() {
         }
     }
 
+    qDebug() << "Starting reading classification data";
     outputFile.open(QIODevice::ReadOnly);
 
     QTextStream stream(&outputFile);
@@ -153,13 +155,14 @@ void WorkerThread::run() {
     } else {
         qDebug() << "Worker process finished";
     }
+    qDebug() << "Closing classification data file";
     outputFile.close();
     emitStopped();
 }
 
 void WorkerThread::emitStopped() {
     AppEvents::instance()->killChildProcesses();
-    emit stopped();
+    // do not actually emit anything, conserned parties must connect on QThread::finished
 }
 
 void WorkerThread::processPredictedResults(const ImageResult& imageResult) {
