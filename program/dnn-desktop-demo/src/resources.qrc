@@ -23,4 +23,7 @@
     <qresource prefix="/images">
         <file alias="frame">../images/film_frame.png</file>
     </qresource>
+    <qresource prefix="/qss">
+        <file>app.qss</file>
+    </qresource>
 </RCC>

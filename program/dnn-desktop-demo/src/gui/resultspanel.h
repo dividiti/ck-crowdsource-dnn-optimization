@@ -1,6 +1,7 @@
 #ifndef RESULTSPANEL_H
 #define RESULTSPANEL_H
 
+#include "appmodels.h"
 #include <QFrame>
 
 QT_BEGIN_NAMESPACE
@@ -20,13 +21,21 @@ public:
 
 private slots:
     void experimentStarted();
-    void experimentResultReady();
+    void newImageResult(ImageResult);
 
 private:
     ExperimentContext* _context;
     QLabel *_infoImagesPerSec;
     QLabel *_infoMetricTop1, *_infoMetricTop5;
     ImageView *_worstPredictedImage;
+
+    int _top1Count;
+    int _top5Count;
+    int _imageCount;
+    double _worstAccuracyDelta;
+
+    const qint64 _updateIntervalMs;
+    qint64 _lastUpdateMs;
 
     QLabel* makeInfoLabel(const QString& role = QString());
     QFrame* makePanel(const std::initializer_list<QObject*>& items, const QString& objectName = QString());

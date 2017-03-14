@@ -20,13 +20,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(const AppRunParams& runParams, QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = Q_NULLPTR);
     ~MainWindow();
 
 private:
     QList<Experiment*> _experiments;
-
-    void initialize(const AppRunParams &runParams);
 
 private slots:
     void onError(const QString& msg);

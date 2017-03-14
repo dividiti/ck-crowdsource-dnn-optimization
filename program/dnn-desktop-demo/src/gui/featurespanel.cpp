@@ -1,14 +1,16 @@
 #include "appconfig.h"
 #include "appmodels.h"
+#include "appevents.h"
 #include "experimentcontext.h"
 #include "featurespanel.h"
-#include "utils.h"
 #include "../ori/OriWidgets.h"
 
 #include <QBoxLayout>
 #include <QDebug>
 #include <QInputDialog>
 #include <QLabel>
+#include <QRadioButton>
+#include <QDialogButtonBox>
 
 FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFrame(parent)
 {
@@ -29,30 +31,30 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     auto panelEngine = new QFrame;
     panelEngine->setProperty("qss-role", "features-panel");
     panelEngine->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Utils::makeTitle("CAFFE ENGINE"), 0, _linkSelectEngine }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("CAFFE ENGINE"), 0, _linkSelectEngine }),
         _infoEngine,
     }));
 
     auto panelModel = new QFrame;
     panelModel->setProperty("qss-role", "features-panel");
     panelModel->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Utils::makeTitle("CAFFE MODEL"), 0, _linkSelectModel }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("CAFFE MODEL"), 0, _linkSelectModel }),
         _infoModel,
     }));
 
     auto panelImages = new QFrame;
     panelImages->setProperty("qss-role", "features-panel");
     panelImages->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Utils::makeTitle("IMAGE SOURCE"), 0, _linkSelectImages }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("IMAGE SOURCE"), 0, _linkSelectImages }),
         _infoImages,
     }));
 
     setLayout(Ori::Gui::layoutV(0, 0,
     {
         panelEngine,
-        Utils::makeDivider(),
+        Ori::Gui::makeDivider(),
         panelModel,
-        Utils::makeDivider(),
+        Ori::Gui::makeDivider(),
         panelImages,
     }));
 }
@@ -75,38 +77,68 @@ QLabel* FeaturesPanel::makeInfoLabel()
     return label;
 }
 
-void FeaturesPanel::selectEngine()
-{
-    if (_context->engines().isEmpty())
-        return Utils::infoDlg(tr("Recognition engines not found"));
+template<typename T>
+QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) {
+    QDialog dlg;
+    auto layout = new QVBoxLayout;
+    QVector<QRadioButton*> flags;
+    for (int i = 0; i < items.size(); i++) {
+        auto flag = new QRadioButton(items.at(i).title());
+        flag->setChecked(current.isValid() && items[i] == current.value<T>());
+        layout->addWidget(flag);
+        flags << flag;
+    }
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    dlg.connect(buttons, SIGNAL(accepted()), &dlg, SLOT(accept()));
+    dlg.connect(buttons, SIGNAL(rejected()), &dlg, SLOT(reject()));
+    layout->addSpacing(12);
+    layout->addWidget(buttons);
+    dlg.setLayout(layout);
+    QVariant ret;
+    if (dlg.exec() == QDialog::Accepted) {
+        for (int i = 0; i < flags.size(); i++) {
+            if (flags.at(i)->isChecked()) {
+                ret.setValue(items[i]);
+                break;
+            }
+        }
+    }
+    return ret;
+}
 
-    if (_context->engines().selectCurrentViaDialog())
-    {
-        AppConfig::setSelectedEngineIndex(_context->experimentIndex(), _context->engines().currentIndex());
+void FeaturesPanel::selectEngine() {
+    auto list = AppConfig::programs();
+    if (list.isEmpty()) {
+        return AppEvents::info("Recognition engines not found");
+    }
+    QVariant v = selectCurrentViaDialog(list, AppConfig::currentProgram());
+    if (v.isValid()) {
+        AppConfig::setCurrentProgram(v.value<Program>().uoa);
         updateExperimentConditions();
     }
 }
 
-void FeaturesPanel::selectModel()
-{
-    if (_context->models().isEmpty())
-        return Utils::infoDlg(tr("Recognition models not found"));
-
-    if (_context->models().selectCurrentViaDialog())
-    {
-        AppConfig::setSelectedModelIndex(_context->experimentIndex(), _context->models().currentIndex());
+void FeaturesPanel::selectModel() {
+    auto list = AppConfig::models();
+    if (list.isEmpty()) {
+        return AppEvents::info("Models not found");
+    }
+    QVariant v = selectCurrentViaDialog(list, AppConfig::currentModel());
+    if (v.isValid()) {
+        AppConfig::setCurrentModel(v.value<Model>().uoa);
         updateExperimentConditions();
     }
 }
 
 void FeaturesPanel::selectImages()
 {
-    if (_context->images().isEmpty())
-        return Utils::infoDlg(tr("Image datasets not found"));
-
-    if (_context->images().selectCurrentViaDialog())
-    {
-        AppConfig::setSelectedImagesIndex(_context->experimentIndex(), _context->images().currentIndex());
+    auto list = AppConfig::datasets();
+    if (list.isEmpty()) {
+        return AppEvents::info("Image datasets not found");
+    }
+    QVariant v = selectCurrentViaDialog(list, AppConfig::currentDataset());
+    if (v.isValid()) {
+        AppConfig::setCurrentDataset(v.value<Dataset>().auxUoa);
         updateExperimentConditions();
     }
 }
@@ -115,30 +147,15 @@ void FeaturesPanel::updateExperimentConditions()
 {
     static QString NA("N/A");
 
-    _infoEngine->setText(_context->engines().hasCurrent()
-        ? _context->engines().current().title()//.replace("(", "\n(")
-        : NA);
+    QVariant v = AppConfig::currentProgram();
+    _infoEngine->setText(v.isValid() ? v.value<Program>().title() : NA);
 
-    _infoModel->setText(_context->models().hasCurrent()
-        ? _context->models().current().title()//.replace("(", "\n(")
-        : NA);
+    v = AppConfig::currentModel();
+    _infoModel->setText(v.isValid() ? v.value<Model>().title() : NA);
 
-    _infoImages->setText(_context->images().hasCurrent()
-        ? _context->images().current().title()//.replace("(", "\n(")
-        : NA);
+    v = AppConfig::currentDataset();
+    _infoImages->setText(v.isValid() ? v.value<Dataset>().title() : NA);
 
-//    _infoBatchSize->setInfo(QString::number(_context->batchSize()));
-}
-
-void FeaturesPanel::setBatchSize()
-{
-    int batchSize = QInputDialog::getInt(this, tr("Batch Size"), tr("Set batch size:"),
-        _context->batchSize(), _context->minBatchSize(), _context->maxBatchSize());
-    if (batchSize != _context->batchSize())
-    {
-        _context->setBatchSize(batchSize);
-        updateExperimentConditions();
-    }
 }
 
 void FeaturesPanel::enableControls(bool on)
@@ -146,7 +163,6 @@ void FeaturesPanel::enableControls(bool on)
     _linkSelectEngine->setVisible(on);
     _linkSelectModel->setVisible(on);
     _linkSelectImages->setVisible(on);
-//    _linkSetBatchSize->setVisible(on);
 }
 
 void FeaturesPanel::experimentStarted()

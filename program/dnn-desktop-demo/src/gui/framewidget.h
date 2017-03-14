@@ -18,6 +18,8 @@ public:
     void loadImage(const QString &imageFile, PredictionResult& correctInfo);
     void showPredictions(const QVector<PredictionResult> &predictions);
 
+    void load(const ImageResult& imageResult);
+
 private:
     ImageView *_imageView;
     QList<PredictionView*> _predictions;

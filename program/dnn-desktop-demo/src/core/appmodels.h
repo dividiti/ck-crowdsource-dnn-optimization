@@ -4,20 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QVector>
-
-class AppRunParams
-{
-public:
-    enum RunMode { Normal, EditStyle };
-
-    QString modelUid;
-    QString engineUid;
-    QString imagesUid;
-    bool startImmediately = false;
-    RunMode runMode = Normal;
-};
-
-//-----------------------------------------------------------------------------
+#include <QMetaType>
 
 class PredictionResult
 {
@@ -27,127 +14,108 @@ public:
     int index;
     bool isCorrect;
 
-    QString str() const;
+    QString str() const {
+        return QString(QStringLiteral("%1 - %2 %3"))
+            .arg(accuracy).arg(labels)
+            .arg(isCorrect ? QString(QStringLiteral(" CORRECT")) : QString());
+    }
 };
+
+Q_DECLARE_METATYPE(PredictionResult)
 
 //-----------------------------------------------------------------------------
 
-class ExperimentProbe
+class ImageResult
 {
 public:
-    QString image;
-    double time;
-    double memory;
+    QString imageFile;
+    double duration;
     QVector<PredictionResult> predictions;
-    PredictionResult correctInfo;
-    bool correctAsTop1;
-    bool correctAsTop5;
+    QString correctLabels;
+
+    bool correctAsTop1() const {
+        return !predictions.isEmpty() && predictions[0].labels == correctLabels;
+    }
+
+    const PredictionResult* findCorrect() const {
+        for (int i = 0; i < predictions.size(); ++i) {
+            if (predictions[i].labels == correctLabels) {
+                return &predictions[i];
+            }
+        }
+        return nullptr;
+    }
+
+    bool correctAsTop5() const {
+        return nullptr != findCorrect();
+    }
+
+    bool isEmpty() const {
+        return predictions.isEmpty();
+    }
+
+    double imagesPerSecond() {
+        return 1.0 / duration;
+    }
+
+    double accuracyDelta() {
+        const PredictionResult* c = findCorrect();
+        return nullptr != c ? predictions[0].accuracy - c->accuracy : 0;
+    }
 };
+
+Q_DECLARE_METATYPE(ImageResult)
 
 //-----------------------------------------------------------------------------
 
-class ExperimentResult
-{
-public:
-    int imagesCount;
-    double totalTime;
-    double timePerImage;
-    double imagesPerSecond;
-    double timePerBatch;
-    double memoryPerImage;
+struct Program {
+    QString uoa;
+    QString name;
+    QString outputFile;
+    QString exe;
 
-    double top1Metric;
-    double top5Metric;
-    int top1Count;
-    int top5Count;
+    QString title() const {
+        return name;
+    }
 
-    bool worstPredictionFlag;
-    double worstPredictionMarker;
-    PredictionResult worstPredictionCorrect;
-    PredictionResult worstPredictionTop1;
-    QString worstPredictedImage;
-
-    void reset();
-    void accumulate(const ExperimentProbe *p);
-    void calculateWorstPrediction(const ExperimentProbe *p);
+    bool operator==(const Program& o) const {
+        return uoa == o.uoa;
+    }
 };
+Q_DECLARE_METATYPE(Program)
 
 //-----------------------------------------------------------------------------
 
-class DnnModel
-{
-public:
-    QString title() const { return _title; }
-    QString modelFile() const { return _modelFile; }
-    QString weightsFile() const { return _weightsFile; }
+struct Model {
+    QString uoa;
+    QString name;
 
-    QString str() const { return _title + ": " + _weightsFile; }
-    bool isEmpty() const { return _modelFile.isEmpty() || _weightsFile.isEmpty(); }
+    QString title() const {
+        return name;
+    }
 
-private:
-    QString _title, _modelFile, _weightsFile;
-
-    friend class CK;
+    bool operator==(const Model& o) const {
+        return uoa == o.uoa;
+    }
 };
+Q_DECLARE_METATYPE(Model)
 
 //-----------------------------------------------------------------------------
 
-class DnnEngine
-{
-public:
-    QString title() const { return _title; }
-    QString library() const { return _library; }
-    QStringList deps() const { return _deps; }
+struct Dataset {
+    QString auxUoa;
+    QString auxName;
+    QString valUoa;
+    QString valName;
 
-    QString str() const { return _title + ": " + _library; }
-    bool isEmpty() const { return _library.isEmpty(); }
+    QString title() const {
+        return auxName;
+    }
 
-private:
-    QString _title, _library;
-    QStringList _deps;
-
-    friend class CK;
+    bool operator==(const Dataset& o) const {
+        return auxUoa == o.auxUoa;
+    }
 };
-
-//-----------------------------------------------------------------------------
-
-class ImagesDataset
-{
-public:
-    QString title() const { return _title; }
-    QString imagesPath() const { return _imagesPath; }
-    QString meanFile() const { return _meanFile; }
-    QString labelsFile() const { return _labelsFile; }
-    QString valFile() const { return _valFile; }
-
-    QString str() const { return _title + ": " + _imagesPath; }
-    bool isEmpty() const { return _imagesPath.isEmpty(); }
-
-private:
-    QString _title, _imagesPath;
-    QString _valFile, _meanFile, _labelsFile;
-
-    friend class CK;
-};
-
-//-----------------------------------------------------------------------------
-
-class ImageEntry
-{
-public:
-    QString fileName;
-    int correctIndex;
-};
-
-class ImagesBank
-{
-public:
-    ImagesBank(const QString& imagesDir, const QString& valFile);
-
-    const QList<ImageEntry>& images() const { return _images; }
-    bool isEmpty() const { return _images.isEmpty(); }
-private:
-    QList<ImageEntry> _images;
-};
+Q_DECLARE_METATYPE(Dataset)
 
 #endif // APPMODELS_H

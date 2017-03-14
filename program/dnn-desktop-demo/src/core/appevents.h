@@ -10,9 +10,17 @@ class AppEvents : public QObject
 public:
     static AppEvents* instance();
 
+    // Must be called at application startup
+    void init();
+
     static void info(const QString& msg);
     static void warning(const QString& msg);
     static void error(const QString& msg);
+
+    static void registerProcess(const QString& processName);
+
+public slots:
+    void killChildProcesses();
 
 signals:
     void onInfo(const QString& msg);

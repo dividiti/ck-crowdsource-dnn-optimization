@@ -1,16 +1,11 @@
 [![logo](https://github.com/ctuning/ck-guide-images/blob/master/logo-powered-by-ck.png)](http://cKnowledge.org)
 [![logo](https://github.com/ctuning/ck-guide-images/blob/master/logo-validated-by-the-community-simple.png)](http://cTuning.org)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Build Status](https://travis-ci.org/dividiti/crowdsource-video-experiments-on-android.svg?branch=master)](https://travis-ci.org/dividiti/crowdsource-video-experiments-on-android)
 
 Introduction
 ============
 
-This [CK-powered] (http://github.com/ctuning/ck) open-source cross-platform desktop demo app (at least, for Linux and Windows) based on QT to recognize images via Caffe or TensorFlow, and send reports (timing/correctness/etc) to CK.
-
-You can download this app from the [Google Play Store](https://play.google.com/store/apps/details?id=openscience.crowdsource.video.experiments). 
-
-You can also find public results at [Live CK repo](http://cknowledge.org/repo)!
+This is a [CK-powered](http://github.com/ctuning/ck) QT-based open-source cross-platform desktop demo app (at least, for Linux and Windows). It recognizes images via Caffe or TensorFlow and sends reports (timing/correctness/etc) to CK.
 
 Public scenarios are prepared using this [CK GitHub repo](https://github.com/ctuning/ck-crowd-scenarios).
 Caffe libraries are generated using [CK-Caffe framework](https://github.com/dividiti/ck-caffe).
@@ -23,7 +18,7 @@ of performance, accuracy, energy, memory footprint, cost, etc.
 See our [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
 
 Related projects:
-* hhttps://github.com/dividiti/crowdsource-video-experiments-on-android/issues
+* hhttps://github.com/dividiti/crowdsource-video-experiments-on-android
 
 License
 =======
@@ -35,13 +30,11 @@ Linux, Windows or MacOS operation system
 
 Preparation to run
 ====================
-To make application run you have to install at least one package from each of three categories: dnn-proxy, caffemodel, imagenet dataset.
+To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) and at least one caffemodel and imagenet dataset.
 
-* dnn-proxy packages:
+* ck-caffe:
 ```
-$ ck install package:dnn-proxy-caffe-cpu
-$ ck install package:dnn-proxy-caffe-opencl
-$ ck install package:dnn-proxy-caffe-cuda
+$ ck pull repo:ck-caffe --url=https://github.com/dividiti/ck-caffe
 ```
 * caffe models:
 ```
@@ -53,51 +46,23 @@ $ ck install package:caffemodel-bvlc-googlenet
 $ ck install package:imagenet-2012-aux
 $ ck install package:imagenet-2012-val
 ```
-To make sure that all is ready, run program caffe-classification. It should compile and run without errors.
+You also need to compile and be able to run `caffe-classification`:
 ```
 $ ck compile program:caffe-classification
 $ ck run program:caffe-classification
 ```
+Finally, you need to pull this repo and 'compile' the program (currently, 'compilation' only unpacks one of the prebuilt packages)
+```
+$ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
+$ ck compile program:dnn-desktop-demo
+```
 
 ## Running the app
-After source code built, executable file lays down into _bin_ directory inside the project directory.
 
-Create _app.conf_ file inside the _bin_ directory, which contains info about your local CK installation:
+Execute the following to run the app:
 ```
-[General]
-ck_exe_name=./ck
-ck_bin_path=/path/to/your/ck/bin
-ck_repos_path=~/CK
+$ ck run program:dnn-desktop-demo
 ```
-Or you can copy dummy file _src/app.conf.example_ into _bin_ and use it as template.
-
-### Windows note:
-Use linux-style paths or double slashes in Windows paths when write config file, e.g.: `ck_bin_path=c:/ck/bin` or `ck_bin_path=c:\\ck\\bin`.
-
-*Don't forget about vc_redist.x64.exe or vc_redist.x86.exe!:*
-You have to force user to install VC-redist when build with MS-related version of Qt. Download installer from 
-[here](http://www.microsoft.com/en-us/download/details.aspx?id=48145) or google for 'visual studio 2015 runtime'.
-
-If program does not start from _bin_ folder and claims something about *dll* or *plugin*, 
-it may be because of Qt bin directory is not in your PATH. Add it to the PATH variable, 
-or run script `make_redist.bat` and copy all the dll files and pulgin folders from directory _redist_ to _bin_.
-
-Authors
-=======
-* Daniil Efremov
-* Grigori Fursin (original crowd-tuner: https://github.com/ctuning/crowdsource-experiments-using-android-devices)
-* Anton Lokhmotov
-
-Privacy Policy
-==============
-
-This application requires access to your Camera to let you
-capture images, recognize them and collect various performance 
-statistics. Note that, by default, no images are sent to public servers!
-Only if misprediction happens, you are encouraged but not obliged (!)
-to submit incorrectly recognized image with the correct label 
-to the public server to help the community enhance existing
-data sets with new images!
 
 Questions/comments/discussions?
 ===============================

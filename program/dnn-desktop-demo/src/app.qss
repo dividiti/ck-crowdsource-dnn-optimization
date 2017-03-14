@@ -1,0 +1,129 @@
+QLabel[qss-role="panel-title"] {
+	font-size: 11px;
+	font-weight: bold;
+	color: #64ffda;
+	font-family: Verdana;
+	margin-bottom: 8px;
+	margin-left: -4px;
+}
+QLabel[qss-role="info-label"] {
+	font-size: 13px;
+	color: #ffffff;
+	font-family: Verdana;
+}
+ResultsPanel QLabel[qss-role="info-label"] {
+	font-size: 18px;
+	font-weight: bold;
+}
+ResultsPanel QLabel[qss-role="info-label-small"] {
+	font-size: 13px;
+	color: #969C9E;
+	font-family: Verdana;
+	margin: 4px 0 0 -4px;
+}
+QFrame#experimentPanel {
+	background: gray;
+	border-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+QFrame#framesPanel {
+	background: #263238;
+	margin: 0px;
+	padding-left: 16px;
+	padding-right: 16px;
+	padding-top: 24px;
+	padding-bottom: 24px;
+	border-right: 1px solid #1B2226;
+}
+QFrame#featuresPanel {
+	background: #313c42;
+}
+QFrame#resultsPanel {
+	background: #313c42;
+	border-bottom: 1px solid #21292C;
+}
+QFrame[qss-role="features-panel"] {
+	margin: 0px;
+	padding: 16px;
+}
+QFrame[qss-role="results-panel"] {
+	margin: 0px;
+	padding: 16px;
+	border-top: 1px solid #21292C;
+}
+QFrame#buttonsPanel {
+	background: #313c42;
+	border-top: 1px solid #40494D;
+}
+QPushButton#buttonStart {
+	height: 32px;
+	width: 154px;
+	background: #009688;
+	border-radius: 16px;
+	border: 1px solid #1F272A;
+	color: #ffffff;
+	font-size: 10pt;
+	font-weight: 600;
+	font-family: Verdana;
+}
+QPushButton#buttonStop {
+	height: 32px;
+	width: 154px;
+	background: #c94747;
+	border-radius: 16px;
+	border: 1px solid #2D2D30;
+	color: #ffffff;
+	font-size: 10pt;
+	font-weight: 600;
+	font-family: Verdana;
+}
+QPushButton#buttonPublish {
+	height: 32px;
+	width: 32px;
+	background: #313c42;
+	border-radius: 16px;
+	border: 1px solid #232A2D;
+	color: #AFB3B5;
+	font-size: 10pt;
+	font-weight: 600;
+	font-family: Verdana;
+}
+QFrame[qss-role="divider"] {
+	border-top: 1px solid #21292C;
+	margin-left: 16px;
+	margin-right: 16px;
+}
+QLabel[qss-role="link"] {
+	font-size: 11px;
+	font-family: Verdana;
+}
+QLabel#predictionProb {
+	font-size: 13px;
+	font-weight: bold;
+	font-family: Verdana;
+}
+QLabel#predictionDescr {
+	font-size: 13px;
+	font-weight: normal;
+	font-family: Verdana;
+}
+QLabel[qss-prediction-line="1"] {
+	color: white;
+}
+QLabel[qss-prediction-line="2"] {
+	color: #D0D3D4;
+}
+QLabel[qss-prediction-line="3"] {
+	color: #9DA3A4;
+}
+QLabel[qss-prediction-line="4"] {
+	color: #747D80;
+}
+QLabel[qss-prediction-line="5"] {
+	color: #505A5E;
+}
+QMessageBox {
+        /* makes QMessageBox selectable */
+        messagebox-text-interaction-flags: 5;
+}

@@ -1,23 +1,26 @@
 #include "imageview.h"
 #include "experimentcontext.h"
 #include "resultspanel.h"
-#include "utils.h"
 #include "../ori/OriWidgets.h"
+#include "appconfig.h"
 
 #include <QBoxLayout>
 #include <QLabel>
 #include <QVariant>
+#include <QDebug>
+#include <QDateTime>
 
 #define WORST_PREDICTED_IMAGE_W 160
 #define WORST_PREDICTED_IMAGE_H 120
 
-ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent)
+ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
+    : QFrame(parent), _updateIntervalMs(AppConfig::fpsUpdateIntervalMs())
 {
     setObjectName("resultsPanel");
 
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
-    connect(_context, &ExperimentContext::experimentResultReady, this, &ResultsPanel::experimentResultReady);
+    connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
 
     _infoImagesPerSec = makeInfoLabel();
     _infoMetricTop1 = makeInfoLabel();
@@ -25,12 +28,12 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
 
     _worstPredictedImage = new ImageView(WORST_PREDICTED_IMAGE_W, WORST_PREDICTED_IMAGE_H);
 
-    auto panelCounters = makePanel({ Utils::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
-    auto panelMetricTop1 = makePanel({ Utils::makeTitle("TOP-1"), _infoMetricTop1 });
-    auto panelMetricTop5 = makePanel({ Utils::makeTitle("TOP-5"), _infoMetricTop5 });
+    auto panelCounters = makePanel({ Ori::Gui::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
+    auto panelMetricTop1 = makePanel({ Ori::Gui::makeTitle("TOP-1"), _infoMetricTop1 });
+    auto panelMetricTop5 = makePanel({ Ori::Gui::makeTitle("TOP-5"), _infoMetricTop5 });
     auto panelMetrics = Ori::Gui::layoutH(0, 0, { panelMetricTop1, panelMetricTop5 });
     auto panelWorstPrediction = makePanel({
-        Utils::makeTitle("WORST PREDICTION"),
+        Ori::Gui::makeTitle("WORST PREDICTION"),
         Ori::Gui::layoutH(0, 0, { 0, _worstPredictedImage, 0}),
     });
 
@@ -40,15 +43,13 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame
     resetInfo();
 }
 
-QLabel* ResultsPanel::makeInfoLabel(const QString &role)
-{
+QLabel* ResultsPanel::makeInfoLabel(const QString &role) {
     auto label = new QLabel;
     label->setProperty("qss-role", role.isEmpty()? QString("info-label"): role);
     return label;
 }
 
-QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, const QString &objectName)
-{
+QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, const QString &objectName) {
     auto panel = new QFrame;
     panel->setProperty("qss-role", "results-panel");
     panel->setObjectName(objectName);
@@ -56,30 +57,46 @@ QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, c
     return panel;
 }
 
-void ResultsPanel::experimentStarted()
-{
+void ResultsPanel::experimentStarted() {
     resetInfo();
 }
 
-void ResultsPanel::experimentResultReady()
-{
-    auto r = _context->experimentResult();
-    _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(r.imagesPerSecond, 0, 'f', 2));
-    _infoMetricTop1->setText(QString::number(r.top1Metric, 'f', 2));
-    _infoMetricTop5->setText(QString::number(r.top5Metric, 'f', 2));
-    if (r.worstPredictionFlag)
-    {
-        _worstPredictedImage->loadImage(r.worstPredictedImage);
-        _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
-                                         .arg(r.worstPredictedImage)
-                                         .arg(r.worstPredictionTop1.str())
-                                         .arg(r.worstPredictionCorrect.str()));
+void ResultsPanel::newImageResult(ImageResult ir) {
+    ++_imageCount;
+    if (ir.correctAsTop1()) {
+        ++_top1Count;
+    }
+    if (ir.correctAsTop5()) {
+        ++_top5Count;
+    }
+    qint64 curTimeMs = QDateTime::currentMSecsSinceEpoch();
+    if (curTimeMs - _lastUpdateMs > _updateIntervalMs) {
+        _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
+        _infoMetricTop1->setText(QString::number((double)_top1Count / _imageCount, 'f', 2));
+        _infoMetricTop5->setText(QString::number((double)_top5Count / _imageCount, 'f', 2));
+
+        double accuracyDelta = ir.accuracyDelta();
+        if (accuracyDelta > _worstAccuracyDelta) {
+            _worstAccuracyDelta = accuracyDelta;
+            _worstPredictedImage->loadImage(ir.imageFile);
+            _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
+                                             .arg(ir.imageFile)
+                                             .arg(ir.predictions[0].str())
+                                             .arg(ir.findCorrect()->str()));
+        }
+        _lastUpdateMs = curTimeMs;
     }
 }
 
-void ResultsPanel::resetInfo()
-{
+void ResultsPanel::resetInfo() {
     _infoImagesPerSec->setText("N/A");
     _infoMetricTop1->setText("N/A");
     _infoMetricTop5->setText("N/A");
+    _top1Count = 0;
+    _top5Count = 0;
+    _imageCount = 0;
+    _worstAccuracyDelta = 0;
+    _worstPredictedImage->clearImage();
+    _worstPredictedImage->setToolTip("");
+    _lastUpdateMs = 0;
 }
