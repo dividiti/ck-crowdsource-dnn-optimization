@@ -34,6 +34,9 @@ private:
     int _imageCount;
     double _worstAccuracyDelta;
 
+    const qint64 _updateIntervalMs;
+    qint64 _lastUpdateMs;
+
     QLabel* makeInfoLabel(const QString& role = QString());
     QFrame* makePanel(const std::initializer_list<QObject*>& items, const QString& objectName = QString());
     void resetInfo();

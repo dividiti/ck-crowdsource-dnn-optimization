@@ -2,16 +2,20 @@
 #include "experimentcontext.h"
 #include "resultspanel.h"
 #include "../ori/OriWidgets.h"
+#include "appconfig.h"
 
 #include <QBoxLayout>
 #include <QLabel>
 #include <QVariant>
 #include <QDebug>
+#include <QDateTime>
 
 #define WORST_PREDICTED_IMAGE_W 160
 #define WORST_PREDICTED_IMAGE_H 120
 
-ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent) : QFrame(parent) {
+ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
+    : QFrame(parent), _updateIntervalMs(AppConfig::fpsUpdateIntervalMs())
+{
     setObjectName("resultsPanel");
 
     _context = context;
@@ -65,18 +69,22 @@ void ResultsPanel::newImageResult(ImageResult ir) {
     if (ir.correctAsTop5()) {
         ++_top5Count;
     }
-    _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
-    _infoMetricTop1->setText(QString::number((double)_top1Count / _imageCount, 'f', 2));
-    _infoMetricTop5->setText(QString::number((double)_top5Count / _imageCount, 'f', 2));
+    qint64 curTimeMs = QDateTime::currentMSecsSinceEpoch();
+    if (curTimeMs - _lastUpdateMs > _updateIntervalMs) {
+        _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
+        _infoMetricTop1->setText(QString::number((double)_top1Count / _imageCount, 'f', 2));
+        _infoMetricTop5->setText(QString::number((double)_top5Count / _imageCount, 'f', 2));
 
-    double accuracyDelta = ir.accuracyDelta();
-    if (accuracyDelta > _worstAccuracyDelta) {
-        _worstAccuracyDelta = accuracyDelta;
-        _worstPredictedImage->loadImage(ir.imageFile);
-        _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
-                                         .arg(ir.imageFile)
-                                         .arg(ir.predictions[0].str())
-                                         .arg(ir.findCorrect()->str()));
+        double accuracyDelta = ir.accuracyDelta();
+        if (accuracyDelta > _worstAccuracyDelta) {
+            _worstAccuracyDelta = accuracyDelta;
+            _worstPredictedImage->loadImage(ir.imageFile);
+            _worstPredictedImage->setToolTip(QString(QStringLiteral("%1\nTop1: %2\nCorrect: %3"))
+                                             .arg(ir.imageFile)
+                                             .arg(ir.predictions[0].str())
+                                             .arg(ir.findCorrect()->str()));
+        }
+        _lastUpdateMs = curTimeMs;
     }
 }
 
@@ -90,4 +98,5 @@ void ResultsPanel::resetInfo() {
     _worstAccuracyDelta = 0;
     _worstPredictedImage->clearImage();
     _worstPredictedImage->setToolTip("");
+    _lastUpdateMs = 0;
 }

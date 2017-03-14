@@ -34,6 +34,8 @@ public:
 
     static int classificationStartupTimeoutSeconds();
 
+    static qint64 fpsUpdateIntervalMs();
+
 private:
     static QString configFileName();
     static QSettings& config();

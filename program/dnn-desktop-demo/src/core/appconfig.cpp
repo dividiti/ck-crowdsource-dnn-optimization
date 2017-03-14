@@ -181,5 +181,9 @@ void AppConfig::setCurrentDataset(QString uoa) {
 }
 
 int AppConfig::classificationStartupTimeoutSeconds() {
-    return config().value("startup_timeout_seconds", 20).toInt();
+    return config().value("startup_timeout_seconds", 40).toInt();
+}
+
+qint64 AppConfig::fpsUpdateIntervalMs() {
+    return config().value("fps_update_interval_ms", 500).toInt();
 }
