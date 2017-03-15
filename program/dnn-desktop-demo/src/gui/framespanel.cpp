@@ -45,7 +45,7 @@ void FramesPanel::experimentStarted() {
     QVariant model = AppConfig::currentModel();
     QVariant dataset = AppConfig::currentDataset();
     if (program.isValid() && model.isValid() && dataset.isValid()) {
-        _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>(), this);
+        _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>(), AppConfig::batchSize(), this);
         connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
         connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
         connect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);
