@@ -187,3 +187,21 @@ int AppConfig::classificationStartupTimeoutSeconds() {
 qint64 AppConfig::fpsUpdateIntervalMs() {
     return config().value("fps_update_interval_ms", 500).toInt();
 }
+
+int AppConfig::batchSize() {
+    int ret = config().value("batch_size", 1).toInt();
+    if (0 >= ret) {
+        qWarning() << "Non-positive batch size is specified in the config file. Defaulting to 1. Batch size from config: " << ret;
+        ret = 1;
+    }
+    return ret;
+}
+
+void AppConfig::setBatchSize(int batchSize) {
+    if (0 >= batchSize) {
+        qWarning() << "Trying to set non-positive batch size, which is not allowed: " << batchSize;
+        return;
+    }
+    config().setValue("batch_size", batchSize);
+    config().sync();
+}

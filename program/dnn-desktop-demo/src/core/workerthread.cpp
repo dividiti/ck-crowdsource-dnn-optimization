@@ -46,8 +46,8 @@ static const QRegExp PREDICTION_REGEX("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
 
-WorkerThread::WorkerThread(const Program& program, const Model& model, const Dataset& dataset, QObject* parent)
-    : QThread(parent), program(program), model(model), dataset(dataset) {}
+WorkerThread::WorkerThread(const Program& program, const Model& model, const Dataset& dataset, int batchSize, QObject* parent)
+    : QThread(parent), program(program), model(model), dataset(dataset), batchSize(batchSize) {}
 
 void WorkerThread::run() {
     QProcess ck;
@@ -60,7 +60,8 @@ void WorkerThread::run() {
             "--cmd_key=use_continuous",
             "--deps.caffemodel=" + model.uoa,
             "--deps.imagenet-aux=" + dataset.auxUoa,
-            "--deps.imagenet-val=" + dataset.valUoa
+            "--deps.imagenet-val=" + dataset.valUoa,
+            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize)
             };
     fullArgs.append(args);
     ck.setArguments(fullArgs);
