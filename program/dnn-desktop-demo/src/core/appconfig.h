@@ -36,6 +36,9 @@ public:
 
     static qint64 fpsUpdateIntervalMs();
 
+    static int batchSize();
+    static void setBatchSize(int batchSize);
+
 private:
     static QString configFileName();
     static QSettings& config();

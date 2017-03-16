@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QRadioButton>
 #include <QDialogButtonBox>
+#include <QSpinBox>
 
 FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFrame(parent)
 {
@@ -106,12 +107,66 @@ QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) {
     return ret;
 }
 
-void FeaturesPanel::selectEngine() {
-    auto list = AppConfig::programs();
-    if (list.isEmpty()) {
-        return AppEvents::info("Recognition engines not found");
+QVariant selectEngineAndBatchSizeViaDialog() {
+    QVariant ret;
+
+    auto items = AppConfig::programs();
+    if (items.isEmpty()) {
+        AppEvents::info("Recognition engines not found");
+        return ret;
     }
-    QVariant v = selectCurrentViaDialog(list, AppConfig::currentProgram());
+
+    auto current = AppConfig::currentProgram();
+    QDialog dlg;
+    auto layout = new QVBoxLayout;
+
+    QVector<QRadioButton*> flags;
+    for (int i = 0; i < items.size(); i++) {
+        auto flag = new QRadioButton(items.at(i).title());
+        flag->setChecked(current.isValid() && items[i] == current.value<Program>());
+        layout->addWidget(flag);
+        flags << flag;
+    }
+
+    auto line = new QFrame;
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addSpacing(12);
+    layout->addWidget(line);
+
+    auto batchSize = new QSpinBox;
+    batchSize->setMinimum(1);
+    batchSize->setSingleStep(1);
+    batchSize->setValue(AppConfig::batchSize());
+
+    auto batchSizeWidget = new QWidget;
+    auto batchSizeLayout = new QHBoxLayout;
+    batchSizeLayout->addWidget(new QLabel("Batch size: "));
+    batchSizeLayout->addWidget(batchSize);
+    batchSizeWidget->setLayout(batchSizeLayout);
+
+    layout->addWidget(batchSizeWidget);
+
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    dlg.connect(buttons, SIGNAL(accepted()), &dlg, SLOT(accept()));
+    dlg.connect(buttons, SIGNAL(rejected()), &dlg, SLOT(reject()));
+    layout->addWidget(buttons);
+
+    dlg.setLayout(layout);
+    if (dlg.exec() == QDialog::Accepted) {
+        AppConfig::setBatchSize(batchSize->value());
+        for (int i = 0; i < flags.size(); i++) {
+            if (flags.at(i)->isChecked()) {
+                ret.setValue(items[i]);
+                break;
+            }
+        }
+    }
+    return ret;
+}
+
+void FeaturesPanel::selectEngine() {
+    QVariant v = selectEngineAndBatchSizeViaDialog();
     if (v.isValid()) {
         AppConfig::setCurrentProgram(v.value<Program>().uoa);
         updateExperimentConditions();

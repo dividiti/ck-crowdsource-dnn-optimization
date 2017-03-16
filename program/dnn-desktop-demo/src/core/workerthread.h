@@ -8,7 +8,7 @@ class WorkerThread : public QThread
 {
     Q_OBJECT
 public:
-    WorkerThread(const Program& program, const Model& model, const Dataset& dataset, QObject* parent = Q_NULLPTR);
+    WorkerThread(const Program& program, const Model& model, const Dataset& dataset, int batchSize, QObject* parent = Q_NULLPTR);
 
     void run() override;
 
@@ -22,6 +22,7 @@ private:
     Program program;
     Model model;
     Dataset dataset;
+    int batchSize;
 };
 
 #endif // WORKERTHREAD_H
