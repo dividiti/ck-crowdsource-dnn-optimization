@@ -9,23 +9,15 @@
 #include <QFile>
 
 static QString getExe() {
-#ifdef Q_OS_WIN32
-    return "python";
-#else
     QString ckExe = AppConfig::ckExeName();
     if (ckExe.isEmpty()) {
         AppEvents::error("CK bin path not found in config");
     }
     return ckExe;
-#endif
 }
 
 static QStringList getDefaultArgs() {
-#ifdef Q_OS_WIN32
-    return QStringList { "-W", "ignore::DeprecationWarning", AppConfig::ckBinPath() + "\\..\\ck\\kernel.py" };
-#else
     return QStringList();
-#endif
 }
 
 static QString getBinPath() {
