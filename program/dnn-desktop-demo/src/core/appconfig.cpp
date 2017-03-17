@@ -140,34 +140,42 @@ void AppConfig::setCurrentModel(QString uoa) {
 
 QList<Dataset> AppConfig::datasets() {
     int valCount = sectionCount("VAL");
-    if (0 >= valCount) {
-        return QList<Dataset>();
-    }
-    // for now, we always use the first VAL
-    QString valUoa = sectionValue("VAL", 0, "uoa");
-    QString valName = sectionValue("VAL", 0, "name");
-
-    int count = sectionCount("AUX");
+    int auxCount = sectionCount("AUX");
     QList<Dataset> ret;
-    for (int i = 0; i < count; ++i) {
+    if (0 >= valCount || 0 >= auxCount) {
+        return ret;
+    }
+    for (int i = 0; i < valCount; ++i) {
         Dataset m;
-        m.auxUoa = sectionValue("AUX", i, "uoa");
-        m.auxName = sectionValue("AUX", i, "name");
-        m.valUoa = valUoa;
-        m.valName = valName;
-        ret.append(m);
+        m.valUoa = sectionValue("VAL", i, "uoa");
+        m.valName = sectionValue("VAL", i, "name");
+
+        QString auxPackageUoa = sectionValue("VAL", i, "aux_package_uoa");
+        for (int j = 0; j < auxCount; ++j) {
+            if (auxPackageUoa == sectionValue("AUX", j, "package_uoa")) {
+                m.auxUoa = sectionValue("AUX", j, "uoa");
+                m.auxName = sectionValue("AUX", j, "name");
+                break;
+            }
+        }
+
+        if (m.auxUoa.isEmpty()) {
+            qWarning() << "AUX not found for VAL " + m.valName + " (" + m.valUoa + "), skipping";
+        } else {
+            ret.append(m);
+        }
     }
     return ret;
 }
 
 QVariant AppConfig::currentDataset() {
-    QString uoa = configValueStr("aux_uoa", "");
+    QString uoa = configValueStr("val_uoa", "");
     QVariant ret;
     for (auto i : datasets()) {
         if (!ret.isValid()) {
             ret.setValue(i);
         }
-        if (i.auxUoa == uoa) {
+        if (i.valUoa == uoa) {
             ret.setValue(i);
             break;
         }
@@ -176,7 +184,7 @@ QVariant AppConfig::currentDataset() {
 }
 
 void AppConfig::setCurrentDataset(QString uoa) {
-    config().setValue("aux_uoa", uoa);
+    config().setValue("val_uoa", uoa);
     config().sync();
 }
 

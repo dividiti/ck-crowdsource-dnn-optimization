@@ -124,10 +124,31 @@ def fill_programs(ck, conf, exe_extension):
     return {'return': 0}
 
 def fill_aux(ck, conf):
-    return fill_section(ck, conf, section='AUX', tags='imagenet,aux', module='env')
+    section = 'AUX'
+    r = fill_section(ck, conf, section=section, tags='imagenet,aux', module='env')
+    if r['return'] > 0: return r
+    lst = r['lst']
+    for i, u in enumerate(lst):
+        package_uoa = u.get('meta', {}).get('package_uoa', '')
+        if package_uoa == '':
+            return {'return': 1, 'error': 'There is no package_uoa for AUX ' + u['data_uoa']}
+        setstr(conf, section, str(i) + '_package_uoa', package_uoa)
+    return {'return': 0}
 
 def fill_val(ck, conf):
-    return fill_section(ck, conf, section='VAL', tags='imagenet,val', module='env')
+    section = 'VAL'
+    r = fill_section(ck, conf, section=section, tags='imagenet,val', module='env')
+    if r['return'] > 0: return r
+    lst = r['lst']
+    for i, u in enumerate(lst):
+        package_uoa = u.get('meta', {}).get('package_uoa', '')
+        if package_uoa == '':
+            return {'return': 1, 'error': 'There is no package_uoa for ' + u['data_uoa']}
+        r = ck.access({'action': 'load', 'module_uoa': 'package', 'data_uoa': package_uoa})
+        if r['return'] > 0: return r
+        setstr(conf, section, str(i) + '_name', r.get('data_name', ''))
+        setstr(conf, section, str(i) + '_aux_package_uoa', r.get('dict', {}).get('aux_uoa', ''))
+    return {'return': 0}
 
 #
 # =============================================================================
