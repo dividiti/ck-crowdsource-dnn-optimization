@@ -109,11 +109,11 @@ struct Dataset {
     QString valName;
 
     QString title() const {
-        return auxName;
+        return valName;
     }
 
     bool operator==(const Dataset& o) const {
-        return auxUoa == o.auxUoa;
+        return valUoa == o.valUoa;
     }
 };
 Q_DECLARE_METATYPE(Dataset)

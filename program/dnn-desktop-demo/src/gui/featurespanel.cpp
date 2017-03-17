@@ -193,7 +193,7 @@ void FeaturesPanel::selectImages()
     }
     QVariant v = selectCurrentViaDialog(list, AppConfig::currentDataset());
     if (v.isValid()) {
-        AppConfig::setCurrentDataset(v.value<Dataset>().auxUoa);
+        AppConfig::setCurrentDataset(v.value<Dataset>().valUoa);
         updateExperimentConditions();
     }
 }
