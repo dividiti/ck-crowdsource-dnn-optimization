@@ -1,2 +1,5 @@
-# V0.1
-  2017.01.17 * added minimal files to fork repo 
+2017.03.18 * new version for Linux and Windows to run DNN engines via CK classification programs (continuous mode)
+
+2017.03.07 * support to load various DNN engines via DLL (fast but very fragile)
+
+2017.01.17 * added minimal files to fork repo 

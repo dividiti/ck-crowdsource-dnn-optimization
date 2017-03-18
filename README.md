@@ -5,20 +5,20 @@
 Introduction
 ============
 
-This is a [CK-powered](http://github.com/ctuning/ck) QT-based open-source cross-platform desktop demo app (at least, for Linux and Windows). It recognizes images via Caffe or TensorFlow and sends reports (timing/correctness/etc) to CK.
+This is a [CK-powered](http://github.com/ctuning/ck) QT-based open-source
+cross-platform and customizable desktop tool set (at least, for Linux and Windows) 
+to benchmark and optimize deep learning engines, models and inputs across diverse HW/SW via
+[CK](https://github.com/ctuning/ck). It complements our 
+[Android application](https://play.google.com/store/apps/details?id=openscience.crowdsource.video.experiments)
+to crowdsource deep learning optimization across mobile and IoT devices
+provided by volunteers.
 
-Public scenarios are prepared using this [CK GitHub repo](https://github.com/ctuning/ck-crowd-scenarios).
-Caffe libraries are generated using [CK-Caffe framework](https://github.com/dividiti/ck-caffe).
-
-Current scenarios include multi-dimensional and multi-objective
-optimization of benchmarks and real workloads such as 
-Caffe, TensorFlow and other DNN frameworks in terms
-of performance, accuracy, energy, memory footprint, cost, etc.
+At the moment, it calculates the sustainable rate of continuous image classification via 
+[CK-Caffe](https://github.com/dviditi/ck-caffe) or 
+[CK-TensorFlow](https://github.com/ctuning/ck-tensorflow) 
+DNN engines needed for life object recognition!
 
 See our [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
-
-Related projects:
-* hhttps://github.com/dividiti/crowdsource-video-experiments-on-android
 
 License
 =======
@@ -26,11 +26,14 @@ License
 
 Minimal requirements
 ====================
-Linux, Windows or MacOS operation system
+* Linux, Windows or MacOS operation system
+* [Collective Knowledge Framework](https://github.com/ctuning/ck)
+* []
 
 Preparation to run
 ====================
-To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) and at least one caffemodel and imagenet dataset.
+To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) 
+and at least one caffemodel and imagenet dataset.
 
 * ck-caffe:
 ```
@@ -44,51 +47,61 @@ $ ck install package:caffemodel-bvlc-googlenet
 * imagenet datasets. **Note:** one dataset consists of two packages: `aux` and `val`, you need to install both of them to use the dataset. More datasets may be added in the future:
 ```
 $ ck install package:imagenet-2012-aux
-$ ck install package:imagenet-2012-val
+$ ck install package:imagenet-2012-val-min
 ```
 You also need to compile and be able to run `caffe-classification`:
 ```
 $ ck compile program:caffe-classification
 $ ck run program:caffe-classification
 ```
-Finally, you need to pull this repo and 'compile' the program (currently, 'compilation' only unpacks one of the prebuilt packages)
+Finally, you need to pull this repo and 'compile' this application as a standard CK program 
+(currently, 'compilation' only unpacks one of the prebuilt packages and uses pre-process script
+to prepare various selections such as a DNN engine and a data set):
 ```
 $ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
 $ ck compile program:dnn-desktop-demo
 ```
 
-## Running the app
+Running the app
+===============
 
 Execute the following to run the app:
 ```
 $ ck run program:dnn-desktop-demo
 ```
 
-Questions/comments/discussions?
-===============================
-Please subscribe to our mailing lists:
-* Open, collaborative and reproducible R&D including knowledge preservation, sharing and reuse:
-  http://groups.google.com/group/collective-knowledge
-* Software and hardware multi-objective (performance/energy/accuracy/size/reliability/cost)
-  benchmarking, autotuning, crowdtuning and run-time adaptation: http://groups.google.com/group/ctuning-discussions
+Related Publications with long term vision
+==========================================
 
-Publications
-============
-The concepts have been described in the following publications:
+```
+@inproceedings{Lokhmotov:2016:OCN:2909437.2909449,
+ author = {Lokhmotov, Anton and Fursin, Grigori},
+ title = {Optimizing Convolutional Neural Networks on Embedded Platforms with OpenCL},
+ booktitle = {Proceedings of the 4th International Workshop on OpenCL},
+ series = {IWOCL '16},
+ year = {2016},
+ location = {Vienna, Austria},
+ url = {http://doi.acm.org/10.1145/2909437.2909449},
+ acmid = {2909449},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Convolutional neural networks, OpenCL, collaborative optimization, deep learning, optimization knowledge repository},
+} 
 
-* http://arxiv.org/abs/1506.06256 (CPC'15)
-* http://bit.ly/ck-date16 (DATE'16)
-* http://hal.inria.fr/hal-01054763 (Journal of Scientific Programming'14)
-* https://hal.inria.fr/inria-00436029 (GCC Summit'09)
+@inproceedings{ck-date16,
+    title = {{Collective Knowledge}: towards {R\&D} sustainability},
+    author = {Fursin, Grigori and Lokhmotov, Anton and Plowman, Ed},
+    booktitle = {Proceedings of the Conference on Design, Automation and Test in Europe (DATE'16)},
+    year = {2016},
+    month = {March},
+    url = {https://www.researchgate.net/publication/304010295_Collective_Knowledge_Towards_RD_Sustainability}
+}
+```
 
-If you found this app useful for your R&D, you are welcome
-to reference any of the above publications in your articles
-and reports. You can download all above references in one 
-BibTex file [here](https://raw.githubusercontent.com/ctuning/ck-guide-images/master/collective-knowledge-refs.bib).
+* <a href="https://github.com/ctuning/ck/wiki/Publications">All related references with BibTex</a>
 
 Testimonials and awards
 =======================
-* 2014: HiPEAC technology transfer award: [HiPEAC TT winners](https://www.hipeac.net/research/technology-transfer-awards/2014)
 * 2015: ARM and the cTuning foundation use CK to accelerate computer engineering: [HiPEAC Info'45 page 17](https://www.hipeac.net/assets/public/publications/newsletter/hipeacinfo45.pdf), [ARM TechCon'16 presentation and demo](http://schedule.armtechcon.com/session/know-your-workloads-design-more-efficient-systems), [public CK repo](https://github.com/ctuning/ck-wa)
 
 Acknowledgments
@@ -99,4 +112,7 @@ and the [cTuning foundation](http://cTuning.org) (non-profit research organizati
 We are also extremely grateful to all
 volunteers for their valuable feedback and contributions.
 
-![logo](https://github.com/ctuning/ck-guide-images/blob/master/logo-validated-by-the-community-simple.png)
+Feedback
+========
+Feel free to engage with our community via this mailing list:
+* http://groups.google.com/group/collective-knowledge
