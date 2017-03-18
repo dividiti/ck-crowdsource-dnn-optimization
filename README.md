@@ -28,7 +28,7 @@ Minimal requirements
 ====================
 * Linux, Windows or MacOS operation system
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
-* []
+* [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
 
 Preparation to run
 ====================
