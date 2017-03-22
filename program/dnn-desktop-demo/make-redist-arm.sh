@@ -28,6 +28,17 @@ cp -fL ${QT_LIBS}/libicudata.so.57 ${REDIST}
 cp -fL ${QT_LIBS}/libicui18n.so.57 ${REDIST}
 cp -fL ${QT_LIBS}/libicuuc.so.57 ${REDIST}
 
+cp -fL ${QT_LIBS}/libdouble-conversion.so.1 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-render-util.so.0 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-image.so.0 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-icccm.so.4 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-randr.so.0 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-keysyms.so.1 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-xinerama.so.0 ${REDIST}
+cp -fL ${QT_LIBS}/libxcb-xkb.so.1 ${REDIST}
+cp -fL ${QT_LIBS}/libxkbcommon-x11.so.0 ${REDIST}
+cp -fL ${QT_LIBS}/libxkbcommon.so.0 ${REDIST}
+
 echo "Copy Qt plugins..."
 mkdir -p ${REDIST}/imageformats
 mkdir -p ${REDIST}/platforms
