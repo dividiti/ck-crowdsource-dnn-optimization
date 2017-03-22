@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export APP_EXE=crowdsource-video-experiments-on-desktop
-export TARGET_FILE=crowdsource-video-experiments-on-desktop-linux.zip
+export TARGET_FILE=crowdsource-video-experiments-on-desktop-linux-x86_64.zip
 export TARGET_DIR="./prebuilt"
 export REDIST="./redist"
 export BIN="./bin"

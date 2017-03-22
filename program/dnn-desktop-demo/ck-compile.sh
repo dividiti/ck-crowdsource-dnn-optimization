@@ -1,5 +1,6 @@
 
-NAME="crowdsource-video-experiments-on-desktop-linux"
+MACHINE=`uname -m`
+NAME="crowdsource-video-experiments-on-desktop-linux-$MACHINE"
 
 rm -rf *
 unzip "../prebuilt/$NAME.zip"
