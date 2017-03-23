@@ -1,7 +1,8 @@
 
-MACHINE=`uname -m`
-NAME="crowdsource-video-experiments-on-desktop-linux-$MACHINE"
+QMAKE="$CK_ENV_LIB_QT_QMAKE_EXE"
 
-rm -rf *
-unzip "../prebuilt/$NAME.zip"
-chmod +x "$CK_PROG_TARGET_EXE.sh"
+$QMAKE ..
+
+make CC=$CK_CC CXX=$CK_CXX
+
+cp ../bin/crowdsource-video-experiments-on-desktop $CK_PROG_TARGET_EXE
