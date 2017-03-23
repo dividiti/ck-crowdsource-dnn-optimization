@@ -5,6 +5,29 @@
       "cmd": "../ck-compile$#script_ext#$"
     }
   },
+  "compile_deps": {
+    "compiler": {
+      "local": "yes",
+      "name": "C++ compiler",
+      "sort": 0,
+      "tags": "compiler,lang-cpp"
+    },
+    "lib-qt": {
+      "local": "yes",
+      "name": "Qt library",
+      "sort": 1,
+      "tags": "lib,qt"
+    }
+  },
+  "run_deps": {
+    "lib-qt": {
+      "local": "yes",
+      "name": "Qt library",
+      "sort": 1,
+      "tags": "lib,qt"
+    }
+  },
+  "compiler_env": "CK_CXX",
   "data_name": "dnn-desktop-demo", 
   "process_in_tmp": "yes", 
   "program": "yes", 
