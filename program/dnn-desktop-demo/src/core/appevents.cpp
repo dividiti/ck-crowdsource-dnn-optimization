@@ -59,7 +59,7 @@ void AppEvents::init() {
 
 void AppEvents::info(const QString& msg)
 {
-    qInfo() << msg;
+    qDebug() << msg;
     emit instance()->onInfo(msg);
 }
 
