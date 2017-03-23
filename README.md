@@ -20,27 +20,22 @@ DNN engines needed for life object recognition!
 
 See our [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
 
+We validated this app on ARM, Intel and NVidia-based devices 
+with Linux and Windows (from laptops, servers and powerful high-end tablets such as Surface Pro 4 
+to budget devices with constrained resources such as Raspberry Pi 3 and Odroid-XU3).
+
 License
 =======
 * Permissive 3-clause BSD license. (See `LICENSE.txt` for more details).
 
-Prerequisites
-=============
+Minimal requirements
+====================
 * Linux, Windows or MacOS operation system
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
 * [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
 
-### Ubuntu
-```
-$ sudo apt-get install qtdeclarative5-dev
-$ sudo apt-get install libgl1-mesa-dev
-```
-
-### Windows
-* Download and install [latest Qt](https://www.qt.io/download-open-source)
-
-Collective Knowledge workflow preparation
-=========================================
+Preparation to run
+====================
 To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) 
 and at least one caffemodel and imagenet dataset.
 
@@ -63,23 +58,15 @@ You also need to compile and be able to run `caffe-classification`:
 $ ck compile program:caffe-classification
 $ ck run program:caffe-classification
 ```
-Finally, you need to pull this repo and compile this application as a standard CK program:
+Finally, you need to pull this repo and 'compile' this application as a standard CK program 
+(currently, 'compilation' only unpacks one of the prebuilt packages and uses pre-process script
+to prepare various selections such as a DNN engine and a data set):
 ```
-$ ck pull repo --url=https://github.com/dividiti/ck-crowdsource-dnn-optimization.git
+$ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
 $ ck compile program:dnn-desktop-demo
 ```
 
-Compiling this app
-==================
-
-Execute the following to compile this app and follow questions on the screen if any:
-```
-$ ck compile program:dnn-desktop-demo
-```
-
-CK should detect available compilers and Qt library, and then build this application.
-
-Running this app
+Running the app
 ===============
 
 Execute the following to run the app:

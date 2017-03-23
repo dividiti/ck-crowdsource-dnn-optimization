@@ -48,7 +48,6 @@
   }, 
   "run_vars": {
   }, 
-  "skip_bin_ext": "yes", 
   "tags": [
     "dnn-desktop-demo"
   ], 
