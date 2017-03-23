@@ -63,9 +63,7 @@ You also need to compile and be able to run `caffe-classification`:
 $ ck compile program:caffe-classification
 $ ck run program:caffe-classification
 ```
-Finally, you need to pull this repo and 'compile' this application as a standard CK program 
-(currently, 'compilation' only unpacks one of the prebuilt packages and uses pre-process script
-to prepare various selections such as a DNN engine and a data set):
+Finally, you need to pull this repo and compile this application as a standard CK program:
 ```
 $ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
 $ ck compile program:dnn-desktop-demo
