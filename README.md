@@ -24,14 +24,23 @@ License
 =======
 * Permissive 3-clause BSD license. (See `LICENSE.txt` for more details).
 
-Minimal requirements
-====================
+Prerequisites
+=============
 * Linux, Windows or MacOS operation system
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
 * [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
 
-Preparation to run
-====================
+## Ubuntu
+```
+$ sudo apt-get install qtdeclarative5-dev
+$ sudo apt-get install libgl1-mesa-dev
+```
+
+## Windows
+* Download and install [latest Qt](https://www.qt.io/download-open-source)
+
+Collective Knowledge workflow preparation
+=========================================
 To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) 
 and at least one caffemodel and imagenet dataset.
 
@@ -62,7 +71,17 @@ $ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-o
 $ ck compile program:dnn-desktop-demo
 ```
 
-Running the app
+Compiling this app
+==================
+
+Execute the following to compile this app and follow questions on the screen if any:
+```
+$ ck compile program:dnn-desktop-demo
+```
+
+CK should detect available compilers and Qt library, and then build this application.
+
+Running this app
 ===============
 
 Execute the following to run the app:
