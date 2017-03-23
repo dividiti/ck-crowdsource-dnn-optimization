@@ -1,7 +1,16 @@
 
-set NAME="crowdsource-video-experiments-on-desktop-windows"
+set QMAKE="%CK_ENV_LIB_QT_QMAKE_EXE%"
+for /f %%i in ('%QMAKE% -query QT_INSTALL_BINS') do set WINDEPLOYQT=%%i\windeployqt
 
-rm -rf *
-unzip "../prebuilt/%NAME%.zip"
+@echo on
+%QMAKE% ..
+
+%CK_MAKE% CC=%CK_CC% CXX=%CK_CXX%
+
+cp ../bin/crowdsource-video-experiments-on-desktop.exe %CK_PROG_TARGET_EXE%
+
+%WINDEPLOYQT% %CK_PROG_TARGET_EXE%
+
+@echo off
 
 exit /b 0
