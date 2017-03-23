@@ -65,7 +65,7 @@ $ ck run program:caffe-classification
 ```
 Finally, you need to pull this repo and compile this application as a standard CK program:
 ```
-$ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
+$ ck pull repo --url=https://github.com/dividiti/ck-crowdsource-dnn-optimization.git
 $ ck compile program:dnn-desktop-demo
 ```
 
