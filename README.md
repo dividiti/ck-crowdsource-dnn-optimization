@@ -30,13 +30,13 @@ Prerequisites
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
 * [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
 
-## Ubuntu
+### Ubuntu
 ```
 $ sudo apt-get install qtdeclarative5-dev
 $ sudo apt-get install libgl1-mesa-dev
 ```
 
-## Windows
+### Windows
 * Download and install [latest Qt](https://www.qt.io/download-open-source)
 
 Collective Knowledge workflow preparation
