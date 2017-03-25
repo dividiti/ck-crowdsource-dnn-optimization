@@ -33,9 +33,12 @@ Minimal requirements
 * Linux, Windows or MacOS operation system
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
 * [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
+
 * QT5+ library. You can install it as following:
- * **Ubuntu:** $ sudo apt-get qtdeclarative5-dev
- * **Windows:** Download Qt from [official website](https://www.qt.io/download-open-source) and install to C:\Qt (CK will then automatically pick it up)
+
+**Ubuntu:** $ sudo apt-get qtdeclarative5-dev
+
+**Windows:** Download Qt from [official website](https://www.qt.io/download-open-source) and install to C:\Qt (CK will then automatically pick it up)
 
 Preparation to run
 ====================
