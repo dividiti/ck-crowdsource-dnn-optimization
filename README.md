@@ -33,6 +33,9 @@ Minimal requirements
 * Linux, Windows or MacOS operation system
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
 * [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
+* QT5+ library. You can install it as following:
+** **Ubuntu:** $ sudo apt-get qtdeclarative5-dev
+** **Windows:** Download Qt from [official website](https://www.qt.io/download-open-source) and install to C:\Qt (CK will then automatically pick it up)
 
 Preparation to run
 ====================
@@ -53,14 +56,16 @@ $ ck install package:caffemodel-bvlc-googlenet
 $ ck install package:imagenet-2012-aux
 $ ck install package:imagenet-2012-val-min
 ```
+
 You also need to compile and be able to run `caffe-classification`:
 ```
 $ ck compile program:caffe-classification
 $ ck run program:caffe-classification
 ```
-Finally, you need to pull this repo and 'compile' this application as a standard CK program 
-(currently, 'compilation' only unpacks one of the prebuilt packages and uses pre-process script
-to prepare various selections such as a DNN engine and a data set):
+
+Finally, you need to pull this repo and compile this application as a standard CK program 
+(CK will attempt to detect suitable compiler and installed Qt before compiling this app)
+
 ```
 $ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
 $ ck compile program:dnn-desktop-demo
@@ -69,13 +74,28 @@ $ ck compile program:dnn-desktop-demo
 Running the app
 ===============
 
-Execute the following to run the app:
+Execute the following to run this GUI-based app:
 ```
 $ ck run program:dnn-desktop-demo
 ```
 
-Related Publications with long term vision
-==========================================
+Select DNN engine, data set and press start button! Enjoy!
+
+Future work
+===========
+
+We plan to extend this application to optimize deep learning (training and predictions) 
+across different models and their topologies, data sets, libraries and diverse hardware
+while sharing optimization statistics with the community via [public repo](http://cKnowledge.org/repo).
+
+This should allow end-users select the most efficient solution for their tasks
+(DNN running on a supercomputer or in a constrained IoT device), and computer engineers
+designers deliver next generation of efficient libraries and hardware. 
+
+See our vision papers below for more details.
+
+Related Publications with our long term vision
+==============================================
 
 ```
 @inproceedings{Lokhmotov:2016:OCN:2909437.2909449,
@@ -102,7 +122,7 @@ Related Publications with long term vision
 }
 ```
 
-* <a href="https://github.com/ctuning/ck/wiki/Publications">All related references with BibTex</a>
+* [All related references with BibTex](https://github.com/ctuning/ck/wiki/Publications)
 
 Testimonials and awards
 =======================
