@@ -1,6 +1,5 @@
 #include "appconfig.h"
 #include "appevents.h"
-#include "logwindow.h"
 #include "mainwindow.h"
 #include "experimentpanel.h"
 
@@ -9,7 +8,6 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QMessageBox>
-#include <QShortcut>
 
 #define EXPERIMENT_COUNT 1
 
@@ -48,25 +46,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     for (auto e: _experiments) {
         e->panel->updateExperimentConditions();
     }
-
-#ifdef Q_OS_WIN
-    auto shortcut = new QShortcut(QKeySequence(Qt::Key_F12), this);
-    shortcut->setContext(Qt::ApplicationShortcut);
-    connect(shortcut, SIGNAL(activated()), this, SLOT(showLog()));
-#endif
 }
 
 MainWindow::~MainWindow() {
     for (auto e: _experiments) {
         delete e;
     }
-    LogWindow::destroyInstance();
 }
 
 void MainWindow::onError(const QString& msg) {
     QMessageBox::critical(this, windowTitle(), msg);
-}
-
-void MainWindow::showLog() {
-    LogWindow::instance()->show();
 }

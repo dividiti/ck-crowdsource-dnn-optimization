@@ -4,10 +4,8 @@
 #include "framespanel.h"
 #include "framewidget.h"
 
-#include <QApplication>
 #include <QBoxLayout>
 #include <QDebug>
-#include <QDir>
 #include <QGridLayout>
 #include <QTimer>
 

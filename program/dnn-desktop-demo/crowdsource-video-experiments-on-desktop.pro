@@ -40,7 +40,6 @@ SOURCES += \
     src/ori/OriWidgets.cpp \
     src/core/experimentcontext.cpp \
     src/gui/imageview.cpp \
-    src/gui/logwindow.cpp \
     src/core/workerthread.cpp
 
 HEADERS += \
@@ -56,7 +55,6 @@ HEADERS += \
     src/ori/OriWidgets.h \
     src/core/experimentcontext.h \
     src/gui/imageview.h \
-    src/gui/logwindow.h \
     src/core/workerthread.h
 
 RESOURCES += \
