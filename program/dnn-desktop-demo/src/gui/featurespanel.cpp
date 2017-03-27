@@ -220,7 +220,9 @@ void FeaturesPanel::selectMode() {
     }
     QVariant v = selectCurrentViaDialog(list, AppConfig::currentMode());
     if (v.isValid()) {
-        AppConfig::setCurrentMode(v.value<Mode>().type);
+        Mode m = v.value<Mode>();
+        AppConfig::setCurrentMode(m.type);
+        _context->notifyModeChanged(m);
         updateExperimentConditions();
     }
 }

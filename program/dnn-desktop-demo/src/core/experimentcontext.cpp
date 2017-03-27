@@ -7,15 +7,16 @@
 #include <QDialogButtonBox>
 #include <QRadioButton>
 
-void ExperimentContext::startExperiment()
-{
+void ExperimentContext::startExperiment() {
     _isExperimentStarted = true;
     emit experimentStarted();
 }
 
-void ExperimentContext::stopExperiment()
-{
+void ExperimentContext::stopExperiment() {
     _isExperimentStarted = false;
     emit experimentStopping();
 }
 
+void ExperimentContext::notifyModeChanged(const Mode& mode) {
+    emit modeChanged(mode);
+}

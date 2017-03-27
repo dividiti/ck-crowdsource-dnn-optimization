@@ -21,6 +21,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
+    connect(_context, &ExperimentContext::modeChanged, this, &ResultsPanel::updateOnModeChanged);
 
     _infoImagesPerSec = makeInfoLabel();
     _infoMetricTop1 = makeInfoLabel();
@@ -31,16 +32,18 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     auto panelCounters = makePanel({ Ori::Gui::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
     auto panelMetricTop1 = makePanel({ Ori::Gui::makeTitle("TOP-1"), _infoMetricTop1 });
     auto panelMetricTop5 = makePanel({ Ori::Gui::makeTitle("TOP-5"), _infoMetricTop5 });
-    auto panelMetrics = Ori::Gui::layoutH(0, 0, { panelMetricTop1, panelMetricTop5 });
-    auto panelWorstPrediction = makePanel({
+    _panelMetrics = new QFrame;
+    _panelMetrics->setLayout(Ori::Gui::layoutH(0, 0, { panelMetricTop1, panelMetricTop5 }));
+    _panelWorstPrediction = makePanel({
         Ori::Gui::makeTitle("WORST PREDICTION"),
         Ori::Gui::layoutH(0, 0, { 0, _worstPredictedImage, 0}),
     });
 
     setLayout(Ori::Gui::layoutV(0, 0,
-        { panelCounters, panelMetrics, panelWorstPrediction, 0 }));
+        { panelCounters, _panelMetrics, _panelWorstPrediction, 0 }));
 
     resetInfo();
+    updateOnModeChanged(AppConfig::currentMode().value<Mode>());
 }
 
 QLabel* ResultsPanel::makeInfoLabel(const QString &role) {
@@ -99,4 +102,10 @@ void ResultsPanel::resetInfo() {
     _worstPredictedImage->clearImage();
     _worstPredictedImage->setToolTip("");
     _lastUpdateMs = 0;
+}
+
+void ResultsPanel::updateOnModeChanged(Mode mode) {
+    bool v = mode.type == Mode::Type::CLASSIFICATION;
+    _panelMetrics->setVisible(v);
+    _panelWorstPrediction->setVisible(v);
 }

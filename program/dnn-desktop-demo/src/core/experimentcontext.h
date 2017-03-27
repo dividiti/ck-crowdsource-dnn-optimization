@@ -13,6 +13,7 @@ class ExperimentContext : public QObject
 public:
     void startExperiment();
     void stopExperiment();
+    void notifyModeChanged(const Mode& mode);
     bool isExperimentStarted() const { return _isExperimentStarted; }
 
 signals:
@@ -20,6 +21,7 @@ signals:
     void experimentStopping();
     void experimentFinished();
     void newImageResult(ImageResult);
+    void modeChanged(Mode);
 
 private:
     bool _isExperimentStarted = false;

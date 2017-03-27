@@ -22,12 +22,14 @@ public:
 private slots:
     void experimentStarted();
     void newImageResult(ImageResult);
+    void updateOnModeChanged(Mode);
 
 private:
     ExperimentContext* _context;
     QLabel *_infoImagesPerSec;
     QLabel *_infoMetricTop1, *_infoMetricTop5;
     ImageView *_worstPredictedImage;
+    QFrame *_panelMetrics, *_panelWorstPrediction;
 
     int _top1Count;
     int _top5Count;

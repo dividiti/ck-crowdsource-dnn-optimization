@@ -45,7 +45,7 @@ QFrame#resultsPanel {
 }
 QFrame[qss-role="features-panel"] {
 	margin: 0px;
-	padding: 16px;
+        padding: 16px;
 }
 QFrame[qss-role="results-panel"] {
 	margin: 0px;
