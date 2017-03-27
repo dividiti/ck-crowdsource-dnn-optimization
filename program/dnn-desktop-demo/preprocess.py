@@ -117,9 +117,12 @@ def fill_programs(ck, conf, exe_extension):
         target_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#target_file'}).get('value', None)
         if None == target_file:
             return {'return': 1, 'error': 'Could not find target file for ' + u['data_uoa']}
-        if not target_file.startswith(exe_extension):
+        if not target_file.endswith(exe_extension):
             target_file = target_file + exe_extension
         setstr(conf, section, str(i) + '_exe', target_file)
+        full_target_path = os.path.join(os.path.dirname(output_file), target_file)
+        if not os.path.isfile(full_target_path):
+            print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
 
     return {'return': 0}
 

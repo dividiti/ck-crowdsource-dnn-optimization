@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QSettings>
 #include <QDir>
+#include <QFileInfo>
 #include <QDebug>
 
 static const QString STYLESHEET_PATH = ":/qss/app.qss";
@@ -71,6 +72,12 @@ QString AppConfig::sectionValue(const QString& sectionName, int index, const QSt
     return configValueStr(sectionName + "/" + QString::number(index) + "_" + suffix, "");
 }
 
+bool isCompiled(const Program& p) {
+    QFileInfo out(p.outputFile);
+    QDir dir = out.absoluteDir();
+    return dir.exists(p.exe);
+}
+
 QList<Program> AppConfig::programs() {
     int programCount = sectionCount("Programs");
     QList<Program> ret;
@@ -80,7 +87,9 @@ QList<Program> AppConfig::programs() {
         p.name = sectionValue("Programs", i, "name");
         p.outputFile = sectionValue("Programs", i, "output_file");
         p.exe = sectionValue("Programs", i, "exe");
-        ret.append(p);
+        if (isCompiled(p)) {
+            ret.append(p);
+        }
     }
     return ret;
 }
