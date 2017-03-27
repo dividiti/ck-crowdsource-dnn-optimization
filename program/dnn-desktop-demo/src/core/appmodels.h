@@ -68,6 +68,32 @@ Q_DECLARE_METATYPE(ImageResult)
 
 //-----------------------------------------------------------------------------
 
+struct Mode {
+    enum Type { CLASSIFICATION, RECOGNITION };
+
+    const Type type;
+
+    QString title() const {
+        switch (type) {
+        case Type::CLASSIFICATION:
+            return "Image classification";
+        case Type::RECOGNITION:
+            return "Object recognition";
+        default:
+            return "Unknown";
+        }
+    }
+
+    Mode(Type t = CLASSIFICATION) : type(t) {}
+
+    bool operator==(const Mode& o) const {
+        return type == o.type;
+    }
+};
+Q_DECLARE_METATYPE(Mode)
+
+//-----------------------------------------------------------------------------
+
 struct Program {
     QString uoa;
     QString name;

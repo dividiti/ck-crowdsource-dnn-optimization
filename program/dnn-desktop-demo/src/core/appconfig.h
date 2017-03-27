@@ -32,6 +32,10 @@ public:
     static QVariant currentDataset();
     static void setCurrentDataset(QString uoa);
 
+    static QList<Mode> modes();
+    static QVariant currentMode();
+    static void setCurrentMode(Mode::Type type);
+
     static int classificationStartupTimeoutSeconds();
 
     static qint64 fpsUpdateIntervalMs();

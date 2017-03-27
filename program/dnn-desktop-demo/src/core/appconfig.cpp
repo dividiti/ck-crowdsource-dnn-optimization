@@ -197,6 +197,22 @@ void AppConfig::setCurrentDataset(QString uoa) {
     config().sync();
 }
 
+QList<Mode> AppConfig::modes() {
+    return QList<Mode>({ Mode(Mode::Type::CLASSIFICATION), Mode(Mode::Type::RECOGNITION) });
+}
+
+QVariant AppConfig::currentMode() {
+    Mode m(static_cast<Mode::Type>(configValueInt("demo_mode", Mode::Type::CLASSIFICATION)));
+    QVariant ret;
+    ret.setValue(m);
+    return ret;
+}
+
+void AppConfig::setCurrentMode(Mode::Type type) {
+    config().setValue("demo_mode", type);
+    config().sync();
+}
+
 int AppConfig::classificationStartupTimeoutSeconds() {
     return config().value("startup_timeout_seconds", 40).toInt();
 }
