@@ -36,6 +36,9 @@ def ck_preprocess(i):
     r = fill_val(ck, conf)
     if r['return'] > 0: return r
 
+    r = fill_squeezedet(ck, conf)
+    if r['return'] > 0: return r
+
     with open(APP_CONF_FILE, 'w') as f:
         conf.write(f)
 
@@ -151,6 +154,23 @@ def fill_val(ck, conf):
         if r['return'] > 0: return r
         setstr(conf, section, str(i) + '_name', r.get('data_name', ''))
         setstr(conf, section, str(i) + '_aux_package_uoa', r.get('dict', {}).get('aux_uoa', ''))
+    return {'return': 0}
+
+def fill_squeezedet(ck, conf):
+    section = 'SqueezeDet'
+    r = fill_section(ck, conf, section=section, tags='tensorflow,squeezedet,continuous')
+    if r['return'] > 0: return r
+    lst = r['lst']
+    for i, u in enumerate(lst):
+        output_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#run_cmds#use_continuous#run_time#run_cmd_out1'}).get('value', None)
+        if None == output_file:
+            return {'return': 1, 'error': 'Could not find output file for ' + u['data_uoa']}
+        r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
+        if r['return'] > 0: return r
+        output_file = os.path.join(r['path'], 'tmp', output_file)
+        setstr(conf, section, str(i) + '_output_file', output_file)
+        setstr(conf, section, str(i) + '_exe', 'continuous.sh')
+
     return {'return': 0}
 
 #

@@ -23,6 +23,7 @@ public:
     static QList<Program> programs();
     static QVariant currentProgram();
     static void setCurrentProgram(QString uoa);
+    static QVariant currentSqueezeDetProgram();
 
     static QList<Model> models();
     static QVariant currentModel();

@@ -115,6 +115,22 @@ void AppConfig::setCurrentProgram(QString uoa) {
     config().sync();
 }
 
+QVariant AppConfig::currentSqueezeDetProgram() {
+    static const QString& SECTION = "SqueezeDet";
+    int programCount = sectionCount(SECTION);
+    if (programCount < 1) {
+        return QVariant();
+    }
+    Program p;
+    p.uoa = sectionValue(SECTION, 0, "uoa");
+    p.name = sectionValue(SECTION, 0, "name");
+    p.outputFile = sectionValue(SECTION, 0, "output_file");
+    p.exe = sectionValue(SECTION, 0, "exe");
+    QVariant ret;
+    ret.setValue(p);
+    return ret;
+}
+
 QList<Model> AppConfig::models() {
     int count = sectionCount("Models");
     QList<Model> ret;
@@ -198,19 +214,34 @@ void AppConfig::setCurrentDataset(QString uoa) {
 }
 
 QList<Mode> AppConfig::modes() {
+#ifdef Q_OS_WIN
+    return QList<Mode>({ Mode(Mode::Type::CLASSIFICATION) });
+#else
     return QList<Mode>({ Mode(Mode::Type::CLASSIFICATION), Mode(Mode::Type::RECOGNITION) });
+#endif
 }
 
 QVariant AppConfig::currentMode() {
     Mode m(static_cast<Mode::Type>(configValueInt("demo_mode", Mode::Type::CLASSIFICATION)));
     QVariant ret;
-    ret.setValue(m);
+    ret.setValue(Mode());
+    for (auto m1 : modes()) {
+        if (m.type == m1.type) {
+            ret.setValue(m);
+            break;
+        }
+    }
     return ret;
 }
 
 void AppConfig::setCurrentMode(Mode::Type type) {
-    config().setValue("demo_mode", type);
-    config().sync();
+    for (auto m : modes()) {
+        if (m.type == type) {
+            config().setValue("demo_mode", type);
+            config().sync();
+            return;
+        }
+    }
 }
 
 int AppConfig::classificationStartupTimeoutSeconds() {

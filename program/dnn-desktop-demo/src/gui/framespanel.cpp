@@ -35,23 +35,44 @@ FramesPanel::~FramesPanel() {
     clearWorker();
 }
 
+static QString cannotRunError() {
+    Mode mode = AppConfig::currentMode().value<Mode>();
+    if (mode.type == Mode::Type::RECOGNITION) {
+        if (!AppConfig::currentSqueezeDetProgram().isValid()) {
+            return "No recognition programs found. Please, install one (e.g. SqueezeDet)";
+        }
+    } else {
+        if (!AppConfig::currentProgram().isValid() || !AppConfig::currentModel().isValid() || !AppConfig::currentDataset().isValid()) {
+            return "Please select engine, model and dataset first";
+        }
+    }
+    return "";
+}
+
 void FramesPanel::experimentStarted() {
     if (Q_NULLPTR != _worker) {
         return abortExperiment("Another experiment is already running");
     }
-    QVariant program = AppConfig::currentProgram();
-    QVariant model = AppConfig::currentModel();
-    QVariant dataset = AppConfig::currentDataset();
-    if (program.isValid() && model.isValid() && dataset.isValid()) {
-        _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>(), AppConfig::batchSize(), this);
+    QString errorMsg = cannotRunError();
+    if (errorMsg.isEmpty()) {
+        Mode mode = AppConfig::currentMode().value<Mode>();
+        if (mode.type == Mode::Type::CLASSIFICATION) {
+            QVariant program = AppConfig::currentProgram();
+            QVariant model = AppConfig::currentModel();
+            QVariant dataset = AppConfig::currentDataset();
+            _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>(), AppConfig::batchSize(),
+                                       mode, this);
+        } else {
+            _worker = new WorkerThread(AppConfig::currentSqueezeDetProgram().value<Program>(), Model(), Dataset(), 1, mode, this);
+        }
         connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
         connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
         connect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);
         _current_frame = 0;
         _worker->start();
     } else {
-        AppEvents::error("Please select engine, model and dataset first");
-        return abortExperiment("Please select engine, model and dataset first");
+        AppEvents::error(errorMsg);
+        return abortExperiment(errorMsg);
     }
 }
 

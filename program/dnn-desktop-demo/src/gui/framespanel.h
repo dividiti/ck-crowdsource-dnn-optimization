@@ -34,6 +34,7 @@ private:
     ExperimentContext* _context;
     QGridLayout* _layout;
     WorkerThread* _worker = Q_NULLPTR;
+    Mode _mode;
 
     QList<FrameWidget*> _frames;
     const int _frame_count = 8;
