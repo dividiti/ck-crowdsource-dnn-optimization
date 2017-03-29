@@ -40,6 +40,19 @@ Minimal requirements
 
 **Windows:** Download Qt from [official website](https://www.qt.io/download-open-source) and install to C:\Qt (CK will then automatically pick it up)
 
+Troubleshooting
+===============
+On some Linux-based platforms including odroid and Raspberry Pi you may get a message:
+```
+/usr/bin/ld: **cannot find -lGL**
+```
+This means that either you OpenCL drivers are not installed or corrupted. To solve this problem you can either try to reinstall 
+your video driver (for example, by reinstalling original NVidia drivers) or installing mesa driver:
+```
+ $ sudo apt-get install libgl1-mesa-dev
+```
+You may also try to soft link the required library as described at [StackOverflow](http://stackoverflow.com/questions/18406369).
+
 Preparation to run
 ====================
 To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) 
