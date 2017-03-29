@@ -122,7 +122,6 @@ void FramesPanel::newImageResult(ImageResult ir) {
         f->load(ir);
         _current_frame = (_current_frame + 1) % _frame_count;
     } else {
-        qDebug() << "load";
         _rec_widget->load(ir);
     }
 }
