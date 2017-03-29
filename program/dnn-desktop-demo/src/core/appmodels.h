@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QVector>
+#include <QMap>
 #include <QMetaType>
 
 class PredictionResult
@@ -32,6 +33,9 @@ public:
     double duration;
     QVector<PredictionResult> predictions;
     QString correctLabels;
+
+    QMap<QString, int> recognizedObjects;
+    QMap<QString, int> expectedObjects;
 
     bool correctAsTop1() const {
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;

@@ -31,6 +31,9 @@ static const QString CORRECT_LABEL_PREFIX = "Correct label: ";
 static const QString PREDICTION_PREFIX = "Predictions: ";
 static const QRegExp PREDICTION_REGEX("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
+static const QRegExp RECOGNIZED_OBJECT_REGEX("Recognized ([^:]*): (\\d+)");
+static const QRegExp EXPECTED_OBJECT_REGEX("Expected ([^:]*): (\\d+)");
+
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
 
@@ -58,6 +61,14 @@ QStringList WorkerThread::getArgs() {
             "--deps.imagenet-val=" + dataset.valUoa,
             "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize)
             };
+    }
+}
+
+static void insertOrUpdate(QMap<QString, int>& map, QString key, int v) {
+    if (map.contains(key)) {
+        map[key] += v;
+    } else {
+        map[key] = v;
     }
 }
 
@@ -133,6 +144,12 @@ void WorkerThread::run() {
 
         } else if (line.startsWith(PREDICTION_PREFIX)) {
             predictionCount = line.mid(PREDICTION_PREFIX.size()).toInt();
+
+        } else if (RECOGNIZED_OBJECT_REGEX.exactMatch(line)) {
+            insertOrUpdate(ir.recognizedObjects, RECOGNIZED_OBJECT_REGEX.cap(1).trimmed(), RECOGNIZED_OBJECT_REGEX.cap(2).toInt());
+
+        } else if (EXPECTED_OBJECT_REGEX.exactMatch(line)) {
+            insertOrUpdate(ir.expectedObjects, EXPECTED_OBJECT_REGEX.cap(1).trimmed(), EXPECTED_OBJECT_REGEX.cap(2).toInt());
 
         } else if (predictionCount > 0) {
             // parsing a prediction line
