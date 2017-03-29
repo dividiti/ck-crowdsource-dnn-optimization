@@ -252,6 +252,10 @@ qint64 AppConfig::fpsUpdateIntervalMs() {
     return config().value("fps_update_interval_ms", 500).toInt();
 }
 
+qint64 AppConfig::recognitionUpdateIntervalMs() {
+    return config().value("recognition_update_interval_ms", 1000).toInt();
+}
+
 int AppConfig::batchSize() {
     int ret = config().value("batch_size", 1).toInt();
     if (0 >= ret) {

@@ -127,3 +127,8 @@ QMessageBox {
         /* makes QMessageBox selectable */
         messagebox-text-interaction-flags: 5;
 }
+QLabel[qss-role="recognition-label"] {
+        font-size: 15px;
+        font-family: Verdana;
+        color: white;
+}

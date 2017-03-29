@@ -40,6 +40,7 @@ public:
     static int classificationStartupTimeoutSeconds();
 
     static qint64 fpsUpdateIntervalMs();
+    static qint64 recognitionUpdateIntervalMs();
 
     static int batchSize();
     static void setBatchSize(int batchSize);

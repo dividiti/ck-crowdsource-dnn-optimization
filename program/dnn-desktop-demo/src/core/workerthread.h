@@ -13,9 +13,16 @@ class WorkerThread : public QThread
 {
     Q_OBJECT
 public:
-    WorkerThread(const Program& program, const Model& model, const Dataset& dataset, int batchSize, const Mode& mode, QObject* parent = Q_NULLPTR);
+    WorkerThread(const Program& program, const Mode& mode, QObject* parent = Q_NULLPTR);
 
     void run() override;
+
+    Mode getMode() const { return mode; }
+
+    void setModel(const Model& model) { this->model = model; }
+    void setDataset(const Dataset& dataset) { this->dataset = dataset; }
+    void setBatchSize(int batchSize) { this->batchSize = batchSize; }
+    void setMinResultInterval(long milliseconds) { minResultIntervalMs = milliseconds; }
 
 signals:
     void newImageResult(ImageResult result);
@@ -32,6 +39,8 @@ private:
     Dataset dataset;
     int batchSize;
     Mode mode;
+    long minResultIntervalMs = 0;
+    qint64 lastResultMs = 0;
 };
 
 #endif // WORKERTHREAD_H

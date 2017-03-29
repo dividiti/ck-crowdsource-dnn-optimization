@@ -7,6 +7,7 @@
 #include <QRegExp>
 #include <QDebug>
 #include <QFile>
+#include <QDateTime>
 
 static QString getExe() {
     QString ckExe = AppConfig::ckExeName();
@@ -37,8 +38,7 @@ static const QRegExp EXPECTED_OBJECT_REGEX("Expected ([^:]*): (\\d+)");
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
 
-WorkerThread::WorkerThread(const Program& program, const Model& model, const Dataset& dataset, int batchSize, const Mode& mode, QObject* parent)
-    : QThread(parent), program(program), model(model), dataset(dataset), batchSize(batchSize), mode(mode) {}
+WorkerThread::WorkerThread(const Program& program, const Mode& mode, QObject* parent) : QThread(parent), program(program), mode(mode) {}
 
 QStringList WorkerThread::getArgs() {
     switch (mode.type) {
@@ -185,9 +185,15 @@ void WorkerThread::emitStopped() {
 }
 
 void WorkerThread::processPredictedResults(const ImageResult& imageResult) {
-    if (mode.type == Mode::Type::CLASSIFICATION && imageResult.isEmpty()) {
+    if (imageResult.isEmpty()) {
         return;
     }
-    emit newImageResult(imageResult);
+    while (!isInterruptionRequested() && minResultIntervalMs > QDateTime::currentMSecsSinceEpoch() - lastResultMs) {
+        msleep(NORMAL_WAIT_MS);
+    }
+    lastResultMs = QDateTime::currentMSecsSinceEpoch();
+    if (!isInterruptionRequested()) {
+        emit newImageResult(imageResult);
+    }
 }
 

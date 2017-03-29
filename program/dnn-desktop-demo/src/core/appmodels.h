@@ -55,7 +55,7 @@ public:
     }
 
     bool isEmpty() const {
-        return predictions.isEmpty();
+        return predictions.isEmpty() && recognizedObjects.isEmpty();
     }
 
     double imagesPerSecond() {
