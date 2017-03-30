@@ -34,6 +34,7 @@ static const QRegExp PREDICTION_REGEX("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
 static const QRegExp RECOGNIZED_OBJECT_REGEX("Recognized ([^:]*): (\\d+)");
 static const QRegExp EXPECTED_OBJECT_REGEX("Expected ([^:]*): (\\d+)");
+static const QRegExp FALSE_POSITIVE_OBJECT_REGEX("False positive ([^:]*): (\\d+)");
 
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
@@ -150,6 +151,9 @@ void WorkerThread::run() {
 
         } else if (EXPECTED_OBJECT_REGEX.exactMatch(line)) {
             insertOrUpdate(ir.expectedObjects, EXPECTED_OBJECT_REGEX.cap(1).trimmed(), EXPECTED_OBJECT_REGEX.cap(2).toInt());
+
+        } else if (FALSE_POSITIVE_OBJECT_REGEX.exactMatch(line)) {
+            insertOrUpdate(ir.falsePositiveObjects, FALSE_POSITIVE_OBJECT_REGEX.cap(1).trimmed(), FALSE_POSITIVE_OBJECT_REGEX.cap(2).toInt());
 
         } else if (predictionCount > 0) {
             // parsing a prediction line

@@ -24,13 +24,22 @@ RecognitionWidget::RecognitionWidget(QWidget *parent) : QWidget(parent) {
 
 void RecognitionWidget::load(const ImageResult& ir) {
     imageLabel->setPixmap(QPixmap(ir.imageFile));
+    imageLabel->setToolTip(ir.imageFile);
+    QString text = "<style>td, th { padding-left: 1em; text-align: left; }</style>"
+            "<table><tr><th>Object</th><th>Found</th><th>Expected</th><th>False positives</th><th>Precision</th><th>Recall</th></tr>";
     QMapIterator<QString, int> iter(ir.recognizedObjects);
-    QString text = "";
     while (iter.hasNext()) {
         iter.next();
         int expected = ir.expectedObjects.contains(iter.key()) ? ir.expectedObjects[iter.key()] : 0;
-        text += QString(QStringLiteral("<b>%1:</b> %2 found, %3 expected<br>")).arg(iter.key()).arg(iter.value()).arg(expected);
+        int identified = iter.value();
+        int falsePositive = ir.falsePositiveObjects.contains(iter.key()) ? ir.falsePositiveObjects[iter.key()] : 0;
+        int trueObjects = identified - falsePositive;
+        double precision = 0 == identified ? (0 == expected ? 1 : 0) : (double)trueObjects / (double)identified;
+        double recall = 0 == expected ? (0 == identified ? 1 : 0) : (double)trueObjects / (double)expected;
+        text += QString("<tr><td>%1</td><td>%2</td><td>%3</td><td>%4</td><td>%5</td><td>%6</td></tr>")
+                .arg(iter.key()).arg(identified).arg(expected).arg(falsePositive).arg(precision).arg(recall);
     }
+    text += "</table>";
     descriptionLabel->setText(text);
 }
 

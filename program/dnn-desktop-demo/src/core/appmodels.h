@@ -36,6 +36,7 @@ public:
 
     QMap<QString, int> recognizedObjects;
     QMap<QString, int> expectedObjects;
+    QMap<QString, int> falsePositiveObjects;
 
     bool correctAsTop1() const {
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;
