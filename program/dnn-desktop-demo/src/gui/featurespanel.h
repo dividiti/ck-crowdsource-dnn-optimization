@@ -23,13 +23,15 @@ private slots:
     void selectEngine();
     void selectModel();
     void selectImages();
+    void selectMode();
     void experimentStarted();
     void experimentFinished();
 
 private:
     ExperimentContext* _context;
-    QLabel *_infoEngine, *_infoModel, *_infoImages;
-    QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSelectImages;
+    QLabel *_infoEngine, *_infoModel, *_infoImages, *_infoMode;
+    QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSelectImages, *_linkSelectMode;
+    QFrame* _classificationPanel;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
     QLabel* makeInfoLabel();

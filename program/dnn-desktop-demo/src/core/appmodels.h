@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QVector>
+#include <QMap>
 #include <QMetaType>
 
 class PredictionResult
@@ -33,6 +34,10 @@ public:
     QVector<PredictionResult> predictions;
     QString correctLabels;
 
+    QMap<QString, int> recognizedObjects;
+    QMap<QString, int> expectedObjects;
+    QMap<QString, int> falsePositiveObjects;
+
     bool correctAsTop1() const {
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;
     }
@@ -51,7 +56,7 @@ public:
     }
 
     bool isEmpty() const {
-        return predictions.isEmpty();
+        return predictions.isEmpty() && recognizedObjects.isEmpty();
     }
 
     double imagesPerSecond() {
@@ -65,6 +70,32 @@ public:
 };
 
 Q_DECLARE_METATYPE(ImageResult)
+
+//-----------------------------------------------------------------------------
+
+struct Mode {
+    enum Type { CLASSIFICATION, RECOGNITION };
+
+    const Type type;
+
+    QString title() const {
+        switch (type) {
+        case Type::CLASSIFICATION:
+            return "Image classification";
+        case Type::RECOGNITION:
+            return "Object recognition";
+        default:
+            return "Unknown";
+        }
+    }
+
+    Mode(Type t = CLASSIFICATION) : type(t) {}
+
+    bool operator==(const Mode& o) const {
+        return type == o.type;
+    }
+};
+Q_DECLARE_METATYPE(Mode)
 
 //-----------------------------------------------------------------------------
 

@@ -23,6 +23,7 @@ public:
     static QList<Program> programs();
     static QVariant currentProgram();
     static void setCurrentProgram(QString uoa);
+    static QVariant currentSqueezeDetProgram();
 
     static QList<Model> models();
     static QVariant currentModel();
@@ -32,9 +33,14 @@ public:
     static QVariant currentDataset();
     static void setCurrentDataset(QString uoa);
 
+    static QList<Mode> modes();
+    static QVariant currentMode();
+    static void setCurrentMode(Mode::Type type);
+
     static int classificationStartupTimeoutSeconds();
 
     static qint64 fpsUpdateIntervalMs();
+    static qint64 recognitionUpdateIntervalMs();
 
     static int batchSize();
     static void setBatchSize(int batchSize);

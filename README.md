@@ -92,10 +92,19 @@ Running the app
 
 Execute the following to run this GUI-based app:
 ```
-$ ck run program:dnn-desktop-demo
+$ ck run program:dnn-desktop-demo [parameters]
 ```
 
+Parameters supported:
+
+1. `--params.fps_update_interval_ms`: integer value in milliseconds, controls the maximum frequency of 'Images per second' (FPS) updates. The actual value of FPS will still be shown accurately, but it will be updated at most once per the given value of milliseconds. The default value is `500`. Set it to `0` to get the real-time speed (it may be hard to read). Example: `ck run program:dnn-desktop-demo --params.fps_update_interval_ms=0`
+
+1. `--params.recognition_update_interval_ms`: integer value in milliseconds, controls the maximum frequency of updates in the object recognition mode. The image and metrics below it will be updated at most once per the given value of milliseconds. The default value is `1000`. Set it to `0` to get the real-time speed (it may be hard to read).  Example: `ck run program:dnn-desktop-demo --params.recognition_update_interval_ms=2000`
+
+Parameter values are saved for the future use. So, next time you call `ck run`, you don't need to specify them again.
+
 Select DNN engine, data set and press start button! Enjoy!
+
 
 Future work
 ===========

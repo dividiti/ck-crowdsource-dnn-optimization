@@ -3,6 +3,7 @@
 #include "experimentcontext.h"
 #include "framespanel.h"
 #include "framewidget.h"
+#include "recognitionwidget.h"
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -15,43 +16,93 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentStopping()), this, SLOT(experimentStopping()));
-
-    _layout = new QGridLayout;
-    _layout->setSpacing(24);
-    _layout->setMargin(0);
-    setLayout(_layout);
-
-    const int framesCount = _frame_count;
-    for (int i = 0; i < framesCount; i++) {
-        FrameWidget* f = new FrameWidget(this);
-        _frames.append(f);
-        int row = (i > framesCount/2-1)? 1: 0;
-        int col = ((i - framesCount/2) < 0)? i: i-framesCount/2;
-        _layout->addWidget(f, row, col);
-    }
 }
 
 FramesPanel::~FramesPanel() {
     clearWorker();
 }
 
+void FramesPanel::clearWidgets() {
+    delete _layout;
+    for (auto f : _frames) {
+        delete f;
+    }
+    _frames.clear();
+    delete _rec_widget;
+    _rec_widget = Q_NULLPTR;
+}
+
+void FramesPanel::initLayout() {
+    if (!_worker) {
+        return;
+    }
+    clearWidgets();
+    if (_worker->getMode().type == Mode::Type::CLASSIFICATION) {
+        QGridLayout* l = new QGridLayout;
+        _layout = l;
+        l->setSpacing(24);
+        l->setMargin(0);
+        setLayout(l);
+
+        const int framesCount = _frame_count;
+        for (int i = 0; i < framesCount; i++) {
+            FrameWidget* f = new FrameWidget;
+            _frames.append(f);
+            int row = (i > framesCount/2-1)? 1: 0;
+            int col = ((i - framesCount/2) < 0)? i: i-framesCount/2;
+            l->addWidget(f, row, col);
+        }
+    } else {
+        _rec_widget = new RecognitionWidget;
+
+        QVBoxLayout* l = new QVBoxLayout;
+        _layout = l;
+        l->addWidget(_rec_widget);
+        l->addStretch();
+        setLayout(l);
+    }
+}
+
+static QString cannotRunError() {
+    Mode mode = AppConfig::currentMode().value<Mode>();
+    if (mode.type == Mode::Type::RECOGNITION) {
+        if (!AppConfig::currentSqueezeDetProgram().isValid()) {
+            return "No recognition programs found. Please, install one (e.g. SqueezeDet)";
+        }
+    } else {
+        if (!AppConfig::currentProgram().isValid() || !AppConfig::currentModel().isValid() || !AppConfig::currentDataset().isValid()) {
+            return "Please select engine, model and dataset first";
+        }
+    }
+    return "";
+}
+
 void FramesPanel::experimentStarted() {
     if (Q_NULLPTR != _worker) {
         return abortExperiment("Another experiment is already running");
     }
-    QVariant program = AppConfig::currentProgram();
-    QVariant model = AppConfig::currentModel();
-    QVariant dataset = AppConfig::currentDataset();
-    if (program.isValid() && model.isValid() && dataset.isValid()) {
-        _worker = new WorkerThread(program.value<Program>(), model.value<Model>(), dataset.value<Dataset>(), AppConfig::batchSize(), this);
+    QString errorMsg = cannotRunError();
+    if (errorMsg.isEmpty()) {
+        Mode mode = AppConfig::currentMode().value<Mode>();
+        if (mode.type == Mode::Type::CLASSIFICATION) {
+            _worker = new WorkerThread(AppConfig::currentProgram().value<Program>(), mode, this);
+            _worker->setModel(AppConfig::currentModel().value<Model>());
+            _worker->setDataset(AppConfig::currentDataset().value<Dataset>());
+            _worker->setBatchSize(AppConfig::batchSize());
+            initLayout();
+        } else {
+            _worker = new WorkerThread(AppConfig::currentSqueezeDetProgram().value<Program>(), mode, this);
+            _worker->setMinResultInterval(AppConfig::recognitionUpdateIntervalMs());
+            initLayout();
+        }
         connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
         connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
         connect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);
         _current_frame = 0;
         _worker->start();
     } else {
-        AppEvents::error("Please select engine, model and dataset first");
-        return abortExperiment("Please select engine, model and dataset first");
+        AppEvents::error(errorMsg);
+        return abortExperiment(errorMsg);
     }
 }
 
@@ -63,9 +114,16 @@ void FramesPanel::experimentStopping() {
 }
 
 void FramesPanel::newImageResult(ImageResult ir) {
-    FrameWidget* f = _frames[_current_frame];
-    f->load(ir);
-    _current_frame = (_current_frame + 1) % _frame_count;
+    if (Q_NULLPTR == _worker) {
+        return;
+    }
+    if (_worker->getMode().type == Mode::Type::CLASSIFICATION) {
+        FrameWidget* f = _frames[_current_frame];
+        f->load(ir);
+        _current_frame = (_current_frame + 1) % _frame_count;
+    } else {
+        _rec_widget->load(ir);
+    }
 }
 
 void FramesPanel::workerStopped() {

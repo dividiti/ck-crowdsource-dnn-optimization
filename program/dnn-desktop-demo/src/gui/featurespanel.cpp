@@ -24,10 +24,12 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     _infoEngine = makeInfoLabel();
     _infoModel = makeInfoLabel();
     _infoImages = makeInfoLabel();
+    _infoMode = makeInfoLabel();
 
     _linkSelectEngine = makeLink("Select", "Select another engine", SLOT(selectEngine()));
     _linkSelectModel = makeLink("Select", "Select another scenario", SLOT(selectModel()));
     _linkSelectImages = makeLink("Select", "Select image source", SLOT(selectImages()));
+    _linkSelectMode = makeLink("Select", "Select mode", SLOT(selectMode()));
 
     auto panelEngine = new QFrame;
     panelEngine->setProperty("qss-role", "features-panel");
@@ -50,13 +52,27 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
         _infoImages,
     }));
 
-    setLayout(Ori::Gui::layoutV(0, 0,
-    {
+    auto panelMode = new QFrame;
+    panelMode->setProperty("qss-role", "features-panel");
+    panelMode->setLayout(Ori::Gui::layoutV(0, 0, {
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("MODE"), 0, _linkSelectMode }),
+        _infoMode,
+    }));
+
+    _classificationPanel = new QFrame;
+    _classificationPanel->setLayout(Ori::Gui::layoutV(0, 0, {
         panelEngine,
         Ori::Gui::makeDivider(),
         panelModel,
         Ori::Gui::makeDivider(),
         panelImages,
+    }));
+
+    setLayout(Ori::Gui::layoutV(0, 0,
+    {
+        panelMode,
+        Ori::Gui::makeDivider(),
+        _classificationPanel
     }));
 }
 
@@ -185,8 +201,7 @@ void FeaturesPanel::selectModel() {
     }
 }
 
-void FeaturesPanel::selectImages()
-{
+void FeaturesPanel::selectImages() {
     auto list = AppConfig::datasets();
     if (list.isEmpty()) {
         return AppEvents::info("Image datasets not found");
@@ -194,6 +209,20 @@ void FeaturesPanel::selectImages()
     QVariant v = selectCurrentViaDialog(list, AppConfig::currentDataset());
     if (v.isValid()) {
         AppConfig::setCurrentDataset(v.value<Dataset>().valUoa);
+        updateExperimentConditions();
+    }
+}
+
+void FeaturesPanel::selectMode() {
+    auto list = AppConfig::modes();
+    if (list.isEmpty()) {
+        return AppEvents::info("No run modes found");
+    }
+    QVariant v = selectCurrentViaDialog(list, AppConfig::currentMode());
+    if (v.isValid()) {
+        Mode m = v.value<Mode>();
+        AppConfig::setCurrentMode(m.type);
+        _context->notifyModeChanged(m);
         updateExperimentConditions();
     }
 }
@@ -211,6 +240,10 @@ void FeaturesPanel::updateExperimentConditions()
     v = AppConfig::currentDataset();
     _infoImages->setText(v.isValid() ? v.value<Dataset>().title() : NA);
 
+    v = AppConfig::currentMode();
+    Mode m = v.isValid() ? v.value<Mode>() : Mode();
+    _infoMode->setText(m.title());
+    _classificationPanel->setVisible(m.type == Mode::Type::CLASSIFICATION);
 }
 
 void FeaturesPanel::enableControls(bool on)
@@ -218,6 +251,7 @@ void FeaturesPanel::enableControls(bool on)
     _linkSelectEngine->setVisible(on);
     _linkSelectModel->setVisible(on);
     _linkSelectImages->setVisible(on);
+    _linkSelectMode->setVisible(on);
 }
 
 void FeaturesPanel::experimentStarted()

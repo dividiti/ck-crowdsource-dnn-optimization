@@ -14,6 +14,7 @@ QT_END_NAMESPACE
 
 class ExperimentContext;
 class FrameWidget;
+class RecognitionWidget;
 
 class FramesPanel : public QFrame
 {
@@ -32,17 +33,23 @@ private slots:
 
 private:
     ExperimentContext* _context;
-    QGridLayout* _layout;
+    QLayout* _layout = Q_NULLPTR;
     WorkerThread* _worker = Q_NULLPTR;
 
     QList<FrameWidget*> _frames;
     const int _frame_count = 8;
     int _current_frame = 0;
 
+    RecognitionWidget* _rec_widget = Q_NULLPTR;
+
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();
 
     void clearWorker();
+
+    void initLayout();
+
+    void clearWidgets();
 };
 
 #endif // FRAMESPANEL_H

@@ -45,7 +45,7 @@ QFrame#resultsPanel {
 }
 QFrame[qss-role="features-panel"] {
 	margin: 0px;
-	padding: 16px;
+        padding: 16px;
 }
 QFrame[qss-role="results-panel"] {
 	margin: 0px;
@@ -126,4 +126,9 @@ QLabel[qss-prediction-line="5"] {
 QMessageBox {
         /* makes QMessageBox selectable */
         messagebox-text-interaction-flags: 5;
+}
+QLabel[qss-role="recognition-label"] {
+        font-size: 15px;
+        font-family: Verdana;
+        color: white;
 }

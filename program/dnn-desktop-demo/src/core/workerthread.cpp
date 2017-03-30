@@ -7,6 +7,7 @@
 #include <QRegExp>
 #include <QDebug>
 #include <QFile>
+#include <QDateTime>
 
 static QString getExe() {
     QString ckExe = AppConfig::ckExeName();
@@ -14,10 +15,6 @@ static QString getExe() {
         AppEvents::error("CK bin path not found in config");
     }
     return ckExe;
-}
-
-static QStringList getDefaultArgs() {
-    return QStringList();
 }
 
 static QString getBinPath() {
@@ -35,18 +32,28 @@ static const QString CORRECT_LABEL_PREFIX = "Correct label: ";
 static const QString PREDICTION_PREFIX = "Predictions: ";
 static const QRegExp PREDICTION_REGEX("([0-9]*\\.?[0-9]+) - \"([^\"]+)\"");
 
+static const QRegExp RECOGNIZED_OBJECT_REGEX("Recognized ([^:]*): (\\d+)");
+static const QRegExp EXPECTED_OBJECT_REGEX("Expected ([^:]*): (\\d+)");
+static const QRegExp FALSE_POSITIVE_OBJECT_REGEX("False positive ([^:]*): (\\d+)");
+
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
 
-WorkerThread::WorkerThread(const Program& program, const Model& model, const Dataset& dataset, int batchSize, QObject* parent)
-    : QThread(parent), program(program), model(model), dataset(dataset), batchSize(batchSize) {}
+WorkerThread::WorkerThread(const Program& program, const Mode& mode, QObject* parent) : QThread(parent), program(program), mode(mode) {}
 
-void WorkerThread::run() {
-    QProcess ck;
-    ck.setWorkingDirectory(getBinPath());
-    ck.setProgram(getExe());
-    QStringList fullArgs = getDefaultArgs();
-    auto args = QStringList {
+QStringList WorkerThread::getArgs() {
+    switch (mode.type) {
+    case Mode::Type::RECOGNITION:
+        return QStringList {
+            "run",
+            "program:" + program.uoa,
+            "--cmd_key=use_continuous",
+            "--quiet"
+            };
+
+    case Mode::Type::CLASSIFICATION:
+    default:
+        return QStringList {
             "run",
             "program:" + program.uoa,
             "--cmd_key=use_continuous",
@@ -55,8 +62,22 @@ void WorkerThread::run() {
             "--deps.imagenet-val=" + dataset.valUoa,
             "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize)
             };
-    fullArgs.append(args);
-    ck.setArguments(fullArgs);
+    }
+}
+
+static void insertOrUpdate(QMap<QString, int>& map, QString key, int v) {
+    if (map.contains(key)) {
+        map[key] += v;
+    } else {
+        map[key] = v;
+    }
+}
+
+void WorkerThread::run() {
+    QProcess ck;
+    ck.setWorkingDirectory(getBinPath());
+    ck.setProgram(getExe());
+    ck.setArguments(getArgs());
 
     const QString runCmd = ck.program() + " " +  ck.arguments().join(" ");
     qDebug() << "Run CK command: " << runCmd;
@@ -71,7 +92,7 @@ void WorkerThread::run() {
     qDebug() << "Waiting until the program starts writing classification data";
     while (!outputFile.exists() && !isInterruptionRequested()) {
         if (ck.waitForFinished(NORMAL_WAIT_MS)) {
-            AppEvents::error("Classification program stopped prematurely. "
+            AppEvents::error("Program stopped prematurely. "
                              "Please, select the command below, copy it and run manually from command line "
                              "to investigate the issue:\n\n" + runCmd);
             emitStopped();
@@ -81,7 +102,7 @@ void WorkerThread::run() {
         if (0 >= timout) {
             ck.kill();
             ck.waitForFinished(KILL_WAIT_MS);
-            AppEvents::error("Classification program startup takes too long. "
+            AppEvents::error("Program startup takes too long. "
                              "Please, select the command below, copy it and run manually from command line "
                              "to investigate the issue:\n\n" + runCmd);
             emitStopped();
@@ -89,7 +110,7 @@ void WorkerThread::run() {
         }
     }
 
-    qDebug() << "Starting reading classification data";
+    qDebug() << "Starting reading data";
     outputFile.open(QIODevice::ReadOnly);
 
     QTextStream stream(&outputFile);
@@ -124,6 +145,15 @@ void WorkerThread::run() {
 
         } else if (line.startsWith(PREDICTION_PREFIX)) {
             predictionCount = line.mid(PREDICTION_PREFIX.size()).toInt();
+
+        } else if (RECOGNIZED_OBJECT_REGEX.exactMatch(line)) {
+            insertOrUpdate(ir.recognizedObjects, RECOGNIZED_OBJECT_REGEX.cap(1).trimmed(), RECOGNIZED_OBJECT_REGEX.cap(2).toInt());
+
+        } else if (EXPECTED_OBJECT_REGEX.exactMatch(line)) {
+            insertOrUpdate(ir.expectedObjects, EXPECTED_OBJECT_REGEX.cap(1).trimmed(), EXPECTED_OBJECT_REGEX.cap(2).toInt());
+
+        } else if (FALSE_POSITIVE_OBJECT_REGEX.exactMatch(line)) {
+            insertOrUpdate(ir.falsePositiveObjects, FALSE_POSITIVE_OBJECT_REGEX.cap(1).trimmed(), FALSE_POSITIVE_OBJECT_REGEX.cap(2).toInt());
 
         } else if (predictionCount > 0) {
             // parsing a prediction line
@@ -162,6 +192,12 @@ void WorkerThread::processPredictedResults(const ImageResult& imageResult) {
     if (imageResult.isEmpty()) {
         return;
     }
-    emit newImageResult(imageResult);
+    while (!isInterruptionRequested() && minResultIntervalMs > QDateTime::currentMSecsSinceEpoch() - lastResultMs) {
+        msleep(NORMAL_WAIT_MS);
+    }
+    lastResultMs = QDateTime::currentMSecsSinceEpoch();
+    if (!isInterruptionRequested()) {
+        emit newImageResult(imageResult);
+    }
 }
 
