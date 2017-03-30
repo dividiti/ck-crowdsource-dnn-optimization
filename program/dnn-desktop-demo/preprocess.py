@@ -15,7 +15,7 @@ def ck_preprocess(i):
 
     ck = i['ck_kernel']
 
-    r = fill_general(ck, conf)
+    r = fill_general(ck, conf, i.get('params', {}))
     if r['return'] > 0: return r
 
     r = fill_models(ck, conf)
@@ -63,19 +63,26 @@ def ensure_section(conf, section, clean=False):
     if not conf.has_section(section):
         conf.add_section(section)
 
-def fill_general(ck, conf):
-    ensure_section(conf, 'General')
+def fill_general(ck, conf, params):
+    section = 'General'
+    ensure_section(conf, section)
     try:
         bin_path, bin_name = os.path.split(which('ck'))
-        setstr(conf, 'General', 'ck_bin_path', bin_path)
-        setstr(conf, 'General', 'ck_exe_name', bin_name)
+        setstr(conf, section, 'ck_bin_path', bin_path)
+        setstr(conf, section, 'ck_exe_name', bin_name)
     except WhichError:
         return {'return':1, 'error': 'Path to ck not found'}
 
     r = ck.access({'action': 'where', 'module_uoa': 'repo', 'data_uoa': 'local'})
     if r['return'] > 0: return r
 
-    setstr(conf, 'General', 'ck_repos_path', os.path.dirname(r['path']))
+    setstr(conf, section, 'ck_repos_path', os.path.dirname(r['path']))
+
+    if 'fps_update_interval_ms' in params:
+        conf.set(section, 'fps_update_interval_ms', str(params['fps_update_interval_ms']))
+    if 'recognition_update_interval_ms' in params:
+        conf.set(section, 'recognition_update_interval_ms', str(params['recognition_update_interval_ms']))
+
     return {'return':0}
 
 def fill_section(ck, conf, section, tags, module=''):
