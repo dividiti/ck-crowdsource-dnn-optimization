@@ -80,6 +80,7 @@ def fill_general(ck, conf, params):
 
     if 'fps_update_interval_ms' in params:
         conf.set(section, 'fps_update_interval_ms', str(params['fps_update_interval_ms']))
+
     if 'recognition_update_interval_ms' in params:
         conf.set(section, 'recognition_update_interval_ms', str(params['recognition_update_interval_ms']))
 
@@ -118,21 +119,23 @@ def fill_programs(ck, conf, exe_extension):
     for i, u in enumerate(lst):
         output_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#run_cmds#use_continuous#run_time#run_cmd_out1'}).get('value', None)
         if None == output_file:
-            return {'return': 1, 'error': 'Could not find output file for ' + u['data_uoa']}
-        r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
-        if r['return'] > 0: return r
-        output_file = os.path.join(r['path'], 'tmp', output_file)
-        setstr(conf, section, str(i) + '_output_file', output_file)
+            print('! Could not find output file for ' + u['data_uoa'])
+        else:
+            r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
+            if r['return'] == 0:
+                output_file = os.path.join(r['path'], 'tmp', output_file)
+                setstr(conf, section, str(i) + '_output_file', output_file)
 
         target_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#target_file'}).get('value', None)
         if None == target_file:
-            return {'return': 1, 'error': 'Could not find target file for ' + u['data_uoa']}
-        if not target_file.endswith(exe_extension):
-            target_file = target_file + exe_extension
-        setstr(conf, section, str(i) + '_exe', target_file)
-        full_target_path = os.path.join(os.path.dirname(output_file), target_file)
-        if not os.path.isfile(full_target_path):
-            print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
+            print('! Could not find target file for ' + u['data_uoa'])
+        else:
+            if not target_file.endswith(exe_extension):
+                target_file = target_file + exe_extension
+            setstr(conf, section, str(i) + '_exe', target_file)
+            full_target_path = os.path.join(os.path.dirname(output_file), target_file)
+            if not os.path.isfile(full_target_path):
+                print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
 
     return {'return': 0}
 
@@ -144,7 +147,7 @@ def fill_aux(ck, conf):
     for i, u in enumerate(lst):
         package_uoa = u.get('meta', {}).get('package_uoa', '')
         if package_uoa == '':
-            return {'return': 1, 'error': 'There is no package_uoa for AUX ' + u['data_uoa']}
+            print('! There is no package_uoa for AUX env entry ' + u['data_uoa'])
         setstr(conf, section, str(i) + '_package_uoa', package_uoa)
     return {'return': 0}
 
@@ -155,10 +158,11 @@ def fill_val(ck, conf):
     lst = r['lst']
     for i, u in enumerate(lst):
         package_uoa = u.get('meta', {}).get('package_uoa', '')
+        r = {}
         if package_uoa == '':
-            return {'return': 1, 'error': 'There is no package_uoa for ' + u['data_uoa']}
-        r = ck.access({'action': 'load', 'module_uoa': 'package', 'data_uoa': package_uoa})
-        if r['return'] > 0: return r
+            print('! There is no package_uoa for VAL env entry ' + u['data_uoa'])
+        else:
+            r = ck.access({'action': 'load', 'module_uoa': 'package', 'data_uoa': package_uoa})
         setstr(conf, section, str(i) + '_name', r.get('data_name', ''))
         setstr(conf, section, str(i) + '_aux_package_uoa', r.get('dict', {}).get('aux_uoa', ''))
     return {'return': 0}
@@ -171,11 +175,12 @@ def fill_squeezedet(ck, conf):
     for i, u in enumerate(lst):
         output_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#run_cmds#use_continuous#run_time#run_cmd_out1'}).get('value', None)
         if None == output_file:
-            return {'return': 1, 'error': 'Could not find output file for ' + u['data_uoa']}
-        r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
-        if r['return'] > 0: return r
-        output_file = os.path.join(r['path'], 'tmp', output_file)
-        setstr(conf, section, str(i) + '_output_file', output_file)
+            print('! Could not find output file for ' + u['data_uoa'])
+        else:
+            r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
+            if r['return'] == 0:
+                output_file = os.path.join(r.get('path', ''), 'tmp', output_file)
+                setstr(conf, section, str(i) + '_output_file', output_file)
         setstr(conf, section, str(i) + '_exe', 'continuous.sh')
 
     return {'return': 0}
