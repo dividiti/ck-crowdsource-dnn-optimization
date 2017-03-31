@@ -81,9 +81,9 @@ struct Mode {
     QString title() const {
         switch (type) {
         case Type::CLASSIFICATION:
-            return "Image classification";
+            return "Object classification";
         case Type::RECOGNITION:
-            return "Object recognition";
+            return "Object detection";
         default:
             return "Unknown";
         }
