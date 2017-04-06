@@ -53,8 +53,8 @@ your video driver (for example, by reinstalling original NVidia drivers) or inst
 ```
 You may also try to soft link the required library as described at [StackOverflow](http://stackoverflow.com/questions/18406369).
 
-Preparation to run
-====================
+Preparation to run (object classification)
+==========================================
 To make application run you have to install [ck-caffe](https://github.com/dividiti/ck-caffe) 
 and at least one caffemodel and imagenet dataset.
 
@@ -86,6 +86,37 @@ Finally, you need to pull this repo and compile this application as a standard C
 $ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
 $ ck compile program:dnn-desktop-demo
 ```
+
+Preparation to run (object detection)
+=====================================
+
+For the object detection mode to work, you also need to setup SqueezeDet from CK-Tensorflow. 
+
+First, pull the repo:
+```
+$ ck pull repo:ck-tensorflow
+```
+
+Then, [install](https://www.tensorflow.org/install/) Tensorflow for Python.
+
+Then, install a dataset:
+```
+$ ck install package:dataset-KITTI-min
+```
+
+You also need to install model data:
+```
+$ ck install package:tensorflowmodel-squeezedet
+```
+
+After that, you should be able to successfully run a simple demo:
+```
+$ ck run program:squeezedet --cmd_key=squeezedet
+```
+
+(choose `0` for dataset UOA).
+
+If this works for you, the object detection mode in the UI will be available.
 
 Running the app
 ===============
