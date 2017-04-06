@@ -214,11 +214,7 @@ void AppConfig::setCurrentDataset(QString uoa) {
 }
 
 QList<Mode> AppConfig::modes() {
-#ifdef Q_OS_WIN
-    return QList<Mode>({ Mode(Mode::Type::CLASSIFICATION) });
-#else
     return QList<Mode>({ Mode(Mode::Type::CLASSIFICATION), Mode(Mode::Type::RECOGNITION) });
-#endif
 }
 
 QVariant AppConfig::currentMode() {
