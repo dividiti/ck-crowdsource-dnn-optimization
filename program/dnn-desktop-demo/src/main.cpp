@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     app.addLibraryPath(app.applicationDirPath());
     app.setApplicationVersion("1.1.0.0");
+    app.setApplicationName("Collaboratively optimizing deep learning via Collective Knowledge");
 
     AppEvents::instance()->init();
 
