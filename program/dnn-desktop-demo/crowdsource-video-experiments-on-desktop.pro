@@ -41,7 +41,9 @@ SOURCES += \
     src/core/experimentcontext.cpp \
     src/gui/imageview.cpp \
     src/core/workerthread.cpp \
-    src/gui/recognitionwidget.cpp
+    src/gui/recognitionwidget.cpp \
+    src/gui/footerpanel.cpp \
+    src/ori/clickablelabel.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -57,7 +59,9 @@ HEADERS += \
     src/core/experimentcontext.h \
     src/gui/imageview.h \
     src/core/workerthread.h \
-    src/gui/recognitionwidget.h
+    src/gui/recognitionwidget.h \
+    src/gui/footerpanel.h \
+    src/ori/clickablelabel.h
 
 RESOURCES += \
     src/resources.qrc

@@ -132,3 +132,13 @@ QLabel[qss-role="recognition-label"] {
         font-family: Verdana;
         color: white;
 }
+QFrame#footerPanel {
+        background: #1a2227;
+        border: 1px solid #0f1417;
+}
+QLabel[qss-role="credential"] {
+        font-family: Verdana;
+        font-size: 13px;
+        line-height: 1.38;
+        color: #fff8a6;
+}

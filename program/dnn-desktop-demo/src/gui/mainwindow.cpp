@@ -2,6 +2,7 @@
 #include "appevents.h"
 #include "mainwindow.h"
 #include "experimentpanel.h"
+#include "footerpanel.h"
 
 #include <QApplication>
 #include <QBoxLayout>
@@ -36,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         _experiments.append(e);
         experimentsWidget->layout()->addWidget(e->panel);
     }
+
+    experimentsWidget->layout()->addWidget(new FooterPanel);
 
     setCentralWidget(experimentsWidget);
     setInitialWindowGeometry(this);
