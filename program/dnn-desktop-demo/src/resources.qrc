@@ -22,9 +22,9 @@
     </qresource>
     <qresource prefix="/images">
         <file alias="frame">../images/film_frame.png</file>
-        <file alias="logo-ctuning">../images/logo-c-tuning.png</file>
         <file alias="logo-dividiti">../images/logo-dividiti.png</file>
         <file alias="logo-xored">../images/logo-xored.png</file>
+        <file alias="logo-cknowledge">../images/logo-cknowlege.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>app.qss</file>

@@ -41,7 +41,7 @@ FooterPanel::FooterPanel(QWidget* parent) : QFrame(parent) {
     layout->addSpacing(20);
     addCompany(layout, "dividiti", "dividiti.com");
     addCompany(layout, "xored", "xored.com");
-    addCompany(layout, "ctuning", "cknowledge.org/ai");
+    addCompany(layout, "cknowledge", "cknowledge.org/ai");
 
     layout->addStretch();
     setLayout(layout);
