@@ -97,24 +97,13 @@ First, pull the repo:
 $ ck pull repo:ck-tensorflow
 ```
 
-Then, [install](https://www.tensorflow.org/install/) Tensorflow for Python.
-
-Then, install a dataset:
-```
-$ ck install package:dataset-KITTI-min
-```
-
-You also need to install model data:
-```
-$ ck install package:tensorflowmodel-squeezedet
-```
-
 After that, you should be able to successfully run a simple demo:
 ```
+$ ck compile program:squeezedet
 $ ck run program:squeezedet --cmd_key=squeezedet
 ```
 
-(choose `0` for dataset UOA).
+(it may ask a couple of questions and install some stuff like a dataset at the first run).
 
 If this works for you, the object detection mode in the UI will be available.
 
