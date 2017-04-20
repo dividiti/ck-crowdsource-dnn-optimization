@@ -25,6 +25,9 @@
         <file alias="logo-dividiti">../images/logo-dividiti.png</file>
         <file alias="logo-xored">../images/logo-xored.png</file>
         <file alias="logo-cknowledge">../images/logo-cknowlege.png</file>
+        <file alias="ico-auto">../images/ico-auto.png</file>
+        <file alias="ico-bike">../images/ico-bike.png</file>
+        <file alias="ico-pedestrian">../images/ico-pedestrian.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>app.qss</file>

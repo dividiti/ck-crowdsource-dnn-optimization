@@ -127,11 +127,6 @@ QMessageBox {
         /* makes QMessageBox selectable */
         messagebox-text-interaction-flags: 5;
 }
-QLabel[qss-role="recognition-label"] {
-        font-size: 15px;
-        font-family: Verdana;
-        color: white;
-}
 QFrame#footerPanel {
         background: #1a2227;
         border: 1px solid #0f1417;
