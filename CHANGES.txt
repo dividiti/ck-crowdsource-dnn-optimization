@@ -1,3 +1,5 @@
+2017.04.20 * started implementing module:experiment.bench.dnn.desktop to share performance statistics
+
 2017.03.18 * new version for Linux and Windows to run DNN engines via CK classification programs (continuous mode)
 
 2017.03.07 * support to load various DNN engines via DLL (fast but very fragile)
