@@ -21,12 +21,15 @@ form_name='wa_web_form'
 onchange='document.'+form_name+'.submit();'
 
 hextra='<i><center>\n'
-hextra+='This is an on-going long-term project. Please check our vision [ '
-hextra+='<a href="http://doi.acm.org/10.1145/2909437.2909449">IWOCL\'16</a>, \n'
-hextra+='<a href="http://arxiv.org/abs/1506.06256">CPC\'15</a>, \n'
-hextra+='<a href="https://www.youtube.com/watch?v=Q94yWxXUMP0">YouTube</a>, \n'
-hextra+='<a href="http://ctuning.org/cm/wiki/index.php?title=CM:data:45741e3fbcf4024b:1db78910464c9d05">wiki</a> ] '
-hextra+=' and <a href="https://github.com/dividiti/ck-caffe">CK-Caffe GitHub repo</a> for more details!'
+hextra+='This is a community-driven R&D: \n'
+hextra+=' [ <a href="http://cKnowledge.org/ai">collaborative AI optimization</a> ], '
+hextra+=' [ <a href="https://github.com/dividiti/ck-crowdsource-dnn-optimization">Desktop app to crowd-optimize DNN engines and models</a> ], '
+hextra+=' [ <a href="https://github.com/ctuning/ck-tensorflow">CK-TensorFlow</a> ], '
+hextra+=' [ <a href="https://github.com/dividiti/ck-caffe">CK-Caffe</a> ], '
+hextra+=' [ <a href="https://en.wikipedia.org/wiki/Collective_Knowledge_(software)">CK intro</a>, \n'
+hextra+='CK papers: <a href="https://www.researchgate.net/publication/304010295_Collective_Knowledge_Towards_RD_Sustainability">1</a> and \n'
+hextra+='<a href="https://arxiv.org/abs/1506.06256">2</a>; \n'
+hextra+='<a href="https://www.youtube.com/watch?v=Q94yWxXUMP0">YouTube intro</a> ] \n'
 hextra+='</center></i>\n'
 hextra+='<br>\n'
 
@@ -108,7 +111,7 @@ def show(i):
     h+='<center>\n'
     h+='\n\n<script language="JavaScript">function copyToClipboard (text) {window.prompt ("Copy to clipboard: Ctrl+C, Enter", text);}</script>\n\n' 
 
-    h+='<h2>Aggregated results from Caffe crowd-benchmarking (time, accuracy, energy, cost, ...)</h2>\n'
+    h+='<h2>Aggregated results from desktop-based DNN crowd-benchmarking</h2>\n'
 
     h+=hextra
 
