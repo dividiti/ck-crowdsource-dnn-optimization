@@ -107,11 +107,12 @@ def show(i):
 
     hi_uid=i.get('highlight_uid','')
 
-    h='<hr>\n'
+    h=''
+#    h='<hr>\n'
     h+='<center>\n'
     h+='\n\n<script language="JavaScript">function copyToClipboard (text) {window.prompt ("Copy to clipboard: Ctrl+C, Enter", text);}</script>\n\n' 
 
-    h+='<h2>Aggregated results from desktop-based DNN crowd-benchmarking</h2>\n'
+#    h+='<h2>Aggregated results from desktop-based DNN crowd-benchmarking</h2>\n'
 
     h+=hextra
 
