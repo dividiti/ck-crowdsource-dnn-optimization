@@ -83,7 +83,7 @@ Finally, you need to pull this repo and compile this application as a standard C
 (CK will attempt to detect suitable compiler and installed Qt before compiling this app)
 
 ```
-$ ck pull repo --url=https://github.com/dividiti/crowdsource-video-experiments-on-desktop
+$ ck pull repo --url=https://github.com/dividiti/ck-crowdsource-dnn-optimization
 $ ck compile program:dnn-desktop-demo
 ```
 
