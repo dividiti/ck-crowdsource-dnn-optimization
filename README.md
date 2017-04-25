@@ -36,7 +36,7 @@ Minimal requirements
 
 * QT5+ library. You can install it as following:
 
-**Ubuntu:** $ sudo apt-get qtdeclarative5-dev
+**Ubuntu:** $ sudo apt-get install qtdeclarative5-dev
 
 **Windows:** Download Qt from [official website](https://www.qt.io/download-open-source) and install to C:\Qt (CK will then automatically pick it up)
 
