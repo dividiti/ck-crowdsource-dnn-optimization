@@ -46,7 +46,7 @@ QStringList WorkerThread::getArgs() {
     case Mode::Type::RECOGNITION:
         return QStringList {
             "run",
-            "program:" + program.uoa,
+            "program:" + program.program_uoa,
             "--cmd_key=use_continuous",
             "--quiet"
             };
@@ -55,7 +55,8 @@ QStringList WorkerThread::getArgs() {
     default:
         return QStringList {
             "run",
-            "program:" + program.uoa,
+            "program:" + program.program_uoa,
+            "--tmp_dir=" + program.target_dir,
             "--cmd_key=use_continuous",
             "--deps.caffemodel=" + model.uoa,
             "--deps.imagenet-aux=" + dataset.auxUoa,

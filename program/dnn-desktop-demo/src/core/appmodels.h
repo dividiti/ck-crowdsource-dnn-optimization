@@ -100,17 +100,19 @@ Q_DECLARE_METATYPE(Mode)
 //-----------------------------------------------------------------------------
 
 struct Program {
-    QString uoa;
+    QString program_uoa;
+    QString target_uoa;
     QString name;
     QString outputFile;
     QString exe;
+    QString target_dir;
 
     QString title() const {
         return name;
     }
 
     bool operator==(const Program& o) const {
-        return uoa == o.uoa;
+        return target_uoa == o.target_uoa;
     }
 };
 Q_DECLARE_METATYPE(Program)

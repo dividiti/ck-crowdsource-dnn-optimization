@@ -112,30 +112,81 @@ def fill_models(ck, conf):
     return fill_section(ck, conf, section='Models', tags='caffemodel', module='env')
 
 def fill_programs(ck, conf, exe_extension):
+    import glob
+
     section = 'Programs'
     r = fill_section(ck, conf, section=section, tags='caffe-classification,continuous')
     if r['return'] > 0: return r
     lst = r['lst']
     for i, u in enumerate(lst):
         output_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#run_cmds#use_continuous#run_time#run_cmd_out1'}).get('value', None)
-        if None == output_file:
+        if not output_file:
             print('! Could not find output file for ' + u['data_uoa'])
-        else:
-            r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
-            if r['return'] == 0:
-                output_file = os.path.join(r['path'], 'tmp', output_file)
-                setstr(conf, section, str(i) + '_output_file', output_file)
+            continue
 
         target_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#target_file'}).get('value', None)
-        if None == target_file:
+        if not target_file:
             print('! Could not find target file for ' + u['data_uoa'])
-        else:
-            if not target_file.endswith(exe_extension):
-                target_file = target_file + exe_extension
-            setstr(conf, section, str(i) + '_exe', target_file)
-            full_target_path = os.path.join(os.path.dirname(output_file), target_file)
-            if not os.path.isfile(full_target_path):
-                print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
+            continue
+
+        if not target_file.endswith(exe_extension):
+            target_file = target_file + exe_extension
+
+        r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
+        if r['return'] != 0:
+            print('! Could not load program ' + u['data_uoa'] + ': ' + r['error'])
+            continue
+
+        program_path = r['path']
+
+        target_dirs = glob.glob(os.path.join(program_path, 'tmp*'))
+        if not target_dirs:
+            print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
+            continue
+
+        target_paths = []
+        target_names = []
+        target_uoas = []
+
+        for target_path in target_dirs:
+            full_target_path = os.path.join(program_path, target_path)
+            r = ck.load_json_file({'json_file': os.path.join(full_target_path, 'tmp-deps.json')})
+            if r['return'] != 0:
+                print('! Failed to load tmp-deps.json from ' + full_target_path + ': ' + r['error'])
+                continue
+
+            target_uoa = ck.get_by_flat_key({'dict': r['dict'], 'key': '##lib-caffe#uoa'}).get('value', None)
+            if not target_uoa:
+                print('! Not found Caffe lib env UOA for ' + full_target_path)
+                continue
+
+            target_caffe_name = ck.get_by_flat_key({'dict': r['dict'], 'key': '##lib-caffe#dict#data_name'}).get('value', None)
+            if not target_caffe_name:
+                print('! Not found Caffe lib data_name for ' + full_target_path)
+                continue
+
+            if target_caffe_name in target_names:
+                print('! Duplicate Caffe lib "' + target_caffe_name + '", skipping directory ' + full_target_path)
+                continue
+
+            target_names.append(target_caffe_name)
+            target_paths.append(os.path.basename(target_path))
+            target_uoas.append(target_uoa)
+
+        if not target_paths:
+            print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
+            continue
+
+        setstr(conf, section, str(i) + '_path', program_path)
+        setstr(conf, section, str(i) + '_output_file', output_file)
+        setstr(conf, section, str(i) + '_exe', target_file)
+
+        conf.set(section, str(i) + '_target_count', str(len(target_paths)))
+        for j, target_path in enumerate(target_paths):
+            k = str(i) + '_target_' + str(j)
+            setstr(conf, section, k + '_path', target_path)
+            setstr(conf, section, k + '_name', target_names[j])
+            setstr(conf, section, k + '_uoa', target_uoas[j])
 
     return {'return': 0}
 

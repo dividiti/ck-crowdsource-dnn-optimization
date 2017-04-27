@@ -78,31 +78,51 @@ bool isCompiled(const Program& p) {
     return dir.exists(p.exe);
 }
 
+static QString pathAppend(const QString& path1, const QString& path2) {
+    return QDir::cleanPath(path1 + QDir::separator() + path2);
+}
+
 QList<Program> AppConfig::programs() {
-    int programCount = sectionCount("Programs");
+    const QString section = "Programs";
+    int programCount = sectionCount(section);
     QList<Program> ret;
     for (int i = 0; i < programCount; ++i) {
-        Program p;
-        p.uoa = sectionValue("Programs", i, "uoa");
-        p.name = sectionValue("Programs", i, "name");
-        p.outputFile = sectionValue("Programs", i, "output_file");
-        p.exe = sectionValue("Programs", i, "exe");
-        if (isCompiled(p)) {
-            ret.append(p);
+        auto outputFile = sectionValue(section, i, "output_file");
+        auto exe = sectionValue(section, i, "exe");
+        auto programPath = sectionValue(section, i, "path");
+        auto programUoa= sectionValue(section, i, "uoa");
+        int targetCount = configValueInt(section + "/" + QString::number(i) + "_target_count", 0);
+        for (int j = 0; j < targetCount; ++j) {
+            auto keyPrefix = "target_" + QString::number(j) + "_";
+            Program p;
+            p.name = sectionValue(section, i, keyPrefix + "name");
+            p.target_uoa = sectionValue(section, i, keyPrefix + "uoa");
+            p.program_uoa = programUoa;
+
+            auto targetPath = sectionValue(section, i, keyPrefix + "path");
+            auto targetFullPath = pathAppend(programPath, targetPath);
+
+            p.target_dir = targetPath;
+            p.outputFile = pathAppend(targetFullPath, outputFile);
+            p.exe = pathAppend(targetFullPath, exe);
+
+            if (isCompiled(p)) {
+                ret.append(p);
+            }
         }
     }
     return ret;
 }
 
 QVariant AppConfig::currentProgram() {
-    QString uoa = configValueStr("program_uoa", "");
+    QString uoa = configValueStr("classification_target_uoa", "");
     QList<Program> progs = programs();
     QVariant ret;
     for (auto i : progs) {
         if (!ret.isValid()) {
             ret.setValue(i);
         }
-        if (i.uoa == uoa) {
+        if (i.target_uoa == uoa) {
             ret.setValue(i);
             break;
         }
@@ -111,7 +131,7 @@ QVariant AppConfig::currentProgram() {
 }
 
 void AppConfig::setCurrentProgram(QString uoa) {
-    config().setValue("program_uoa", uoa);
+    config().setValue("classification_target_uoa", uoa);
     config().sync();
 }
 
@@ -122,7 +142,7 @@ QVariant AppConfig::currentSqueezeDetProgram() {
         return QVariant();
     }
     Program p;
-    p.uoa = sectionValue(SECTION, 0, "uoa");
+    p.program_uoa = sectionValue(SECTION, 0, "uoa");
     p.name = sectionValue(SECTION, 0, "name");
     p.outputFile = sectionValue(SECTION, 0, "output_file");
     p.exe = sectionValue(SECTION, 0, "exe");
