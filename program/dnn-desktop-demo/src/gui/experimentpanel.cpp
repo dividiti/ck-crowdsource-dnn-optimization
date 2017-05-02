@@ -97,9 +97,16 @@ void ExperimentPanel::experimentStarted() {
     enableControls(false);
     clearAggregatedResults();
     _experiment_start_time = QDateTime::currentMSecsSinceEpoch();
-    _program = AppConfig::currentProgram().value<Program>();
-    _model = AppConfig::currentModel().value<Model>();
-    _dataset = AppConfig::currentDataset().value<Dataset>();
+    Mode mode = AppConfig::currentMode().value<Mode>();
+    if (Mode::CLASSIFICATION == mode.type) {
+        _program = AppConfig::currentProgram().value<Program>();
+        _model = AppConfig::currentModel().value<Model>();
+        _dataset = AppConfig::currentDataset().value<Dataset>();
+    } else {
+        _program = AppConfig::currentSqueezeDetProgram().value<Program>();
+        _model = Model();
+        _dataset = Dataset();
+    }
 }
 
 void ExperimentPanel::experimentFinished() {
@@ -143,9 +150,9 @@ void ExperimentPanel::publishResults() {
         return;
     }
     QJsonObject dict;
-    dict["avg"] = _avg;
-    dict["min"] = _min;
-    dict["max"] = _max;
+    dict["avg_duration"] = _avg;
+    dict["min_duration"] = _min;
+    dict["max_duration"] = _max;
     dict["model_uoa"] = _model.uoa;
     dict["dataset_uoa"] = _dataset.valUoa;
     dict["program_uoa"] = _program.program_uoa;

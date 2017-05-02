@@ -146,6 +146,7 @@ QVariant AppConfig::currentSqueezeDetProgram() {
     p.name = sectionValue(SECTION, 0, "name");
     p.outputFile = sectionValue(SECTION, 0, "output_file");
     p.exe = sectionValue(SECTION, 0, "exe");
+    p.target_dir = "tmp";
     QVariant ret;
     ret.setValue(p);
     return ret;
