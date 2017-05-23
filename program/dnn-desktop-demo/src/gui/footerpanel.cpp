@@ -54,6 +54,7 @@ FooterPanel::FooterPanel(QWidget* parent) : QFrame(parent) {
         label->setText(rightText);
         layout->addWidget(label);
     }
+
     setLayout(layout);
 }
 
