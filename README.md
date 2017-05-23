@@ -129,6 +129,10 @@ Parameters supported:
 
 1. `--params.recognition_update_interval_ms`: integer value in milliseconds, controls the maximum frequency of updates in the object recognition mode. The image and metrics below it will be updated at most once per the given value of milliseconds. The default value is `1000`. Set it to `0` to get the real-time speed (it may be hard to read).  Example: `ck run program:dnn-desktop-demo --params.recognition_update_interval_ms=2000`
 
+1. `--params.footer_right_text`: text to be shown in the bottom right corner of the application
+
+1. `--params.footer_right_url`: if specified, and `footer_right_text` is also specified, the text becomes clickable, and this URL is opened on click
+
 Parameter values are saved for the future use. So, next time you call `ck run`, you don't need to specify them again.
 
 Select DNN engine, data set and press start button! Enjoy!
