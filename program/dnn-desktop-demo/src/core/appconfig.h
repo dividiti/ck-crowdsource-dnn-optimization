@@ -15,6 +15,9 @@ public:
     static QString ckBinPath();
     static QString ckExeName();
 
+    static QString footerRightText();
+    static QString footerRightUrl();
+
     static QString styleSheet();
 
     static QString logPath() { return localSubdir("logs_path", "logs"); }

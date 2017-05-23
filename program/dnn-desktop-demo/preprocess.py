@@ -63,6 +63,11 @@ def ensure_section(conf, section, clean=False):
     if not conf.has_section(section):
         conf.add_section(section)
 
+def conf_set_from_params(conf, section, params, param_names):
+    for param_name in param_names:
+        if param_name in params:
+            conf.set(section, param_name, str(params[param_name]))
+
 def fill_general(ck, conf, params):
     section = 'General'
     ensure_section(conf, section)
@@ -78,11 +83,12 @@ def fill_general(ck, conf, params):
 
     setstr(conf, section, 'ck_repos_path', os.path.dirname(r['path']))
 
-    if 'fps_update_interval_ms' in params:
-        conf.set(section, 'fps_update_interval_ms', str(params['fps_update_interval_ms']))
-
-    if 'recognition_update_interval_ms' in params:
-        conf.set(section, 'recognition_update_interval_ms', str(params['recognition_update_interval_ms']))
+    conf_set_from_params(conf, section, params, [
+            'fps_update_interval_ms',
+            'recognition_update_interval_ms',
+            'footer_right_text',
+            'footer_right_url'
+        ])
 
     return {'return':0}
 

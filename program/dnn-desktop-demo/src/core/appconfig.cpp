@@ -43,6 +43,14 @@ QString AppConfig::ckExeName() {
     return config().value("ck_exe_name").toString();
 }
 
+QString AppConfig::footerRightText() {
+    return config().value("footer_right_text", "").toString();
+}
+
+QString AppConfig::footerRightUrl() {
+    return config().value("footer_right_url", "").toString();
+}
+
 int AppConfig::configValueInt(const QString& key, int defaultValue) {
     bool ok;
     int value = config().value(key, defaultValue).toInt(&ok);
