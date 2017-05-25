@@ -65,15 +65,8 @@ void FramesPanel::initLayout() {
 }
 
 static QString cannotRunError() {
-    Mode mode = AppConfig::currentMode().value<Mode>();
-    if (mode.type == Mode::Type::RECOGNITION) {
-        if (!AppConfig::currentSqueezeDetProgram().isValid()) {
-            return "No recognition programs found. Please, install one (e.g. SqueezeDet)";
-        }
-    } else {
-        if (!AppConfig::currentProgram().isValid() || !AppConfig::currentModel().isValid() || !AppConfig::currentDataset().isValid()) {
-            return "Please select engine, model and dataset first";
-        }
+    if (!AppConfig::currentProgram().isValid() || !AppConfig::currentModel().isValid() || !AppConfig::currentDataset().isValid()) {
+        return "Please select engine, model and dataset first";
     }
     return "";
 }
@@ -85,17 +78,15 @@ void FramesPanel::experimentStarted() {
     QString errorMsg = cannotRunError();
     if (errorMsg.isEmpty()) {
         Mode mode = AppConfig::currentMode().value<Mode>();
+        _worker = new WorkerThread(AppConfig::currentProgram().value<Program>(), mode, this);
+        _worker->setModel(AppConfig::currentModel().value<Model>());
+        _worker->setDataset(AppConfig::currentDataset().value<Dataset>());
         if (mode.type == Mode::Type::CLASSIFICATION) {
-            _worker = new WorkerThread(AppConfig::currentProgram().value<Program>(), mode, this);
-            _worker->setModel(AppConfig::currentModel().value<Model>());
-            _worker->setDataset(AppConfig::currentDataset().value<Dataset>());
             _worker->setBatchSize(AppConfig::batchSize());
-            initLayout();
         } else {
-            _worker = new WorkerThread(AppConfig::currentSqueezeDetProgram().value<Program>(), mode, this);
             _worker->setMinResultInterval(AppConfig::recognitionUpdateIntervalMs());
-            initLayout();
         }
+        initLayout();
         connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
         connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
         connect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);

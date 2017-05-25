@@ -97,16 +97,9 @@ void ExperimentPanel::experimentStarted() {
     enableControls(false);
     clearAggregatedResults();
     _experiment_start_time = QDateTime::currentMSecsSinceEpoch();
-    Mode mode = AppConfig::currentMode().value<Mode>();
-    if (Mode::CLASSIFICATION == mode.type) {
-        _program = AppConfig::currentProgram().value<Program>();
-        _model = AppConfig::currentModel().value<Model>();
-        _dataset = AppConfig::currentDataset().value<Dataset>();
-    } else {
-        _program = AppConfig::currentSqueezeDetProgram().value<Program>();
-        _model = Model();
-        _dataset = Dataset();
-    }
+    _program = AppConfig::currentProgram().value<Program>();
+    _model = AppConfig::currentModel().value<Model>();
+    _dataset = AppConfig::currentDataset().value<Dataset>();
 }
 
 void ExperimentPanel::experimentFinished() {
