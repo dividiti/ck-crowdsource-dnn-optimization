@@ -65,7 +65,8 @@ QStringList WorkerThread::getArgs() {
             "--deps.caffemodel=" + model.uoa,
             "--deps.imagenet-aux=" + dataset.auxUoa,
             "--deps.imagenet-val=" + dataset.valUoa,
-            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize)
+            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize),
+            "--quiet"
             };
     }
 }
