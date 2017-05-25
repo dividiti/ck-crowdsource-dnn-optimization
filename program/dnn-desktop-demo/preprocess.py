@@ -96,7 +96,8 @@ def fill_general(ck, conf, params):
             'fps_update_interval_ms',
             'recognition_update_interval_ms',
             'footer_right_text',
-            'footer_right_url'
+            'footer_right_url',
+            'recognition_image_height'
         ])
 
     return {'return':0}
