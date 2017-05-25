@@ -18,6 +18,8 @@ public:
     static QString footerRightText();
     static QString footerRightUrl();
 
+    static int recognitionImageHeight();
+
     static QString styleSheet();
 
     static QString logPath() { return localSubdir("logs_path", "logs"); }

@@ -94,7 +94,7 @@ void WorkerThread::run() {
     AppEvents::registerProcess(program.exe);
 
     long timout = 1000 * AppConfig::classificationStartupTimeoutSeconds();
-    qDebug() << "Waiting until the program starts writing data to " + program.outputFile;
+    qDebug() << "Waiting until the program starts writing data to " << program.outputFile;
     while (!outputFile.exists() && !isInterruptionRequested()) {
         if (ck.waitForFinished(NORMAL_WAIT_MS)) {
             AppEvents::error("Program stopped prematurely. "

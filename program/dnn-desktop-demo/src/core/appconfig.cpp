@@ -51,6 +51,10 @@ QString AppConfig::footerRightUrl() {
     return config().value("footer_right_url", "").toString();
 }
 
+int AppConfig::recognitionImageHeight() {
+    return config().value("recognition_image_height", -1).toInt();
+}
+
 int AppConfig::configValueInt(const QString& key, int defaultValue) {
     bool ok;
     int value = config().value(key, defaultValue).toInt(&ok);

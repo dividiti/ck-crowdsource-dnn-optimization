@@ -57,7 +57,6 @@ void FramesPanel::initLayout() {
 
         QVBoxLayout* l = new QVBoxLayout;
         _layout = l;
-        l->addStretch();
         l->addWidget(_rec_widget);
         l->addStretch();
         setLayout(l);

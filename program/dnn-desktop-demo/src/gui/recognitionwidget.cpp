@@ -1,20 +1,32 @@
 #include "recognitionwidget.h"
 #include "appmodels.h"
+#include "appconfig.h"
 
 #include <QLabel>
 #include <QPixmap>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QVariant>
 #include <QMap>
+#include <QFrame>
 
 static const QMap<QString, QString> ICONS{ {"car", ":/images/ico-auto"}, {"cyclist", ":/images/ico-bike"}, {"pedestrian", ":/images/ico-pedestrian"} };
 
 RecognitionWidget::RecognitionWidget(QWidget *parent) : QWidget(parent) {
     imageLabel = new QLabel;
-    imageLabel->setScaledContents(true);
+
+    auto hl = new QHBoxLayout;
+    hl->setMargin(0);
+    hl->addStretch();
+    hl->addWidget(imageLabel);
+    hl->addStretch();
+
+    auto frame = new QFrame;
+    frame->setLayout(hl);
+
     QVBoxLayout* l = new QVBoxLayout;
     l->setMargin(0);
-    l->addWidget(imageLabel);
+    l->addWidget(frame);
 
     descriptionLabel = new QLabel;
     descriptionLabel->setProperty("qss-role", "recognition-label");
@@ -25,7 +37,12 @@ RecognitionWidget::RecognitionWidget(QWidget *parent) : QWidget(parent) {
 }
 
 void RecognitionWidget::load(const ImageResult& ir) {
-    imageLabel->setPixmap(QPixmap(ir.imageFile));
+    QPixmap pixmap(ir.imageFile);
+    int h = AppConfig::recognitionImageHeight();
+    if (0 < h) {
+        pixmap = pixmap.scaledToHeight(h);
+    }
+    imageLabel->setPixmap(pixmap);
     imageLabel->setToolTip(ir.imageFile);
     QString text = "<style>"
                    "    th { "
