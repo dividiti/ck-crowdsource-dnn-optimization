@@ -70,18 +70,13 @@ void RecognitionWidget::load(const ImageResult& ir) {
     QMapIterator<QString, int> iter(ir.recognizedObjects);
     while (iter.hasNext()) {
         iter.next();
-        int expected = ir.expectedObjects.contains(iter.key()) ? ir.expectedObjects[iter.key()] : 0;
-        int identified = iter.value();
-        int falsePositive = ir.falsePositiveObjects.contains(iter.key()) ? ir.falsePositiveObjects[iter.key()] : 0;
-        int trueObjects = identified - falsePositive;
-        double precision = 0 == identified ? (0 == expected ? 1 : 0) : (double)trueObjects / (double)identified;
-        double recall = 0 == expected ? (0 == identified ? 1 : 0) : (double)trueObjects / (double)expected;
         QString obj = iter.key();
+        auto spec = ir.labelSpec(obj);
         if (ICONS.contains(obj)) {
             obj = "<img src=\"" + ICONS[obj] + "\">";
         }
         text += QString("<tr><td class=\"obj\">%1</td><td>%2</td><td>%3</td><td>%4</td><td>%5</td><td>%6</td></tr>")
-                .arg(obj).arg(identified).arg(expected).arg(falsePositive).arg(precision, 0, 'g', 2).arg(recall, 0, 'g', 2);
+                .arg(obj).arg(spec.identified).arg(spec.expected).arg(spec.falsePositive).arg(spec.precision(), 0, 'g', 2).arg(spec.recall(), 0, 'g', 2);
     }
     text += "</table>";
     descriptionLabel->setText(text);
