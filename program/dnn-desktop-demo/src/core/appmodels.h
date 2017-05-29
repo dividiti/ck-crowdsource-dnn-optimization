@@ -114,6 +114,10 @@ struct Program {
     bool operator==(const Program& o) const {
         return target_uoa == o.target_uoa;
     }
+
+    bool operator<(const Program& o) const {
+        return title() < o.title();
+    }
 };
 Q_DECLARE_METATYPE(Program)
 
@@ -129,6 +133,10 @@ struct Model {
 
     bool operator==(const Model& o) const {
         return uoa == o.uoa;
+    }
+
+    bool operator<(const Model& o) const {
+        return title() < o.title();
     }
 };
 Q_DECLARE_METATYPE(Model)
@@ -147,6 +155,10 @@ struct Dataset {
 
     bool operator==(const Dataset& o) const {
         return valUoa == o.valUoa;
+    }
+
+    bool operator<(const Dataset& o) const {
+        return title() < o.title();
     }
 };
 Q_DECLARE_METATYPE(Dataset)

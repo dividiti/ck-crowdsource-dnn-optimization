@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QDebug>
+#include <algorithm>
 
 static const QString STYLESHEET_PATH = ":/qss/app.qss";
 
@@ -123,6 +124,7 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
             }
         }
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
 
@@ -161,6 +163,7 @@ QList<Model> AppConfig::models(Mode::Type mode) {
         m.name = sectionValue(section, i, "name");
         ret.append(m);
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
 
@@ -223,6 +226,7 @@ QList<Dataset> AppConfig::datasets(Mode::Type mode) {
             ret.append(m);
         }
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
 
