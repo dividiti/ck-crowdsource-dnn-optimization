@@ -103,7 +103,8 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
         auto outputFile = sectionValue(section, i, "output_file");
         auto exe = sectionValue(section, i, "exe");
         auto programPath = sectionValue(section, i, "path");
-        auto programUoa= sectionValue(section, i, "uoa");
+        auto programUoa = sectionValue(section, i, "uoa");
+        auto programEngine = Engine::parse(sectionValue(section, i, "engine"));
         int targetCount = configValueInt(section + "/" + QString::number(i) + "_target_count", 0);
         for (int j = 0; j < targetCount; ++j) {
             auto keyPrefix = "target_" + QString::number(j) + "_";
@@ -111,6 +112,7 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
             p.name = sectionValue(section, i, keyPrefix + "name");
             p.target_uoa = sectionValue(section, i, keyPrefix + "uoa");
             p.program_uoa = programUoa;
+            p.engine = programEngine;
 
             auto targetPath = sectionValue(section, i, keyPrefix + "path");
             auto targetFullPath = pathAppend(programPath, targetPath);
@@ -153,12 +155,16 @@ void AppConfig::setCurrentProgram(QString uoa, Mode::Type mode) {
     config().sync();
 }
 
-QList<Model> AppConfig::models(Mode::Type mode) {
+QList<Model> AppConfig::models(Mode::Type mode, Engine::Type engine) {
     const QString section = Mode::Type::CLASSIFICATION == mode ? "Models" : "DetectionModels";
     int count = sectionCount(section);
     QList<Model> ret;
     for (int i = 0; i < count; ++i) {
         Model m;
+        m.engine = Engine::parse(sectionValue(section, i, "engine"));
+        if (engine != m.engine) {
+            continue;
+        }
         m.uoa = sectionValue(section, i, "uoa");
         m.name = sectionValue(section, i, "name");
         ret.append(m);
@@ -167,12 +173,13 @@ QList<Model> AppConfig::models(Mode::Type mode) {
     return ret;
 }
 
-static QString currentModelKey(Mode::Type mode) {
-    return Mode::Type::CLASSIFICATION == mode ? "classification_model_uoa" : "recognition_model_uoa";
+static QString currentModelKey(Mode::Type mode, Engine::Type engine) {
+    QString prefix = Mode::Type::CLASSIFICATION == mode ? "classification_model_uoa" : "recognition_model_uoa";
+    return prefix + "_" + Engine::toString(engine);
 }
 
-QVariant AppConfig::currentModel(Mode::Type mode) {
-    QString uoa = configValueStr(currentModelKey(mode), "");
+QVariant AppConfig::currentModel(Mode::Type mode, Engine::Type engine) {
+    QString uoa = configValueStr(currentModelKey(mode, engine), "");
     QVariant ret;
     for (auto i : models()) {
         if (!ret.isValid()) {
@@ -186,8 +193,8 @@ QVariant AppConfig::currentModel(Mode::Type mode) {
     return ret;
 }
 
-void AppConfig::setCurrentModel(QString uoa, Mode::Type mode) {
-    config().setValue(currentModelKey(mode), uoa);
+void AppConfig::setCurrentModel(QString uoa, Mode::Type mode, Engine::Type engine) {
+    config().setValue(currentModelKey(mode, engine), uoa);
     config().sync();
 }
 
@@ -273,6 +280,11 @@ QVariant AppConfig::currentMode() {
 
 Mode::Type AppConfig::currentModeType() {
     return currentMode().value<Mode>().type;
+}
+
+Engine::Type AppConfig::currentEngineType() {
+    QVariant p = currentProgram();
+    return p.isValid() ? p.value<Program>().engine : Engine::Type::UNKNOWN;
 }
 
 void AppConfig::setCurrentMode(Mode::Type type) {

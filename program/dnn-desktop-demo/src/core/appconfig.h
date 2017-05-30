@@ -28,10 +28,11 @@ public:
     static QList<Program> programs(Mode::Type mode = currentModeType());
     static QVariant currentProgram(Mode::Type mode = currentModeType());
     static void setCurrentProgram(QString uoa, Mode::Type mode = currentModeType());
+    static Engine::Type currentEngineType();
 
-    static QList<Model> models(Mode::Type mode = currentModeType());
-    static QVariant currentModel(Mode::Type mode = currentModeType());
-    static void setCurrentModel(QString uoa, Mode::Type mode = currentModeType());
+    static QList<Model> models(Mode::Type mode = currentModeType(), Engine::Type engine = currentEngineType());
+    static QVariant currentModel(Mode::Type mode = currentModeType(), Engine::Type engine = currentEngineType());
+    static void setCurrentModel(QString uoa, Mode::Type mode = currentModeType(), Engine::Type engine = currentEngineType());
 
     static QList<Dataset> datasets(Mode::Type mode = currentModeType());
     static QVariant currentDataset(Mode::Type mode = currentModeType());

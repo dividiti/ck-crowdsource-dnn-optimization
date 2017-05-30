@@ -135,6 +135,33 @@ Q_DECLARE_METATYPE(Mode)
 
 //-----------------------------------------------------------------------------
 
+struct Engine {
+    enum Type { UNKNOWN, CAFFE, TF };
+
+    static Type parse(QString s) {
+        s = s.toLower();
+        if (s == "caffe") {
+            return CAFFE;
+        } else if (s == "tf") {
+            return TF;
+        } else {
+            return UNKNOWN;
+        }
+    }
+
+    static QString toString(Type t) {
+        if (t == CAFFE) {
+            return "caffe";
+        } else if (t == TF) {
+            return "tf";
+        } else {
+            return "unknown";
+        }
+    }
+};
+
+//-----------------------------------------------------------------------------
+
 struct Program {
     QString program_uoa;
     QString target_uoa;
@@ -142,6 +169,8 @@ struct Program {
     QString outputFile;
     QString exe;
     QString target_dir;
+
+    Engine::Type engine;
 
     QString title() const {
         return name;
@@ -162,6 +191,8 @@ Q_DECLARE_METATYPE(Program)
 struct Model {
     QString uoa;
     QString name;
+
+    Engine::Type engine;
 
     QString title() const {
         return name;

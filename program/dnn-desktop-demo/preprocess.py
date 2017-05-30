@@ -2,6 +2,8 @@ import sys
 import os
 
 APP_CONF_FILE = 'app.conf'
+CAFFE_ENGINE = 'caffe'
+TF_ENGINE = 'tf'
 
 def ck_preprocess(i):
     if sys.version_info[0]>2:
@@ -18,10 +20,13 @@ def ck_preprocess(i):
     r = fill_general(ck, conf, i.get('params', {}))
     if r['return'] > 0: return r
 
-    r = fill_models(ck, conf, 'Models', tags='caffemodel', exclude_tags=['ssd'])
+    r = fill_models(ck, conf, 'Models', tags='caffemodel', exclude_tags=['ssd'], engine=CAFFE_ENGINE)
     if r['return'] > 0: return r
 
-    r = fill_models(ck, conf, 'DetectionModels', 'caffemodel,ssd')
+    r = fill_models(ck, conf, 'DetectionModels', 'caffemodel,ssd', engine=CAFFE_ENGINE)
+    if r['return'] > 0: return r
+
+    r = fill_models(ck, conf, 'DetectionModels', 'model,tensorflow,squeezedetmodel', engine=TF_ENGINE, start_count=len(r['lst']))
     if r['return'] > 0: return r
 
     host_os_dict = i.get('host_os_dict', {})
@@ -143,8 +148,16 @@ def fill_section(ck, conf, section, tags, module='', exclude_tags=[], start_coun
 
     return {'return':0, 'lst': lst}
 
-def fill_models(ck, conf, section, tags, exclude_tags=[]):
-    return fill_section(ck, conf, section=section, tags=tags, module='env', exclude_tags=exclude_tags)
+def fill_models(ck, conf, section, tags, exclude_tags=[], engine='', start_count=0):
+    r = fill_section(ck, conf, section=section, tags=tags, module='env', exclude_tags=exclude_tags, start_count=start_count)
+    if r['return'] > 0: return r
+
+    lst = r['lst']
+    for i, u in enumerate(lst):
+        i = i + start_count
+        setstr(conf, section, str(i) + '_engine', engine)
+
+    return {'return':0, 'lst': lst}
 
 def fill_programs(ck, conf, exe_extension, section, tags):
     import glob
@@ -214,6 +227,7 @@ def fill_programs(ck, conf, exe_extension, section, tags):
         setstr(conf, section, str(i) + '_path', program_path)
         setstr(conf, section, str(i) + '_output_file', output_file)
         setstr(conf, section, str(i) + '_exe', target_file)
+        setstr(conf, section, str(i) + '_engine', CAFFE_ENGINE)
 
         conf.set(section, str(i) + '_target_count', str(len(target_paths)))
         for j, target_path in enumerate(target_paths):
@@ -271,6 +285,7 @@ def fill_squeezedet(ck, conf, section, start_count):
 
         program_path = r['path']
         setstr(conf, section, str(i) + '_path', program_path)
+        setstr(conf, section, str(i) + '_engine', TF_ENGINE)
 
         r = find_by_tags(ck, tags='lib,tensorflow', module='env')
         if r['return'] > 0: return r

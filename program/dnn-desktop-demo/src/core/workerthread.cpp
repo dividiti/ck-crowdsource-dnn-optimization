@@ -50,6 +50,7 @@ QStringList WorkerThread::getArgs() {
             "--tmp_dir=" + program.target_dir,
             "--cmd_key=use_continuous",
             "--deps.caffemodel=" + model.uoa,
+            "--deps.squeezedet=" + model.uoa,
             "--deps.detection-dataset=" + dataset.valUoa,
             "--deps.lib-tensorflow=" + program.target_uoa,
             "--quiet"
