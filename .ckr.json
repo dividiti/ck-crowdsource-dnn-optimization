@@ -3,7 +3,12 @@
   "data_name": "ck-crowdsource-dnn-optimization", 
   "dict": {
     "url": "https://github.com/dividiti/ck-crowdsource-dnn-optimization", 
-    "shared": "git"
+    "shared": "git",
+    "repo_deps": [
+      {
+        "repo_uoa": "ck-crowdtuning"
+      }
+    ] 
   }, 
   "data_alias": "ck-crowdsource-dnn-optimization", 
   "data_uoa": "ck-crowdsource-dnn-optimization"
