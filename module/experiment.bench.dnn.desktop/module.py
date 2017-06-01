@@ -33,11 +33,10 @@ hextra+='<a href="https://www.youtube.com/watch?v=Q94yWxXUMP0">YouTube intro</a>
 hextra+='</center></i>\n'
 hextra+='<br>\n'
 
-selector=[{'name':'Type', 'key':'caffe_type'},
-          {'name':'Network', 'key':'nn_type'},
-          {'name':'Platform', 'key':'plat_name'},
-          {'name':'CPU', 'key':'cpu_name', 'new_line':'yes'},
+selector=[{'name':'Platform', 'key':'plat_name'},
+          {'name':'CPU', 'key':'cpu_name'},
           {'name':'OS', 'key':'os_name'},
+          {'name':'GPU', 'key':'gpu_name', 'new_line':'yes'},
           {'name':'GPGPU', 'key':'gpgpu_name'}]
 
 ##############################################################################
@@ -249,18 +248,14 @@ def show(i):
     h+='  <tr style="background-color:#dddddd">\n'
     h+='   <td '+ha+'><b>All raw files</b></td>\n'
     h+='   <td '+ha+'><b>Type</b></td>\n'
-    h+='   <td '+ha+'><b>Network</b></td>\n'
-    h+='   <td '+ha+'><b>FWBW</b></td>\n'
-    h+='   <td '+ha+'><b>FW</b></td>\n'
-    h+='   <td '+ha+'><b>BW</b></td>\n'
-    h+='   <td '+ha+'><b>Accuracy<br>(TP1 / TP5)</b></td>\n'
-    h+='   <td '+ha+'><b>Chars</b></td>\n'
+    h+='   <td '+ha+'><b>DNN</b></td>\n'
+    h+='   <td '+ha+'><b>Data set</b></td>\n'
+    h+='   <td '+ha+'><b>Classification time (sec.)</b></td>\n'
     h+='   <td '+ha+'><b>Platform</b></td>\n'
     h+='   <td '+ha+'><b>CPU</b></td>\n'
     h+='   <td '+ha+'><b>GPGPU</b></td>\n'
     h+='   <td '+ha+'><b>OS</b></td>\n'
     h+='   <td '+ha+'><b>Fail?</b></td>\n'
-    h+='   <td '+ha+'><b>Choices</b></td>\n'
     h+='   <td '+ha+'><b>User</b></td>\n'
     h+='   <td '+ha+'><b>Replay</b></td>\n'
     h+='  <tr>\n'
@@ -304,7 +299,11 @@ def show(i):
 
         user=meta.get('user','')
 
-        te=d.get('characteristics',{}).get('run',{})
+        results=d.get('aggregated_results',[])
+
+        program_uoa=meta.get('program_uoa','')
+        model_uoa=meta.get('module_uoa','')
+        dataset_uoa=meta.get('dataset_uoa','')
 
 #        bgc='afffaf'
         bgc='dfffdf'
@@ -326,92 +325,35 @@ def show(i):
         if cmuoa!='': x=cmuoa
         h+='   <td '+ha+'>'+str(ix)+')&nbsp;<a href="'+url0+'&wcid='+x+':'+duid+'">'+duid+'</a></td>\n'
 
-        h+='   <td '+ha+'>'+tp+'</a></td>\n'
+        x=program_uoa
+        h+='   <td '+ha+'>'+x+'</a></td>\n'
 
-        h+='   <td '+ha+'>'+nn+'</a></td>\n'
+        x=model_uoa
+
+        r=ck.access({'action':'load',
+                     'module_uoa':cfg['module_deps']['package'],
+                     'data_uoa':x})
+        if r['return']==0:
+           x=r['data_uoa']
+
+        h+='   <td '+ha+'>'+x+'</a></td>\n'
+
+        x=dataset_uoa
+
+        r=ck.access({'action':'load',
+                     'module_uoa':cfg['module_deps']['package'],
+                     'data_uoa':x})
+        if r['return']==0:
+           x=r['data_uoa']
+
+        h+='   <td '+ha+'>'+x+'</a></td>\n'
 
         # Characteristics
-        # Check if has statistics
-        dstat={}
-        fstat=os.path.join(path,'ck-stat-flat-characteristics.json')
-        if os.path.isfile(fstat):
-            r=ck.load_json_file({'json_file':fstat, 'dict':dstat})
-            if r['return']>0: return r
-            dstat=r['dict']
 
         x=''
 
-        # Check if has stats
-        x0=dstat.get("##characteristics#run#time_fwbw_ms#min",None)
-        x0e=dstat.get("##characteristics#run#time_fwbw_ms#exp",None)
-        x1=dstat.get("##characteristics#run#time_fwbw_ms#center",None)
-        x2=dstat.get("##characteristics#run#time_fwbw_ms#halfrange",None)
-        if x1!=None and x2!=None:
-            x=('%.0f'%x1)+'&nbsp;&PlusMinus;&nbsp;'+('%.0f'%x2)+'&nbsp;ms.'
-
-        h+='   <td '+ha+'>'+x+'</td>\n'
-
-        if fail!='yes' and x0!=None and duid!=hi_uid:
-            bgraph['0'].append([ix,x0])
-            if hi_uid!='': bgraph['1'].append([ix,None])
-
-        x1=dstat.get("##characteristics#run#time_fw_ms#center",None)
-        x2=dstat.get("##characteristics#run#time_fw_ms#halfrange",None)
-        if x1!=None and x2!=None:
-            x=('%.0f'%x1)+'&nbsp;&PlusMinus;&nbsp;'+('%.0f'%x2)+'&nbsp;ms.'
-
-        h+='   <td '+ha+'>'+x+'</td>\n'
-
-        x1=dstat.get("##characteristics#run#time_bw_ms#center",None)
-        x2=dstat.get("##characteristics#run#time_bw_ms#halfrange",None)
-        if x1!=None and x2!=None:
-            x=('%.0f'%x1)+'&nbsp;&PlusMinus;&nbsp;'+('%.0f'%x2)+'&nbsp;ms.'
-
-        h+='   <td '+ha+'>'+x+'</td>\n'
-
-        # Accuracy - for now hardwired - later should get directly from experiment description
-        x=''
-        if nn=='bvlc, alexnet':
-            x='0.568279&nbsp;/&nbsp;0.799501'
-        elif nn=='bvlc, googlenet':
-            x='0.689299&nbsp;/&nbsp;0.891441'
-        elif nn=='deepscale, squeezenet, 1.1':
-            x='0.583880&nbsp;/&nbsp;0.810123'
-        elif nn=='deepscale, squeezenet, 1.0':
-            x='0.576801&nbsp;/&nbsp;0.803903'
-
-        h+='   <td '+ha+'>'+x+'</td>\n'
-
-        # Check all characteristics
-        x=''
-        x5=''
-        for k in sorted(te):
-            v=te[k]
-
-            kx="##characteristics#run#"+k
-
-            kx1=dstat.get(kx+'#center',None)
-            kx2=dstat.get(kx+'#halfrange',None)
-
-            x6=''
-            if type(v)==int:
-                if kx1!=None and kx2!=None:
-                    x6=str(kx1)+' +- '+str(kx2)
-                else:
-                    x6=str(v)
-            elif type(v)==float:
-                if kx1!=None and kx2!=None:
-                    x6=('%.1f'%kx1)+' +- '+('%.1f'%kx2)
-                else:
-                    x6=('%.1f'%v)
-
-            if x6!='':
-                x5+=str(k)+'='+x6+'\n'
-
-#        x5=x5.replace("'","\'").replace('"',"\\'").replace('\n','\\n')
-        x5=x5.replace("\'","'").replace("'","\\'").replace('\"','"').replace('"',"\\'").replace('\n','\\n')
-        if x5!='':
-            x+='<input type="button" class="ck_small_button" onClick="alert(\''+x5+'\');" value="All">'
+        for q in results:
+            x+=str(q.get('tmin',''))+'<br>'
 
         h+='   <td '+ha+'>'+x+'</td>\n'
 
@@ -445,26 +387,9 @@ def show(i):
 
         h+='   <td '+ha+'>'+x+'</td>\n'
 
-        # Params
-#        x='<table border="0" cellpadding="0" cellspacing="2">\n'
-        x=''
-        for k in sorted(params):
-            v=params[k]
-            x+=str(k)+'='+str(v)+'\n'
-#            x+='<tr><td>'+str(k)+'=</td><td>'+str(v)+'</td></tr>\n'
-#        x+='</table>\n'
-#        x=x.replace("'","\'").replace('"',"\\'").replace('\n','\\n')
-        x=x.replace("\'","'").replace("'","\\'").replace('\"','"').replace('"',"\\'").replace('\n','\\n')
-
-        x1=''
-        if x!='':
-            x1='<input type="button" class="ck_small_button" onClick="alert(\''+x+'\');" value="See">'
-
-        h+='   <td '+ha+'>'+x1+'</td>\n'
-
         h+='   <td '+ha+'><a href="'+url0+'&action=index&module_uoa=wfe&native_action=show&native_module_uoa=experiment.user">'+user+'</a></td>\n'
 
-        h+='   <td '+ha+'><input type="button" class="ck_small_button" onClick="copyToClipboard(\'ck replay caffe\');" value="Replay"></td>\n'
+        h+='   <td '+ha+'><input type="button" class="ck_small_button" onClick="copyToClipboard(\'TBD\');" value="Replay"></td>\n'
 
         h+='  <tr>\n'
 
@@ -653,7 +578,7 @@ def submit(i):
           'gpu_name':gpu_name,
           'gpgpu_name':gpgpu_name,
           'program_uoa':program_uoa,
-          'module_uoa':model_uoa,
+          'model_uoa':model_uoa,
           'dataset_uoa':dataset_uoa}
 
     # Call processing function
