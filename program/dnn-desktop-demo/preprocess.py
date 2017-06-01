@@ -2,6 +2,8 @@ import sys
 import os
 
 APP_CONF_FILE = 'app.conf'
+CAFFE_ENGINE = 'caffe'
+TF_ENGINE = 'tf'
 
 def ck_preprocess(i):
     if sys.version_info[0]>2:
@@ -18,7 +20,13 @@ def ck_preprocess(i):
     r = fill_general(ck, conf, i.get('params', {}))
     if r['return'] > 0: return r
 
-    r = fill_models(ck, conf)
+    r = fill_models(ck, conf, 'Models', tags='caffemodel', exclude_tags=['ssd'], engine=CAFFE_ENGINE)
+    if r['return'] > 0: return r
+
+    r = fill_models(ck, conf, 'DetectionModels', 'caffemodel,ssd', engine=CAFFE_ENGINE)
+    if r['return'] > 0: return r
+
+    r = fill_models(ck, conf, 'DetectionModels', 'model,tensorflow,squeezedetmodel', engine=TF_ENGINE, start_count=len(r['lst']))
     if r['return'] > 0: return r
 
     host_os_dict = i.get('host_os_dict', {})
@@ -27,16 +35,22 @@ def ck_preprocess(i):
     if 'win' == host_os:
         exe_extension = '.exe'
 
-    r = fill_programs(ck, conf, exe_extension)
+    r = fill_programs(ck, conf, exe_extension, 'Programs', 'caffe-classification,continuous')
+    if r['return'] > 0: return r
+
+    r = fill_programs(ck, conf, exe_extension, 'DetectionPrograms', 'caffe-detection,continuous')
+    if r['return'] > 0: return r
+
+    r = fill_squeezedet(ck, conf, 'DetectionPrograms', start_count=len(r['lst']))
     if r['return'] > 0: return r
 
     r = fill_aux(ck, conf)
     if r['return'] > 0: return r
 
-    r = fill_val(ck, conf)
+    r = fill_val(ck, conf, 'VAL', 'imagenet,val')
     if r['return'] > 0: return r
 
-    r = fill_squeezedet(ck, conf)
+    r = fill_val(ck, conf, 'DetectionDatasets', 'object-detection,images')
     if r['return'] > 0: return r
 
     with open(APP_CONF_FILE, 'w') as f:
@@ -63,6 +77,11 @@ def ensure_section(conf, section, clean=False):
     if not conf.has_section(section):
         conf.add_section(section)
 
+def conf_set_from_params(conf, section, params, param_names):
+    for param_name in param_names:
+        if param_name in params:
+            conf.set(section, param_name, str(params[param_name]))
+
 def fill_general(ck, conf, params):
     section = 'General'
     ensure_section(conf, section)
@@ -78,24 +97,31 @@ def fill_general(ck, conf, params):
 
     setstr(conf, section, 'ck_repos_path', os.path.dirname(r['path']))
 
-    if 'fps_update_interval_ms' in params:
-        conf.set(section, 'fps_update_interval_ms', str(params['fps_update_interval_ms']))
-
-    if 'recognition_update_interval_ms' in params:
-        conf.set(section, 'recognition_update_interval_ms', str(params['recognition_update_interval_ms']))
+    conf_set_from_params(conf, section, params, [
+            'fps_update_interval_ms',
+            'recognition_update_interval_ms',
+            'footer_right_text',
+            'footer_right_url',
+            'recognition_image_height'
+        ])
 
     return {'return':0}
 
-def fill_section(ck, conf, section, tags, module=''):
-    ensure_section(conf, section, True)
-    search_dict = {'action': 'search', 'tags': tags}
+def meta_contain_tag(u, tags_to_check):
+    utags = u.get('meta', {}).get('tags', [])
+    for t in tags_to_check:
+        if t in utags:
+            return True
+    return False
+
+def find_by_tags(ck, tags, module='', exclude_tags=[]):
+    search_dict = {'action': 'search', 'tags': tags, 'add_meta': 'yes'}
     if module != '':
         search_dict['module_uoa'] = module
     r = ck.access(search_dict)
     if r['return'] > 0: return r
-    
-    lst = r['lst']
-    conf.set(section, 'count', str(len(lst)))
+
+    lst = [x for x in r['lst'] if not meta_contain_tag(x, exclude_tags)]
 
     for i, u in enumerate(lst):
         module_uoa = u['module_uoa']
@@ -103,19 +129,40 @@ def fill_section(ck, conf, section, tags, module=''):
         r = ck.access({'action': 'load', 'module_uoa': module_uoa, 'data_uoa': data_uoa})
         if r['return'] > 0: return r
         u['meta'] = r['dict']
-        setstr(conf, section, str(i) + '_uoa', data_uoa)
-        setstr(conf, section, str(i) + '_name', r.get('data_name', u))
+        u['data_name'] = r['data_name']
 
     return {'return':0, 'lst': lst}
 
-def fill_models(ck, conf):
-    return fill_section(ck, conf, section='Models', tags='caffemodel', module='env')
+def fill_section(ck, conf, section, tags, module='', exclude_tags=[], start_count=0):
+    r = find_by_tags(ck, tags=tags, module=module, exclude_tags=exclude_tags)
+    if r['return'] > 0: return r
 
-def fill_programs(ck, conf, exe_extension):
+    ensure_section(conf, section, 0 == start_count)
+
+    lst = r['lst']
+    conf.set(section, 'count', str(len(lst) + start_count))
+
+    for i, u in enumerate(lst):
+        setstr(conf, section, str(i + start_count) + '_uoa', u['data_uoa'])
+        setstr(conf, section, str(i + start_count) + '_name', u['data_name'])
+
+    return {'return':0, 'lst': lst}
+
+def fill_models(ck, conf, section, tags, exclude_tags=[], engine='', start_count=0):
+    r = fill_section(ck, conf, section=section, tags=tags, module='env', exclude_tags=exclude_tags, start_count=start_count)
+    if r['return'] > 0: return r
+
+    lst = r['lst']
+    for i, u in enumerate(lst):
+        i = i + start_count
+        setstr(conf, section, str(i) + '_engine', engine)
+
+    return {'return':0, 'lst': lst}
+
+def fill_programs(ck, conf, exe_extension, section, tags):
     import glob
 
-    section = 'Programs'
-    r = fill_section(ck, conf, section=section, tags='caffe-classification,continuous')
+    r = fill_section(ck, conf, section=section, tags=tags)
     if r['return'] > 0: return r
     lst = r['lst']
     for i, u in enumerate(lst):
@@ -180,6 +227,7 @@ def fill_programs(ck, conf, exe_extension):
         setstr(conf, section, str(i) + '_path', program_path)
         setstr(conf, section, str(i) + '_output_file', output_file)
         setstr(conf, section, str(i) + '_exe', target_file)
+        setstr(conf, section, str(i) + '_engine', CAFFE_ENGINE)
 
         conf.set(section, str(i) + '_target_count', str(len(target_paths)))
         for j, target_path in enumerate(target_paths):
@@ -188,7 +236,7 @@ def fill_programs(ck, conf, exe_extension):
             setstr(conf, section, k + '_name', target_names[j])
             setstr(conf, section, k + '_uoa', target_uoas[j])
 
-    return {'return': 0}
+    return {'return': 0, 'lst': lst}
 
 def fill_aux(ck, conf):
     section = 'AUX'
@@ -202,9 +250,8 @@ def fill_aux(ck, conf):
         setstr(conf, section, str(i) + '_package_uoa', package_uoa)
     return {'return': 0}
 
-def fill_val(ck, conf):
-    section = 'VAL'
-    r = fill_section(ck, conf, section=section, tags='imagenet,val', module='env')
+def fill_val(ck, conf, section, tags):
+    r = fill_section(ck, conf, section=section, tags=tags, module='env')
     if r['return'] > 0: return r
     lst = r['lst']
     for i, u in enumerate(lst):
@@ -218,21 +265,39 @@ def fill_val(ck, conf):
         setstr(conf, section, str(i) + '_aux_package_uoa', r.get('dict', {}).get('aux_uoa', ''))
     return {'return': 0}
 
-def fill_squeezedet(ck, conf):
-    section = 'SqueezeDet'
-    r = fill_section(ck, conf, section=section, tags='tensorflow,squeezedet,continuous')
+def fill_squeezedet(ck, conf, section, start_count):
+    r = fill_section(ck, conf, section=section, tags='tensorflow,squeezedet,continuous', start_count=start_count)
     if r['return'] > 0: return r
     lst = r['lst']
     for i, u in enumerate(lst):
+        i = i + start_count
         output_file = ck.get_by_flat_key({'dict': u, 'key': '##meta#run_cmds#use_continuous#run_time#run_cmd_out1'}).get('value', None)
         if None == output_file:
             print('! Could not find output file for ' + u['data_uoa'])
         else:
-            r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
-            if r['return'] == 0:
-                output_file = os.path.join(r.get('path', ''), 'tmp', output_file)
-                setstr(conf, section, str(i) + '_output_file', output_file)
+            setstr(conf, section, str(i) + '_output_file', output_file)
         setstr(conf, section, str(i) + '_exe', 'continuous.sh')
+
+        r = ck.access(['find', '--module_uoa=' + u['module_uoa'], '--data_uoa=' + u['data_uoa']])
+        if r['return'] != 0:
+            print('! Could not load program ' + u['data_uoa'] + ': ' + r['error'])
+            continue
+
+        program_path = r['path']
+        setstr(conf, section, str(i) + '_path', program_path)
+        setstr(conf, section, str(i) + '_engine', TF_ENGINE)
+
+        r = find_by_tags(ck, tags='lib,tensorflow', module='env')
+        if r['return'] > 0: return r
+
+        lst = r['lst']
+        conf.set(section, str(i) + '_target_count', str(len(lst)))
+        for j, u in enumerate(lst):
+            k = str(i) + '_target_' + str(j)
+            target = lst[j]
+            setstr(conf, section, k + '_path', 'tmp')
+            setstr(conf, section, k + '_name', target['data_name'])
+            setstr(conf, section, k + '_uoa', target['data_uoa'])
 
     return {'return': 0}
 

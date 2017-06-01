@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QDebug>
+#include <algorithm>
 
 static const QString STYLESHEET_PATH = ":/qss/app.qss";
 
@@ -41,6 +42,18 @@ QString AppConfig::ckBinPath() {
 
 QString AppConfig::ckExeName() {
     return config().value("ck_exe_name").toString();
+}
+
+QString AppConfig::footerRightText() {
+    return config().value("footer_right_text", "").toString();
+}
+
+QString AppConfig::footerRightUrl() {
+    return config().value("footer_right_url", "").toString();
+}
+
+int AppConfig::recognitionImageHeight() {
+    return config().value("recognition_image_height", -1).toInt();
 }
 
 int AppConfig::configValueInt(const QString& key, int defaultValue) {
@@ -82,15 +95,16 @@ static QString pathAppend(const QString& path1, const QString& path2) {
     return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
-QList<Program> AppConfig::programs() {
-    const QString section = "Programs";
+QList<Program> AppConfig::programs(Mode::Type mode) {
+    const QString section = Mode::Type::CLASSIFICATION == mode ? "Programs" : "DetectionPrograms";
     int programCount = sectionCount(section);
     QList<Program> ret;
     for (int i = 0; i < programCount; ++i) {
         auto outputFile = sectionValue(section, i, "output_file");
         auto exe = sectionValue(section, i, "exe");
         auto programPath = sectionValue(section, i, "path");
-        auto programUoa= sectionValue(section, i, "uoa");
+        auto programUoa = sectionValue(section, i, "uoa");
+        auto programEngine = Engine::parse(sectionValue(section, i, "engine"));
         int targetCount = configValueInt(section + "/" + QString::number(i) + "_target_count", 0);
         for (int j = 0; j < targetCount; ++j) {
             auto keyPrefix = "target_" + QString::number(j) + "_";
@@ -98,6 +112,7 @@ QList<Program> AppConfig::programs() {
             p.name = sectionValue(section, i, keyPrefix + "name");
             p.target_uoa = sectionValue(section, i, keyPrefix + "uoa");
             p.program_uoa = programUoa;
+            p.engine = programEngine;
 
             auto targetPath = sectionValue(section, i, keyPrefix + "path");
             auto targetFullPath = pathAppend(programPath, targetPath);
@@ -106,17 +121,22 @@ QList<Program> AppConfig::programs() {
             p.outputFile = pathAppend(targetFullPath, outputFile);
             p.exe = pathAppend(targetFullPath, exe);
 
-            if (isCompiled(p)) {
+            if ("squeezedet" == programUoa || isCompiled(p)) {
                 ret.append(p);
             }
         }
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
 
-QVariant AppConfig::currentProgram() {
-    QString uoa = configValueStr("classification_target_uoa", "");
-    QList<Program> progs = programs();
+static QString currentProgramKey(Mode::Type mode) {
+    return Mode::Type::CLASSIFICATION == mode ? "classification_target_uoa" : "recognition_target_uoa";
+}
+
+QVariant AppConfig::currentProgram(Mode::Type mode) {
+    QString uoa = configValueStr(currentProgramKey(mode), "");
+    QList<Program> progs = programs(mode);
     QVariant ret;
     for (auto i : progs) {
         if (!ret.isValid()) {
@@ -130,42 +150,36 @@ QVariant AppConfig::currentProgram() {
     return ret;
 }
 
-void AppConfig::setCurrentProgram(QString uoa) {
-    config().setValue("classification_target_uoa", uoa);
+void AppConfig::setCurrentProgram(QString uoa, Mode::Type mode) {
+    config().setValue(currentProgramKey(mode), uoa);
     config().sync();
 }
 
-QVariant AppConfig::currentSqueezeDetProgram() {
-    static const QString& SECTION = "SqueezeDet";
-    int programCount = sectionCount(SECTION);
-    if (programCount < 1) {
-        return QVariant();
-    }
-    Program p;
-    p.program_uoa = sectionValue(SECTION, 0, "uoa");
-    p.name = sectionValue(SECTION, 0, "name");
-    p.outputFile = sectionValue(SECTION, 0, "output_file");
-    p.exe = sectionValue(SECTION, 0, "exe");
-    p.target_dir = "tmp";
-    QVariant ret;
-    ret.setValue(p);
-    return ret;
-}
-
-QList<Model> AppConfig::models() {
-    int count = sectionCount("Models");
+QList<Model> AppConfig::models(Mode::Type mode, Engine::Type engine) {
+    const QString section = Mode::Type::CLASSIFICATION == mode ? "Models" : "DetectionModels";
+    int count = sectionCount(section);
     QList<Model> ret;
     for (int i = 0; i < count; ++i) {
         Model m;
-        m.uoa = sectionValue("Models", i, "uoa");
-        m.name = sectionValue("Models", i, "name");
+        m.engine = Engine::parse(sectionValue(section, i, "engine"));
+        if (engine != m.engine) {
+            continue;
+        }
+        m.uoa = sectionValue(section, i, "uoa");
+        m.name = sectionValue(section, i, "name");
         ret.append(m);
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
 
-QVariant AppConfig::currentModel() {
-    QString uoa = configValueStr("model_uoa", "");
+static QString currentModelKey(Mode::Type mode, Engine::Type engine) {
+    QString prefix = Mode::Type::CLASSIFICATION == mode ? "classification_model_uoa" : "recognition_model_uoa";
+    return prefix + "_" + Engine::toString(engine);
+}
+
+QVariant AppConfig::currentModel(Mode::Type mode, Engine::Type engine) {
+    QString uoa = configValueStr(currentModelKey(mode, engine), "");
     QVariant ret;
     for (auto i : models()) {
         if (!ret.isValid()) {
@@ -179,43 +193,56 @@ QVariant AppConfig::currentModel() {
     return ret;
 }
 
-void AppConfig::setCurrentModel(QString uoa) {
-    config().setValue("model_uoa", uoa);
+void AppConfig::setCurrentModel(QString uoa, Mode::Type mode, Engine::Type engine) {
+    config().setValue(currentModelKey(mode, engine), uoa);
     config().sync();
 }
 
-QList<Dataset> AppConfig::datasets() {
-    int valCount = sectionCount("VAL");
-    int auxCount = sectionCount("AUX");
+QList<Dataset> AppConfig::datasets(Mode::Type mode) {
+    const QString valSection = Mode::Type::CLASSIFICATION == mode ? "VAL" : "DetectionDatasets";
+    const QString auxSection = "AUX";
+    int valCount = sectionCount(valSection);
+    int auxCount = sectionCount(auxSection);
     QList<Dataset> ret;
-    if (0 >= valCount || 0 >= auxCount) {
+    if (0 >= valCount) {
         return ret;
     }
     for (int i = 0; i < valCount; ++i) {
         Dataset m;
-        m.valUoa = sectionValue("VAL", i, "uoa");
-        m.valName = sectionValue("VAL", i, "name");
+        m.valUoa = sectionValue(valSection, i, "uoa");
+        m.valName = sectionValue(valSection, i, "name");
 
-        QString auxPackageUoa = sectionValue("VAL", i, "aux_package_uoa");
-        for (int j = 0; j < auxCount; ++j) {
-            if (auxPackageUoa == sectionValue("AUX", j, "package_uoa")) {
-                m.auxUoa = sectionValue("AUX", j, "uoa");
-                m.auxName = sectionValue("AUX", j, "name");
-                break;
+        bool append = true;
+
+        if (Mode::Type::CLASSIFICATION == mode) {
+            QString auxPackageUoa = sectionValue(valSection, i, "aux_package_uoa");
+            for (int j = 0; j < auxCount; ++j) {
+                if (auxPackageUoa == sectionValue(auxSection, j, "package_uoa")) {
+                    m.auxUoa = sectionValue(auxSection, j, "uoa");
+                    m.auxName = sectionValue(auxSection, j, "name");
+                    break;
+                }
+            }
+            if (m.auxUoa.isEmpty()) {
+                qWarning() << "AUX not found for VAL " + m.valName + " (" + m.valUoa + "), skipping";
+                append = false;
             }
         }
 
-        if (m.auxUoa.isEmpty()) {
-            qWarning() << "AUX not found for VAL " + m.valName + " (" + m.valUoa + "), skipping";
-        } else {
+        if (append) {
             ret.append(m);
         }
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
 
-QVariant AppConfig::currentDataset() {
-    QString uoa = configValueStr("val_uoa", "");
+static QString currentDatasetKey(Mode::Type mode) {
+    return Mode::Type::CLASSIFICATION == mode ? "classification_val_uoa" : "recognition_val_uoa";
+}
+
+QVariant AppConfig::currentDataset(Mode::Type mode) {
+    QString uoa = configValueStr(currentDatasetKey(mode), "");
     QVariant ret;
     for (auto i : datasets()) {
         if (!ret.isValid()) {
@@ -229,8 +256,8 @@ QVariant AppConfig::currentDataset() {
     return ret;
 }
 
-void AppConfig::setCurrentDataset(QString uoa) {
-    config().setValue("val_uoa", uoa);
+void AppConfig::setCurrentDataset(QString uoa, Mode::Type mode) {
+    config().setValue(currentDatasetKey(mode), uoa);
     config().sync();
 }
 
@@ -249,6 +276,15 @@ QVariant AppConfig::currentMode() {
         }
     }
     return ret;
+}
+
+Mode::Type AppConfig::currentModeType() {
+    return currentMode().value<Mode>().type;
+}
+
+Engine::Type AppConfig::currentEngineType() {
+    QVariant p = currentProgram();
+    return p.isValid() ? p.value<Program>().engine : Engine::Type::UNKNOWN;
 }
 
 void AppConfig::setCurrentMode(Mode::Type type) {

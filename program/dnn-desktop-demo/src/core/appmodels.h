@@ -7,6 +7,8 @@
 #include <QMap>
 #include <QMetaType>
 
+#include <utility>
+
 class PredictionResult
 {
 public:
@@ -25,6 +27,18 @@ public:
 Q_DECLARE_METATYPE(PredictionResult)
 
 //-----------------------------------------------------------------------------
+
+struct LabelSpec {
+    int identified;
+    int expected;
+    int falsePositive;
+
+    int trueObjects() const { return identified - falsePositive; }
+
+    double precision() const { return 0 == identified ? (0 == expected ? 1 : 0) : (double)trueObjects() / (double)identified; }
+
+    double recall() const { return 0 == expected ? (0 == identified ? 1 : 0) : (double)trueObjects() / (double)expected; }
+};
 
 class ImageResult
 {
@@ -59,13 +73,35 @@ public:
         return predictions.isEmpty() && recognizedObjects.isEmpty();
     }
 
-    double imagesPerSecond() {
+    double imagesPerSecond() const {
         return 1.0 / duration;
     }
 
-    double accuracyDelta() {
+    double accuracyDelta() const {
         const PredictionResult* c = findCorrect();
         return nullptr != c ? predictions[0].accuracy - c->accuracy : 0;
+    }
+
+    LabelSpec labelSpec(const QString& label) const {
+        const QString& key = label;
+        LabelSpec ret;
+        ret.identified = recognizedObjects.contains(key) ? recognizedObjects[key] : 0;
+        ret.expected = expectedObjects.contains(key) ? expectedObjects[key] : 0;
+        ret.falsePositive = falsePositiveObjects.contains(key) ? falsePositiveObjects[key] : 0;
+        return ret;
+    }
+
+    double precision() const {
+        if (recognizedObjects.isEmpty()) {
+            return 0;
+        }
+        QMapIterator<QString, int> iter(recognizedObjects);
+        double ret = 0;
+        while (iter.hasNext()) {
+            iter.next();
+            ret += labelSpec(iter.key()).precision();
+        }
+        return ret / recognizedObjects.size();
     }
 };
 
@@ -99,6 +135,33 @@ Q_DECLARE_METATYPE(Mode)
 
 //-----------------------------------------------------------------------------
 
+struct Engine {
+    enum Type { UNKNOWN, CAFFE, TF };
+
+    static Type parse(QString s) {
+        s = s.toLower();
+        if (s == "caffe") {
+            return CAFFE;
+        } else if (s == "tf") {
+            return TF;
+        } else {
+            return UNKNOWN;
+        }
+    }
+
+    static QString toString(Type t) {
+        if (t == CAFFE) {
+            return "caffe";
+        } else if (t == TF) {
+            return "tf";
+        } else {
+            return "unknown";
+        }
+    }
+};
+
+//-----------------------------------------------------------------------------
+
 struct Program {
     QString program_uoa;
     QString target_uoa;
@@ -107,12 +170,18 @@ struct Program {
     QString exe;
     QString target_dir;
 
+    Engine::Type engine;
+
     QString title() const {
         return name;
     }
 
     bool operator==(const Program& o) const {
         return target_uoa == o.target_uoa;
+    }
+
+    bool operator<(const Program& o) const {
+        return title() < o.title();
     }
 };
 Q_DECLARE_METATYPE(Program)
@@ -123,12 +192,18 @@ struct Model {
     QString uoa;
     QString name;
 
+    Engine::Type engine;
+
     QString title() const {
         return name;
     }
 
     bool operator==(const Model& o) const {
         return uoa == o.uoa;
+    }
+
+    bool operator<(const Model& o) const {
+        return title() < o.title();
     }
 };
 Q_DECLARE_METATYPE(Model)
@@ -147,6 +222,10 @@ struct Dataset {
 
     bool operator==(const Dataset& o) const {
         return valUoa == o.valUoa;
+    }
+
+    bool operator<(const Dataset& o) const {
+        return title() < o.title();
     }
 };
 Q_DECLARE_METATYPE(Dataset)

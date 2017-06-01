@@ -34,14 +34,14 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     auto panelEngine = new QFrame;
     panelEngine->setProperty("qss-role", "features-panel");
     panelEngine->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("CAFFE ENGINE"), 0, _linkSelectEngine }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("ENGINE"), 0, _linkSelectEngine }),
         _infoEngine,
     }));
 
     auto panelModel = new QFrame;
     panelModel->setProperty("qss-role", "features-panel");
     panelModel->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("CAFFE MODEL"), 0, _linkSelectModel }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("MODEL"), 0, _linkSelectModel }),
         _infoModel,
     }));
 
@@ -59,8 +59,8 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
         _infoMode,
     }));
 
-    _classificationPanel = new QFrame;
-    _classificationPanel->setLayout(Ori::Gui::layoutV(0, 0, {
+    auto settingsPanel = new QFrame;
+    settingsPanel->setLayout(Ori::Gui::layoutV(0, 0, {
         panelEngine,
         Ori::Gui::makeDivider(),
         panelModel,
@@ -72,7 +72,7 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     {
         panelMode,
         Ori::Gui::makeDivider(),
-        _classificationPanel
+        settingsPanel
     }));
 }
 
@@ -95,7 +95,7 @@ QLabel* FeaturesPanel::makeInfoLabel()
 }
 
 template<typename T>
-QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) {
+static QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) {
     QDialog dlg;
     auto layout = new QVBoxLayout;
     QVector<QRadioButton*> flags;
@@ -123,16 +123,18 @@ QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) {
     return ret;
 }
 
-QVariant selectEngineAndBatchSizeViaDialog() {
+static QVariant selectEngineAndBatchSizeViaDialog() {
     QVariant ret;
 
-    auto items = AppConfig::programs();
+    const Mode::Type m = AppConfig::currentModeType();
+
+    auto items = AppConfig::programs(m);
     if (items.isEmpty()) {
         AppEvents::info("Recognition engines not found");
         return ret;
     }
 
-    auto current = AppConfig::currentProgram();
+    auto current = AppConfig::currentProgram(m);
     QDialog dlg;
     auto layout = new QVBoxLayout;
 
@@ -143,12 +145,6 @@ QVariant selectEngineAndBatchSizeViaDialog() {
         layout->addWidget(flag);
         flags << flag;
     }
-
-    auto line = new QFrame;
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-    layout->addSpacing(12);
-    layout->addWidget(line);
 
     auto batchSize = new QSpinBox;
     batchSize->setMinimum(1);
@@ -161,6 +157,16 @@ QVariant selectEngineAndBatchSizeViaDialog() {
     batchSizeLayout->addWidget(batchSize);
     batchSizeWidget->setLayout(batchSizeLayout);
 
+    if (Mode::Type::CLASSIFICATION == m) {
+        auto line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addSpacing(12);
+        layout->addWidget(line);
+    } else {
+        batchSizeWidget->setVisible(false);
+    }
+
     layout->addWidget(batchSizeWidget);
 
     auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -170,7 +176,9 @@ QVariant selectEngineAndBatchSizeViaDialog() {
 
     dlg.setLayout(layout);
     if (dlg.exec() == QDialog::Accepted) {
-        AppConfig::setBatchSize(batchSize->value());
+        if (Mode::Type::CLASSIFICATION == m) {
+            AppConfig::setBatchSize(batchSize->value());
+        }
         for (int i = 0; i < flags.size(); i++) {
             if (flags.at(i)->isChecked()) {
                 ret.setValue(items[i]);
@@ -227,23 +235,21 @@ void FeaturesPanel::selectMode() {
     }
 }
 
-void FeaturesPanel::updateExperimentConditions()
-{
-    static QString NA("N/A");
+void FeaturesPanel::updateExperimentConditions() {
+    static const QString NA("N/A");
 
-    QVariant v = AppConfig::currentProgram();
+    auto m = AppConfig::currentModeType();
+
+    QVariant v = AppConfig::currentProgram(m);
     _infoEngine->setText(v.isValid() ? v.value<Program>().title() : NA);
 
-    v = AppConfig::currentModel();
+    v = AppConfig::currentModel(m);
     _infoModel->setText(v.isValid() ? v.value<Model>().title() : NA);
 
-    v = AppConfig::currentDataset();
+    v = AppConfig::currentDataset(m);
     _infoImages->setText(v.isValid() ? v.value<Dataset>().title() : NA);
 
-    v = AppConfig::currentMode();
-    Mode m = v.isValid() ? v.value<Mode>() : Mode();
-    _infoMode->setText(m.title());
-    _classificationPanel->setVisible(m.type == Mode::Type::CLASSIFICATION);
+    _infoMode->setText(Mode(m).title());
 }
 
 void FeaturesPanel::enableControls(bool on)

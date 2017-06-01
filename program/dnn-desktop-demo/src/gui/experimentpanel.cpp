@@ -30,7 +30,6 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     _context = context;
     connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
     connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
-    connect(_context, SIGNAL(newImageResult(ImageResult)), this, SLOT(newImageResult(ImageResult)));
 
     _buttonStart = new QPushButton(tr("Start"));
     _buttonStart->setObjectName("buttonStart");
@@ -76,15 +75,7 @@ void ExperimentPanel::updateExperimentConditions() {
     _featuresPanel->updateExperimentConditions();
 }
 
-void ExperimentPanel::clearAggregatedResults() {
-    _avg = 0;
-    _avg_n = 0;
-    _min = 0;
-    _max = 0;
-}
-
 void ExperimentPanel::startExperiment() {
-    clearAggregatedResults();
     _context->startExperiment();
 }
 
@@ -95,18 +86,10 @@ void ExperimentPanel::stopExperiment() {
 
 void ExperimentPanel::experimentStarted() {
     enableControls(false);
-    clearAggregatedResults();
     _experiment_start_time = QDateTime::currentMSecsSinceEpoch();
-    Mode mode = AppConfig::currentMode().value<Mode>();
-    if (Mode::CLASSIFICATION == mode.type) {
-        _program = AppConfig::currentProgram().value<Program>();
-        _model = AppConfig::currentModel().value<Model>();
-        _dataset = AppConfig::currentDataset().value<Dataset>();
-    } else {
-        _program = AppConfig::currentSqueezeDetProgram().value<Program>();
-        _model = Model();
-        _dataset = Dataset();
-    }
+    _program = AppConfig::currentProgram().value<Program>();
+    _model = AppConfig::currentModel().value<Model>();
+    _dataset = AppConfig::currentDataset().value<Dataset>();
 }
 
 void ExperimentPanel::experimentFinished() {
@@ -119,7 +102,7 @@ void ExperimentPanel::enableControls(bool on) {
     _buttonStop->setEnabled(!on);
     _buttonStop->setVisible(!on);
 
-    bool pubOn = on && _avg_n > 0;
+    bool pubOn = on && _context->hasAggregatedResults();
     _buttonPublish->setEnabled(pubOn);
     if (pubOn) {
         _buttonPublish->setToolTip(tr("Publish"));
@@ -133,26 +116,22 @@ void ExperimentPanel::adjustSidebar(QWidget* w) {
     w->setFixedWidth(226);
 }
 
-void ExperimentPanel::newImageResult(ImageResult ir) {
-    ++_avg_n;
-    _avg = (_avg*(_avg_n - 1) + ir.duration)/_avg_n;
-    if (0 == _min || _min > ir.duration) {
-        _min = ir.duration;
-    }
-    if (0 == _max || _max < ir.duration) {
-        _max = ir.duration;
-    }
+static QJsonObject toJson(const ExperimentContext::Stat& stat) {
+    QJsonObject dict;
+    dict["avg"] = stat.avg;
+    dict["min"] = stat.min;
+    dict["max"] = stat.max;
+    return dict;
 }
 
 void ExperimentPanel::publishResults() {
-    if (_avg_n <= 0) {
+    if (!_context->hasAggregatedResults()) {
         // nothing to publish
         return;
     }
     QJsonObject dict;
-    dict["avg_duration"] = _avg;
-    dict["min_duration"] = _min;
-    dict["max_duration"] = _max;
+    dict["duration"] = toJson(_context->duration());
+    dict["precision"] = toJson(_context->precision());
     dict["model_uoa"] = _model.uoa;
     dict["dataset_uoa"] = _dataset.valUoa;
     dict["program_uoa"] = _program.program_uoa;
@@ -198,7 +177,7 @@ void ExperimentPanel::publishResultsFinished(int exitCode, QProcess::ExitStatus 
         _buttonPublish->setEnabled(true);
         _buttonPublish->setToolTip(tr("Publish"));
     } else {
-        clearAggregatedResults();
+        _context->clearAggregatedResults();
         _buttonPublish->setEnabled(false);
         _buttonPublish->setToolTip(tr("Already published"));
     }
@@ -207,7 +186,7 @@ void ExperimentPanel::publishResultsFinished(int exitCode, QProcess::ExitStatus 
 void ExperimentPanel::publishResultsError(QProcess::ProcessError error) {
     qDebug() << "Publishing results error " << error;
     reportPublisherFail(_publisher);
-    if (_avg_n > 0) {
+    if (_context->hasAggregatedResults()) {
         _buttonPublish->setEnabled(true);
         _buttonPublish->setToolTip(tr("Publish"));
     }

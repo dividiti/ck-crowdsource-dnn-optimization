@@ -1,5 +1,6 @@
 #include "footerpanel.h"
 #include "../ori/clickablelabel.h"
+#include "appconfig.h"
 
 #include <QHBoxLayout>
 #include <QFrame>
@@ -44,6 +45,16 @@ FooterPanel::FooterPanel(QWidget* parent) : QFrame(parent) {
     addCompany(layout, "cknowledge", "cknowledge.org/ai");
 
     layout->addStretch();
+
+    auto rightText = AppConfig::footerRightText();
+    if (!rightText.isEmpty()) {
+        auto rightUrl = AppConfig::footerRightUrl();
+        auto label = rightUrl.isEmpty() ? new QLabel() : new ClickableLabel(QUrl(rightUrl));
+        label->setProperty("qss-role", "credential");
+        label->setText(rightText);
+        layout->addWidget(label);
+    }
+
     setLayout(layout);
 }
 

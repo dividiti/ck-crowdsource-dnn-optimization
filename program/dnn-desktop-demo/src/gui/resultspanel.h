@@ -26,10 +26,14 @@ private slots:
 
 private:
     ExperimentContext* _context;
-    QLabel *_infoImagesPerSec;
-    QLabel *_infoMetricTop1, *_infoMetricTop5;
+    QLabel* _infoImagesPerSec;
+    QLabel* _infoPrecision;
+    QLabel* _infoMetricTop1;
+    QLabel* _infoMetricTop5;
     ImageView *_worstPredictedImage;
-    QFrame *_panelMetrics, *_panelWorstPrediction;
+    QFrame* _panelMetrics;
+    QFrame* _panelWorstPrediction;
+    QFrame* _panelPrecision;
 
     int _top1Count;
     int _top5Count;

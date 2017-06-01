@@ -47,7 +47,12 @@ QStringList WorkerThread::getArgs() {
         return QStringList {
             "run",
             "program:" + program.program_uoa,
+            "--tmp_dir=" + program.target_dir,
             "--cmd_key=use_continuous",
+            "--deps.caffemodel=" + model.uoa,
+            "--deps.squeezedet=" + model.uoa,
+            "--deps.detection-dataset=" + dataset.valUoa,
+            "--deps.lib-tensorflow=" + program.target_uoa,
             "--quiet"
             };
 
@@ -61,7 +66,8 @@ QStringList WorkerThread::getArgs() {
             "--deps.caffemodel=" + model.uoa,
             "--deps.imagenet-aux=" + dataset.auxUoa,
             "--deps.imagenet-val=" + dataset.valUoa,
-            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize)
+            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize),
+            "--quiet"
             };
     }
 }
@@ -90,7 +96,7 @@ void WorkerThread::run() {
     AppEvents::registerProcess(program.exe);
 
     long timout = 1000 * AppConfig::classificationStartupTimeoutSeconds();
-    qDebug() << "Waiting until the program starts writing classification data";
+    qDebug() << "Waiting until the program starts writing data to " << program.outputFile;
     while (!outputFile.exists() && !isInterruptionRequested()) {
         if (ck.waitForFinished(NORMAL_WAIT_MS)) {
             AppEvents::error("Program stopped prematurely. "

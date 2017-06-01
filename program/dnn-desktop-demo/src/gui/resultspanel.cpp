@@ -24,12 +24,14 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     connect(_context, &ExperimentContext::modeChanged, this, &ResultsPanel::updateOnModeChanged);
 
     _infoImagesPerSec = makeInfoLabel();
+    _infoPrecision = makeInfoLabel();
     _infoMetricTop1 = makeInfoLabel();
     _infoMetricTop5 = makeInfoLabel();
 
     _worstPredictedImage = new ImageView(WORST_PREDICTED_IMAGE_W, WORST_PREDICTED_IMAGE_H);
 
     auto panelCounters = makePanel({ Ori::Gui::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
+    _panelPrecision = makePanel({ Ori::Gui::makeTitle("AVERAGE PRECISION"), _infoPrecision });
     auto panelMetricTop1 = makePanel({ Ori::Gui::makeTitle("TOP-1"), _infoMetricTop1 });
     auto panelMetricTop5 = makePanel({ Ori::Gui::makeTitle("TOP-5"), _infoMetricTop5 });
     _panelMetrics = new QFrame;
@@ -40,7 +42,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     });
 
     setLayout(Ori::Gui::layoutV(0, 0,
-        { panelCounters, _panelMetrics, _panelWorstPrediction, 0 }));
+        { panelCounters, _panelPrecision, _panelMetrics, _panelWorstPrediction, 0 }));
 
     resetInfo();
     updateOnModeChanged(AppConfig::currentMode().value<Mode>());
@@ -75,6 +77,7 @@ void ResultsPanel::newImageResult(ImageResult ir) {
     qint64 curTimeMs = QDateTime::currentMSecsSinceEpoch();
     if (curTimeMs - _lastUpdateMs > _updateIntervalMs) {
         _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
+        _infoPrecision->setText(QString(QStringLiteral("%1")).arg(_context->precision().avg, 0, 'f', 2));
         _infoMetricTop1->setText(QString::number((double)_top1Count / _imageCount, 'f', 2));
         _infoMetricTop5->setText(QString::number((double)_top5Count / _imageCount, 'f', 2));
 
@@ -93,6 +96,7 @@ void ResultsPanel::newImageResult(ImageResult ir) {
 
 void ResultsPanel::resetInfo() {
     _infoImagesPerSec->setText("N/A");
+    _infoPrecision->setText("N/A");
     _infoMetricTop1->setText("N/A");
     _infoMetricTop5->setText("N/A");
     _top1Count = 0;
@@ -108,4 +112,5 @@ void ResultsPanel::updateOnModeChanged(Mode mode) {
     bool v = mode.type == Mode::Type::CLASSIFICATION;
     _panelMetrics->setVisible(v);
     _panelWorstPrediction->setVisible(v);
+    _panelPrecision->setVisible(!v);
 }
