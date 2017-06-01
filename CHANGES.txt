@@ -1,4 +1,4 @@
-2017.06.01 * added dependency on ck-crowdtuning repo (to share stats via cknowledge.org/repo)
+2017.06.01 * added first logic to push data to cknowledge.org/repo
 
 2017.04.20 * started implementing module:experiment.bench.dnn.desktop to share performance statistics
 

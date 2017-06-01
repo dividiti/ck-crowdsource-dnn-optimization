@@ -563,15 +563,176 @@ def submit(i):
 
     """
 
-    ck.out('submit statistics to repository')
+#    ck.save_json_to_file({'json_file':'d:\\xyz.json', 'dict':i})
 
-    ck.out('')
-    ck.out('Command line: ')
-    ck.out('')
+    import copy
+    import os
 
-    import json
-    cmd=json.dumps(i, indent=2)
+    # Setting repository (local or remote)
+    er=i.get('exchange_repo','')
+    if er=='': er=ck.cfg['default_exchange_repo_uoa']
+    esr=i.get('exchange_subrepo','')
+    if esr=='': esr=ck.cfg['default_exchange_subrepo_uoa']
 
-    ck.out(cmd)
+    if i.get('local','')=='yes': 
+       er='local'
+       esr=''
+
+    hos=i.get('host_os','')
+    tos=i.get('target_os','')
+    tdid=i.get('target_device_id','')
+
+    # Get some info about platforms
+    ii={'action':'detect',
+        'module_uoa':cfg['module_deps']['platform'],
+        'host_os':hos,
+        'target_os':tos,
+        'device_id':tdid,
+        'exchange_repo':er,
+        'exchange_subrepo':esr,
+        'share':'yes'}
+
+    r=ck.access(ii)
+    if r['return']>0: return r
+
+    hos=r['host_os_uoa']
+    hosd=r['host_os_dict']
+
+    tos=r['os_uoa']
+    tosd=r['os_dict']
+    tbits=tosd.get('bits','')
+
+    remote=tosd.get('remote','')
+
+    tdid=r['device_id']
+
+    features=r.get('features',{})
+     
+    # Processing features
+    fplat=features.get('platform',{})
+    fos=features.get('os',{})
+    fcpu=features.get('cpu',{})
+    fgpu=features.get('gpu',{})
+
+    plat_name=fplat.get('name','')
+    plat_uid=features.get('platform_uid','')
+    os_name=fos.get('name','')
+    os_uid=features.get('os_uid','')
+
+    cpu_name=fcpu.get('name','')
+    if cpu_name=='': 
+       #cpu_name='unknown-'+fcpu.get('cpu_abi','')
+       # Likely CPU with multiple cores (such as big-little)
+       cpu_unique=features.get('cpu_unique',[])
+       for x in cpu_unique:
+           if cpu_name!='':
+              cpu_name+=' ; '
+
+           y=x.get('ck_arch_real_name','')
+           if y=='': y=x.get('ck_cpu_name','')
+
+           cpu_name+=y
+
+    cpu_uid=features.get('cpu_uid','')
+    gpu_name=fgpu.get('name','')
+    gpgpu_name=''
+
+    dd=i.get('dict',{})
+    program_uoa=dd.get('program_uoa','')
+    model_uoa=dd.get('model_uoa','')
+    dataset_uoa=dd.get('dataset_uoa','')
+
+    tmin=dd.get('mix_duration','')
+    tmax=dd.get('max_duration','')
+    tmean=dd.get('avg_duration','')
+
+    # Prepare high-level experiment meta
+    meta={'cpu_name':cpu_name,
+          'os_name':os_name,
+          'plat_name':plat_name,
+          'gpu_name':gpu_name,
+          'gpgpu_name':gpgpu_name,
+          'program_uoa':program_uoa,
+          'module_uoa':model_uoa,
+          'dataset_uoa':dataset_uoa}
+
+    # Call processing function
+    ii={'action':'process_results',
+        'module_uoa':work['self_module_uid'],
+        'repo_uoa':er,
+        'remote_repo_uoa':esr,
+        'dict':{'meta':meta, 'results':{'tmin':tmin, 'tmax':tmax, 'tmean':tmean}}}
+    rx=ck.access(ii)
+    if rx['return']>0: return rx
+
+    ck.out('Successfully recorded!')
+
+    return rx
+
+##############################################################################
+# process results (possibly on remote server)
+
+def process_results(i):
+    """
+    Input:  {
+              (dict) - results: {'meta': meta about platform, model, DNN engine, dataset, etc
+                                 'results': results}
+            }
+
+    Output: {
+              return       - return code =  0, if successful
+                                         >  0, if error
+              (error)      - error text if return > 0
+            }
+
+    """
+
+    ruoa=i.get('repo_uoa','')
+
+    dd=i.get('dict',{})
+    meta=dd.get('meta',{})
+    results=dd.get('results',{})
+
+    # Search if entry already exists!
+    ii={'action':'search',
+        'module_uoa':work['self_module_uid'],
+        'repo_uoa':ruoa,
+        'search_dict':{'meta':meta}}
+    rx=ck.access(ii)
+    if rx['return']>0: return rx
+
+    lst=rx['lst']
+
+    aresults=[] # For a proof-of-concept, simply appending results - later should do proper stat and other analysis 
+
+    if len(lst)==1:
+        rduid=lst[0]['data_uid']
+
+        # Load stats
+        rx=ck.access({'action':'load',
+                      'module_uoa':work['self_module_uid'],
+                      'data_uoa':rduid,
+                      'repo_uoa':ruoa})
+        if rx['return']>0: return rx
+
+        aresults=rx['dict'].get('aggregated_results',[])
+    else:
+       rx=ck.gen_uid({})
+       if rx['return']>0: return rx
+       rduid=rx['data_uid']
+
+    # Append results
+    aresults.append(results)
+
+    # Update entry (should later lock it too)
+    rx=ck.access({'action':'updated',
+                  'module_uoa':work['self_module_uid'],
+                  'data_uoa':rduid,
+                  'repo_uoa':ruoa,
+                  'dict':{'aggregated_results':aresults},
+                  'sort_keys':'yes',
+                  'substitute':'yes',
+                  'ignore_update':'yes'})
+    if rx['return']>0: return rx
 
     return {'return':0}

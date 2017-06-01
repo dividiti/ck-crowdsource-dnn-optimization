@@ -3,6 +3,10 @@
     "crowdsource": {
       "desc": "crowdsource these experiments"
     },
+    "process_results": {
+      "desc": "process results (possibly on remote server)",
+      "for_web": "yes"
+    },
     "replay": {
       "desc": "replay experiment (TBD)"
     },
