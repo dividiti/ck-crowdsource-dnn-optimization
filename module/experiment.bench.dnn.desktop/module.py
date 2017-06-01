@@ -729,7 +729,7 @@ def process_results(i):
                   'module_uoa':work['self_module_uid'],
                   'data_uoa':rduid,
                   'repo_uoa':ruoa,
-                  'dict':{'aggregated_results':aresults},
+                  'dict':{'meta':meta, 'aggregated_results':aresults},
                   'sort_keys':'yes',
                   'substitute':'yes',
                   'ignore_update':'yes'})
