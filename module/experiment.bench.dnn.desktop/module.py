@@ -642,7 +642,7 @@ def submit(i):
     model_uoa=dd.get('model_uoa','')
     dataset_uoa=dd.get('dataset_uoa','')
 
-    tmin=dd.get('mix_duration','')
+    tmin=dd.get('min_duration','')
     tmax=dd.get('max_duration','')
     tmean=dd.get('avg_duration','')
 
