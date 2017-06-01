@@ -725,7 +725,7 @@ def process_results(i):
     aresults.append(results)
 
     # Update entry (should later lock it too)
-    rx=ck.access({'action':'updated',
+    rx=ck.access({'action':'update',
                   'module_uoa':work['self_module_uid'],
                   'data_uoa':rduid,
                   'repo_uoa':ruoa,
