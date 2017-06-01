@@ -302,7 +302,7 @@ def show(i):
         results=d.get('aggregated_results',[])
 
         program_uoa=meta.get('program_uoa','')
-        model_uoa=meta.get('module_uoa','')
+        model_uoa=meta.get('model_uoa','')
         dataset_uoa=meta.get('dataset_uoa','')
 
 #        bgc='afffaf'
