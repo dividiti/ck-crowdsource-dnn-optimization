@@ -44,6 +44,13 @@ QString AppConfig::ckExeName() {
     return config().value("ck_exe_name").toString();
 }
 
+QString AppConfig::finisherFilePath() {
+    QString ret = config().value("finisher_file", "finisher_file").toString();
+    QFileInfo info(ret);
+    qWarning() << "absolute finisher path: " << info.absoluteFilePath();
+    return info.absoluteFilePath();
+}
+
 QString AppConfig::footerRightText() {
     return config().value("footer_right_text", "").toString();
 }

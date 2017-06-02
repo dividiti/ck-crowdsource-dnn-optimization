@@ -15,6 +15,8 @@ public:
     static QString ckBinPath();
     static QString ckExeName();
 
+    static QString finisherFilePath();
+
     static QString footerRightText();
     static QString footerRightUrl();
 

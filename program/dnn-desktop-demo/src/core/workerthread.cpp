@@ -53,6 +53,7 @@ QStringList WorkerThread::getArgs() {
             "--deps.squeezedet=" + model.uoa,
             "--deps.detection-dataset=" + dataset.valUoa,
             "--deps.lib-tensorflow=" + program.target_uoa,
+            "--env.FINISHER_FILE=" + AppConfig::finisherFilePath(),
             "--quiet"
             };
 
@@ -67,6 +68,7 @@ QStringList WorkerThread::getArgs() {
             "--deps.imagenet-aux=" + dataset.auxUoa,
             "--deps.imagenet-val=" + dataset.valUoa,
             "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize),
+            "--env.FINISHER_FILE=" + AppConfig::finisherFilePath(),
             "--quiet"
             };
     }
@@ -92,8 +94,10 @@ void WorkerThread::run() {
     QFile outputFile(program.outputFile);
     outputFile.remove();
 
+    QFile finisherFile(AppConfig::finisherFilePath());
+    finisherFile.remove();
+
     ck.start();
-    AppEvents::registerProcess(program.exe);
 
     long timout = 1000 * AppConfig::classificationStartupTimeoutSeconds();
     qDebug() << "Waiting until the program starts writing data to " << program.outputFile;
@@ -107,12 +111,12 @@ void WorkerThread::run() {
         }
         timout -= NORMAL_WAIT_MS;
         if (0 >= timout) {
+            emitStopped();
             ck.kill();
             ck.waitForFinished(KILL_WAIT_MS);
             AppEvents::error("Program startup takes too long. "
                              "Please, select the command below, copy it and run manually from command line "
                              "to investigate the issue:\n\n" + runCmd);
-            emitStopped();
             return;
         }
     }
@@ -178,16 +182,15 @@ void WorkerThread::run() {
         }
     }
     processPredictedResults(ir);
+    emitStopped();
     if (isInterruptionRequested()) {
         qDebug() << "Worker process interrupted by user request";
-        ck.kill();
-        ck.waitForFinished(KILL_WAIT_MS);
+        ck.waitForFinished(3 * 1000);
     } else {
         qDebug() << "Worker process finished";
     }
     qDebug() << "Closing classification data file";
     outputFile.close();
-    emitStopped();
 }
 
 void WorkerThread::emitStopped() {

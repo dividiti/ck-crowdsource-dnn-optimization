@@ -17,8 +17,6 @@ public:
     static void warning(const QString& msg);
     static void error(const QString& msg);
 
-    static void registerProcess(const QString& processName);
-
 public slots:
     void killChildProcesses();
 
