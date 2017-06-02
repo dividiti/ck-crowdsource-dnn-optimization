@@ -8,6 +8,16 @@
 #include <QMutex>
 #include <QFile>
 
+#ifndef Q_OS_WIN
+#include <signal.h>
+#include <unistd.h>
+
+void signalHandler(int) {
+    AppEvents::instance()->killChildProcesses();
+    QCoreApplication::exit(1);
+}
+#endif
+
 AppEvents* AppEvents::instance()
 {
     static AppEvents obj;
@@ -15,6 +25,12 @@ AppEvents* AppEvents::instance()
 }
 
 void AppEvents::init() {
+#ifndef Q_OS_WIN
+    signal(SIGQUIT, signalHandler);
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGHUP, signalHandler);
+#endif
     connect(qApp, &QCoreApplication::aboutToQuit, this, &AppEvents::killChildProcesses);
 }
 
