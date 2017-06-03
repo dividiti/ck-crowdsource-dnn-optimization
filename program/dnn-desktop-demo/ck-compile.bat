@@ -7,7 +7,7 @@ for /f %%i in ('%QMAKE% -query QT_INSTALL_BINS') do set WINDEPLOYQT=%%i\windeplo
 
 %CK_MAKE% CC=%CK_CC% CXX=%CK_CXX%
 
-cp ../bin/crowdsource-video-experiments-on-desktop.exe %CK_PROG_TARGET_EXE%
+copy ../bin/crowdsource-video-experiments-on-desktop.exe %CK_PROG_TARGET_EXE%
 
 %WINDEPLOYQT% %CK_PROG_TARGET_EXE%
 
