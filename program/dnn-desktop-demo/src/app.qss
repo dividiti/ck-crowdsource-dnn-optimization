@@ -56,6 +56,9 @@ QFrame#buttonsPanel {
 	background: #313c42;
 	border-top: 1px solid #40494D;
 }
+QPushButton:focus {
+        outline: none;
+}
 QPushButton#buttonStart {
 	height: 32px;
 	width: 154px;
