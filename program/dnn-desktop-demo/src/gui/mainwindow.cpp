@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setAttribute(Qt::WA_DeleteOnClose);
 
     connect(AppEvents::instance(), &AppEvents::onError, this, &MainWindow::onError);
+    connect(AppEvents::instance(), &AppEvents::onInfo, this, &MainWindow::onInfo);
 
     auto experimentsWidget = new QWidget;
     auto experimentLayout = new QVBoxLayout;
@@ -59,4 +60,8 @@ MainWindow::~MainWindow() {
 
 void MainWindow::onError(const QString& msg) {
     QMessageBox::critical(this, windowTitle(), msg);
+}
+
+void MainWindow::onInfo(const QString& msg) {
+    QMessageBox::information(this, windowTitle(), msg);
 }

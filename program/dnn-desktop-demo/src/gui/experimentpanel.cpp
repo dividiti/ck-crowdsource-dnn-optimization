@@ -161,6 +161,8 @@ void ExperimentPanel::publishResults() {
     const QString runCmd = _publisher->program() + " " +  _publisher->arguments().join(" ");
     qDebug() << "Run CK command: " << runCmd;
     _publisher->start();
+    _buttonStart->setEnabled(false);
+    _buttonStart->setText(tr("Publishing..."));
     _buttonPublish->setEnabled(false);
     _buttonPublish->setToolTip(tr("Publishing in process"));
 }
@@ -174,11 +176,14 @@ static void reportPublisherFail(QProcess* publisher) {
 
 void ExperimentPanel::publishResultsFinished(int exitCode, QProcess::ExitStatus exitStatus) {
     qDebug() << "Publishing results finished with exit code " << exitCode << " and exit status " << exitStatus;
+    _buttonStart->setEnabled(true);
+    _buttonStart->setText(tr("Start"));
     if (0 != exitCode) {
         reportPublisherFail(_publisher);
         _buttonPublish->setEnabled(true);
         _buttonPublish->setToolTip(tr("Publish"));
     } else {
+        AppEvents::info("Results are successfully pushed to the server. Thank you for contributing!");
         _context->clearAggregatedResults();
         _buttonPublish->setEnabled(false);
         _buttonPublish->setToolTip(tr("Already published"));

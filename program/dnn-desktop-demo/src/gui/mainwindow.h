@@ -28,6 +28,7 @@ private:
 
 private slots:
     void onError(const QString& msg);
+    void onInfo(const QString& msg);
 };
 
 #endif // MAINWINDOW_H

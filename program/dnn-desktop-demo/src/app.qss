@@ -70,6 +70,9 @@ QPushButton#buttonStart {
 	font-weight: 600;
 	font-family: Verdana;
 }
+QPushButton#buttonStart:!enabled {
+        background: #969494;
+}
 QPushButton#buttonStop {
 	height: 32px;
 	width: 154px;
