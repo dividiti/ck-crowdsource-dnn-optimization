@@ -81,6 +81,7 @@ void ExperimentPanel::startExperiment() {
 
 void ExperimentPanel::stopExperiment() {
     _buttonStop->setEnabled(false);
+    _buttonStop->setText(tr("Stopping..."));
     _context->stopExperiment();
 }
 
@@ -93,6 +94,7 @@ void ExperimentPanel::experimentStarted() {
 }
 
 void ExperimentPanel::experimentFinished() {
+    _buttonStop->setText(tr("Stop"));
     enableControls(true);
 }
 

@@ -35,7 +35,7 @@ private slots:
 private:
     ExperimentContext* _context;
     FeaturesPanel* _featuresPanel;
-    QWidget *_buttonStart, *_buttonStop;
+    QPushButton *_buttonStart, *_buttonStop;
     QPushButton *_buttonPublish;
 
     Program _program;

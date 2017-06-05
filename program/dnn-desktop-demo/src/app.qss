@@ -78,6 +78,9 @@ QPushButton#buttonStop {
 	font-weight: 600;
 	font-family: Verdana;
 }
+QPushButton#buttonStop:!enabled {
+        background: #969494;
+}
 QPushButton#buttonPublish {
 	height: 32px;
 	width: 32px;
