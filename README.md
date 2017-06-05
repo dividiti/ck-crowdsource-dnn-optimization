@@ -108,10 +108,12 @@ $ ck pull repo:ck-tensorflow
 After that, you should be able to successfully run a simple demo:
 ```
 $ ck compile program:squeezedet
-$ ck run program:squeezedet --cmd_key=squeezedet
+$ ck run program:squeezedet --cmd_key=default
 ```
 
 (it may ask a couple of questions and install some stuff like a dataset at the first run).
+
+Note that you will need Python 3.5 on Windows!
 
 If this works for you, the object detection mode in the UI will be available.
 
