@@ -10,7 +10,31 @@
 #include <QMap>
 #include <QFrame>
 
-static const QMap<QString, QString> ICONS{ {"car", ":/images/ico-auto"}, {"cyclist", ":/images/ico-bike"}, {"pedestrian", ":/images/ico-pedestrian"} };
+static const QMap<QString, QString> ICONS {
+    {"car", ":/images/ico-auto"},
+    {"cyclist", ":/images/ico-bike"},
+    {"pedestrian", ":/images/ico-pedestrian"},
+    {"person", ":/images/ico-pedestrian"},
+
+    {"aeroplane", ":/images/ico-plane"},
+    {"bicycle", ":/images/ico-bicycle"},
+    {"bird", ":/images/ico-bird"},
+    {"boat", ":/images/ico-boat"},
+    {"bottle", ":/images/ico-bottle"},
+    {"bus", ":/images/ico-bus"},
+    {"cat", ":/images/ico-cat"},
+    {"chair", ":/images/ico-chair"},
+    {"cow", ":/images/ico-cow"},
+    {"diningtable", ":/images/ico-diningtable"},
+    {"dog", ":/images/ico-dog"},
+    {"horse", ":/images/ico-horse"},
+    {"motorbike", ":/images/ico-motorbike"},
+    {"pottedplant", ":/images/ico-pottedplant"},
+    {"sheep", ":/images/ico-sheep"},
+    {"sofa", ":/images/ico-sofa"},
+    {"train", ":/images/ico-train"},
+    {"tvmonitor", ":/images/ico-tvmonitor"}
+};
 
 RecognitionWidget::RecognitionWidget(QWidget *parent) : QWidget(parent) {
     imageLabel = new QLabel;

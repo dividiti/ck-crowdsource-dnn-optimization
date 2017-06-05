@@ -28,6 +28,26 @@
         <file alias="ico-auto">../images/ico-auto.png</file>
         <file alias="ico-bike">../images/ico-bike.png</file>
         <file alias="ico-pedestrian">../images/ico-pedestrian.png</file>
+        <file alias="ico-bicycle">../images/ico-bicycle.png</file>
+        <file alias="ico-bird">../images/ico-bird.png</file>
+        <file alias="ico-boat">../images/ico-boat.png</file>
+        <file alias="ico-bottle">../images/ico-bottle.png</file>
+        <file alias="ico-bus">../images/ico-bus.png</file>
+        <file alias="ico-car">../images/ico-car.png</file>
+        <file alias="ico-cat">../images/ico-cat.png</file>
+        <file alias="ico-chair">../images/ico-chair.png</file>
+        <file alias="ico-cow">../images/ico-cow.png</file>
+        <file alias="ico-diningtable">../images/ico-dinningtable.png</file>
+        <file alias="ico-dog">../images/ico-dog.png</file>
+        <file alias="ico-horse">../images/ico-horse.png</file>
+        <file alias="ico-monitor">../images/ico-monitor.png</file>
+        <file alias="ico-motorbike">../images/ico-motorbike.png</file>
+        <file alias="ico-plane">../images/ico-plane.png</file>
+        <file alias="ico-pottedplant">../images/ico-pottedplant.png</file>
+        <file alias="ico-sheep">../images/ico-sheep.png</file>
+        <file alias="ico-sofa">../images/ico-sofa.png</file>
+        <file alias="ico-train">../images/ico-train.png</file>
+        <file alias="ico-tvmonitor">../images/ico-tvmonitor.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>app.qss</file>
