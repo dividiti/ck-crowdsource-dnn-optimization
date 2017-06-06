@@ -35,9 +35,6 @@ private:
     QFrame* _panelWorstPrediction;
     QFrame* _panelPrecision;
 
-    int _top1Count;
-    int _top5Count;
-    int _imageCount;
     double _worstAccuracyDelta;
 
     const qint64 _updateIntervalMs;

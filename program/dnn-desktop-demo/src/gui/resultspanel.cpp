@@ -67,19 +67,12 @@ void ResultsPanel::experimentStarted() {
 }
 
 void ResultsPanel::newImageResult(ImageResult ir) {
-    ++_imageCount;
-    if (ir.correctAsTop1()) {
-        ++_top1Count;
-    }
-    if (ir.correctAsTop5()) {
-        ++_top5Count;
-    }
     qint64 curTimeMs = QDateTime::currentMSecsSinceEpoch();
     if (curTimeMs - _lastUpdateMs > _updateIntervalMs) {
         _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
         _infoPrecision->setText(QString(QStringLiteral("%1")).arg(_context->precision().avg, 0, 'f', 2));
-        _infoMetricTop1->setText(QString::number((double)_top1Count / _imageCount, 'f', 2));
-        _infoMetricTop5->setText(QString::number((double)_top5Count / _imageCount, 'f', 2));
+        _infoMetricTop1->setText(QString::number(_context->top1().avg, 'f', 2));
+        _infoMetricTop5->setText(QString::number(_context->top5().avg, 'f', 2));
 
         double accuracyDelta = ir.accuracyDelta();
         if (accuracyDelta > _worstAccuracyDelta) {
@@ -99,9 +92,6 @@ void ResultsPanel::resetInfo() {
     _infoPrecision->setText("N/A");
     _infoMetricTop1->setText("N/A");
     _infoMetricTop5->setText("N/A");
-    _top1Count = 0;
-    _top5Count = 0;
-    _imageCount = 0;
     _worstAccuracyDelta = 0;
     _worstPredictedImage->clearImage();
     _worstPredictedImage->setToolTip("");

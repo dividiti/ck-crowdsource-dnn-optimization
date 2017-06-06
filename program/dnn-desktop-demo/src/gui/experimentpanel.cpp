@@ -126,6 +126,20 @@ static QJsonObject toJson(const ExperimentContext::Stat& stat) {
     return dict;
 }
 
+static QJsonObject toJsonClassification(const ExperimentContext* context) {
+    QJsonObject dict;
+    dict["top1"] = context->top1().avg;
+    dict["top5"] = context->top5().avg;
+    dict["batch_size"] = context->batchSize();
+    return dict;
+}
+
+static QJsonObject toJsonDetection(const ExperimentContext* context) {
+    QJsonObject dict;
+    dict["precision"] = toJson(context->precision());
+    return dict;
+}
+
 void ExperimentPanel::publishResults() {
     if (!_context->hasAggregatedResults()) {
         // nothing to publish
@@ -133,11 +147,14 @@ void ExperimentPanel::publishResults() {
     }
     QJsonObject dict;
     dict["duration"] = toJson(_context->duration());
-    dict["precision"] = toJson(_context->precision());
+    dict["detection"] = toJsonDetection(_context);
+    dict["classification"] = toJsonClassification(_context);
+    dict["mode"] = Mode(_context->mode()).name();
     dict["model_uoa"] = _model.uoa;
     dict["dataset_uoa"] = _dataset.valUoa;
     dict["program_uoa"] = _program.program_uoa;
     dict["tmp_dir"] = _program.target_dir;
+    dict["engine_uoa"] = _program.target_uoa;
     QJsonObject results;
     results["dict"] = dict;
     QFileInfo out(_program.outputFile);

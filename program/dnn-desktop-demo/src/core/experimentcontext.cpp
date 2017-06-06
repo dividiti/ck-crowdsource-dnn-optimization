@@ -29,9 +29,15 @@ void ExperimentContext::notifyModeChanged(const Mode& mode) {
 void ExperimentContext::clearAggregatedResults() {
     _duration.clear();
     _precision.clear();
+    _top1.clear();
+    _top5.clear();
+    _mode = AppConfig::currentModeType();
+    _batchSize = AppConfig::batchSize();
 }
 
 void ExperimentContext::aggregateResults(ImageResult ir) {
     _duration.add(ir.duration);
     _precision.add(ir.precision());
+    _top1.add(ir.correctAsTop1() ? 1 : 0);
+    _top5.add(ir.correctAsTop5() ? 1 : 0);
 }

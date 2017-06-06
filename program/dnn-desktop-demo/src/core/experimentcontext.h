@@ -42,6 +42,11 @@ public:
 
     Stat duration() const { return _duration; }
     Stat precision() const { return _precision; }
+    Stat top1() const { return _top1; }
+    Stat top5() const { return _top5; }
+
+    Mode::Type mode() const { return _mode; }
+    int batchSize() const { return _batchSize; }
 
     bool hasAggregatedResults() const { return _duration.count > 0; }
     void clearAggregatedResults();
@@ -60,6 +65,10 @@ private:
     bool _isExperimentStarted = false;
     Stat _duration;
     Stat _precision;
+    Stat _top1;
+    Stat _top5;
+    Mode::Type _mode;
+    int _batchSize;
 };
 
 #endif // EXPERIMENTCONTEXT_H

@@ -125,6 +125,10 @@ struct Mode {
         }
     }
 
+    QString name() const {
+        return title().toLower().replace(" ", "-");
+    }
+
     Mode(Type t = CLASSIFICATION) : type(t) {}
 
     bool operator==(const Mode& o) const {
