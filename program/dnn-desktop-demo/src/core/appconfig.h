@@ -2,6 +2,7 @@
 #define APPCONFIG_H
 
 #include <QString>
+#include <QVariant>
 #include "appmodels.h"
 
 QT_BEGIN_NAMESPACE
@@ -36,7 +37,7 @@ public:
     static QVariant currentModel(Mode::Type mode = currentModeType(), Engine::Type engine = currentEngineType());
     static void setCurrentModel(QString uoa, Mode::Type mode = currentModeType(), Engine::Type engine = currentEngineType());
 
-    static QList<Dataset> datasets(Mode::Type mode = currentModeType());
+    static QList<Dataset> datasets(Mode::Type mode = currentModeType(), QVariant program = currentProgram());
     static QVariant currentDataset(Mode::Type mode = currentModeType());
     static void setCurrentDataset(QString uoa, Mode::Type mode = currentModeType());
 

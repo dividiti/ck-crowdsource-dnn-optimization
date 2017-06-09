@@ -192,7 +192,7 @@ static QVariant selectEngineAndBatchSizeViaDialog() {
 void FeaturesPanel::selectEngine() {
     QVariant v = selectEngineAndBatchSizeViaDialog();
     if (v.isValid()) {
-        AppConfig::setCurrentProgram(v.value<Program>().target_uoa);
+        AppConfig::setCurrentProgram(v.value<Program>().targetUoa);
         updateExperimentConditions();
     }
 }

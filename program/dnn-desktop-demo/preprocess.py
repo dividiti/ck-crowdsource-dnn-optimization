@@ -185,6 +185,7 @@ def fill_programs(ck, conf, exe_extension, section, tags):
             continue
 
         program_path = r['path']
+        is_webcam = 'webcam' in u.get('meta', {}).get('tags', [])
 
         target_dirs = glob.glob(os.path.join(program_path, 'tmp*'))
         if not target_dirs:
@@ -228,6 +229,7 @@ def fill_programs(ck, conf, exe_extension, section, tags):
         setstr(conf, section, str(i) + '_output_file', output_file)
         setstr(conf, section, str(i) + '_exe', target_file)
         setstr(conf, section, str(i) + '_engine', CAFFE_ENGINE)
+        conf.set(section, str(i) + '_webcam', 1 if is_webcam else 0)
 
         conf.set(section, str(i) + '_target_count', str(len(target_paths)))
         for j, target_path in enumerate(target_paths):
@@ -284,8 +286,11 @@ def fill_squeezedet(ck, conf, section, start_count):
             continue
 
         program_path = r['path']
+        is_webcam = 'webcam' in u.get('meta', {}).get('tags', [])
+        
         setstr(conf, section, str(i) + '_path', program_path)
         setstr(conf, section, str(i) + '_engine', TF_ENGINE)
+        conf.set(section, str(i) + '_webcam', 1 if is_webcam else 0)
 
         r = find_by_tags(ck, tags='lib,tensorflow', module='env')
         if r['return'] > 0: return r

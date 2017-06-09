@@ -46,13 +46,13 @@ QStringList WorkerThread::getArgs() {
     case Mode::Type::RECOGNITION:
         return QStringList {
             "run",
-            "program:" + program.program_uoa,
-            "--tmp_dir=" + program.target_dir,
-            "--cmd_key=use_continuous",
+            "program:" + program.programUoa,
+            "--tmp_dir=" + program.targetDir,
+            "--cmd_key=" + dataset.cmdKey,
             "--deps.caffemodel=" + model.uoa,
             "--deps.squeezedet=" + model.uoa,
             "--deps.detection-dataset=" + dataset.valUoa,
-            "--deps.lib-tensorflow=" + program.target_uoa,
+            "--deps.lib-tensorflow=" + program.targetUoa,
             "--env.FINISHER_FILE=" + AppConfig::finisherFilePath(),
             "--quiet"
             };
@@ -61,9 +61,9 @@ QStringList WorkerThread::getArgs() {
     default:
         return QStringList {
             "run",
-            "program:" + program.program_uoa,
-            "--tmp_dir=" + program.target_dir,
-            "--cmd_key=use_continuous",
+            "program:" + program.programUoa,
+            "--tmp_dir=" + program.targetDir,
+            "--cmd_key=" + dataset.cmdKey,
             "--deps.caffemodel=" + model.uoa,
             "--deps.imagenet-aux=" + dataset.auxUoa,
             "--deps.imagenet-val=" + dataset.valUoa,

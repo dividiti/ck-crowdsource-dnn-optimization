@@ -167,12 +167,13 @@ struct Engine {
 //-----------------------------------------------------------------------------
 
 struct Program {
-    QString program_uoa;
-    QString target_uoa;
+    QString programUoa;
+    QString targetUoa;
     QString name;
     QString outputFile;
     QString exe;
-    QString target_dir;
+    QString targetDir;
+    bool supportsWebcam;
 
     Engine::Type engine;
 
@@ -181,7 +182,7 @@ struct Program {
     }
 
     bool operator==(const Program& o) const {
-        return target_uoa == o.target_uoa;
+        return targetUoa == o.targetUoa;
     }
 
     bool operator<(const Program& o) const {
@@ -219,6 +220,7 @@ struct Dataset {
     QString auxName;
     QString valUoa;
     QString valName;
+    QString cmdKey = "use_continuous";
 
     QString title() const {
         return valName;

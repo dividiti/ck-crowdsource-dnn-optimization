@@ -152,9 +152,9 @@ void ExperimentPanel::publishResults() {
     dict["mode"] = Mode(_context->mode()).name();
     dict["model_uoa"] = _model.uoa;
     dict["dataset_uoa"] = _dataset.valUoa;
-    dict["program_uoa"] = _program.program_uoa;
-    dict["tmp_dir"] = _program.target_dir;
-    dict["engine_uoa"] = _program.target_uoa;
+    dict["program_uoa"] = _program.programUoa;
+    dict["tmp_dir"] = _program.targetDir;
+    dict["engine_uoa"] = _program.targetUoa;
     QJsonObject results;
     results["dict"] = dict;
     QFileInfo out(_program.outputFile);

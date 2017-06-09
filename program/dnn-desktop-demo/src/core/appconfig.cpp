@@ -9,6 +9,16 @@
 
 static const QString STYLESHEET_PATH = ":/qss/app.qss";
 
+static Dataset createWebcamDataset() {
+    Dataset ret;
+    ret.auxUoa = "734ad44f6454b893";
+    ret.auxName = "Webcam";
+    ret.valUoa = "4ec688c967460298";
+    ret.valName = "Webcam";
+    ret.cmdKey = "use_webcam";
+    return ret;
+}
+
 QSettings& AppConfig::config() {
     static QSettings cfg(configFileName(), QSettings::IniFormat);
     return cfg;
@@ -111,20 +121,22 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
         auto exe = sectionValue(section, i, "exe");
         auto programPath = sectionValue(section, i, "path");
         auto programUoa = sectionValue(section, i, "uoa");
+        bool webcam = "1" == sectionValue(section, i, "webcam");
         auto programEngine = Engine::parse(sectionValue(section, i, "engine"));
         int targetCount = configValueInt(section + "/" + QString::number(i) + "_target_count", 0);
         for (int j = 0; j < targetCount; ++j) {
             auto keyPrefix = "target_" + QString::number(j) + "_";
             Program p;
             p.name = sectionValue(section, i, keyPrefix + "name");
-            p.target_uoa = sectionValue(section, i, keyPrefix + "uoa");
-            p.program_uoa = programUoa;
+            p.targetUoa = sectionValue(section, i, keyPrefix + "uoa");
+            p.programUoa = programUoa;
             p.engine = programEngine;
+            p.supportsWebcam = webcam;
 
             auto targetPath = sectionValue(section, i, keyPrefix + "path");
             auto targetFullPath = pathAppend(programPath, targetPath);
 
-            p.target_dir = targetPath;
+            p.targetDir = targetPath;
             p.outputFile = pathAppend(targetFullPath, outputFile);
             p.exe = pathAppend(targetFullPath, exe);
 
@@ -149,7 +161,7 @@ QVariant AppConfig::currentProgram(Mode::Type mode) {
         if (!ret.isValid()) {
             ret.setValue(i);
         }
-        if (i.target_uoa == uoa) {
+        if (i.targetUoa == uoa) {
             ret.setValue(i);
             break;
         }
@@ -205,12 +217,15 @@ void AppConfig::setCurrentModel(QString uoa, Mode::Type mode, Engine::Type engin
     config().sync();
 }
 
-QList<Dataset> AppConfig::datasets(Mode::Type mode) {
+QList<Dataset> AppConfig::datasets(Mode::Type mode, QVariant program) {
     const QString valSection = Mode::Type::CLASSIFICATION == mode ? "VAL" : "DetectionDatasets";
     const QString auxSection = "AUX";
     int valCount = sectionCount(valSection);
     int auxCount = sectionCount(auxSection);
     QList<Dataset> ret;
+    if (program.isValid() && program.value<Program>().supportsWebcam) {
+        ret.append(createWebcamDataset());
+    }
     if (0 >= valCount) {
         return ret;
     }
@@ -313,7 +328,7 @@ qint64 AppConfig::fpsUpdateIntervalMs() {
 }
 
 qint64 AppConfig::recognitionUpdateIntervalMs() {
-    return config().value("recognition_update_interval_ms", 1000).toInt();
+    return config().value("recognition_update_interval_ms", 10).toInt();
 }
 
 int AppConfig::batchSize() {
