@@ -1,3 +1,5 @@
+2017.06.11 * fixing webcam on Windows
+
 2017.06.01 * added first logic to push data to cknowledge.org/repo
 
 2017.04.20 * started implementing module:experiment.bench.dnn.desktop to share performance statistics
