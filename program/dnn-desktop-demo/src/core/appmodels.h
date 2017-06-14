@@ -221,6 +221,7 @@ struct Dataset {
     QString valUoa;
     QString valName;
     QString cmdKey = "use_continuous";
+    QMap<QString, QString> env;
 
     QString title() const {
         return valName;

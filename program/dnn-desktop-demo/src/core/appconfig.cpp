@@ -9,14 +9,24 @@
 
 static const QString STYLESHEET_PATH = ":/qss/app.qss";
 
-static Dataset createWebcamDataset() {
-    Dataset ret;
-    ret.auxUoa = "734ad44f6454b893";
-    ret.auxName = "Webcam";
-    ret.valUoa = "4ec688c967460298";
-    ret.valName = "Webcam";
-    ret.cmdKey = "use_webcam";
-    return ret;
+static QList<Dataset> createWebcamDatasets() {
+    Dataset main;
+    main.auxUoa = "734ad44f6454b893";
+    main.auxName = "Webcam (0, main)";
+    main.valUoa = "4ec688c967460298";
+    main.valName = "Webcam (0, main)";
+    main.cmdKey = "use_webcam";
+    main.env = {{"IMAGE_SOURCE_DEVICE", "0"}};
+
+    Dataset alt;
+    alt.auxUoa = "6455f8d8f97f1f0a";
+    alt.auxName = "Webcam (1, alternative)";
+    alt.valUoa = "50ec742309832633";
+    alt.valName = "Webcam (1, alternative)";
+    alt.cmdKey = "use_webcam";
+    alt.env = {{"IMAGE_SOURCE_DEVICE", "1"}};
+
+    return { main, alt };
 }
 
 QSettings& AppConfig::config() {
@@ -224,7 +234,7 @@ QList<Dataset> AppConfig::datasets(Mode::Type mode, QVariant program) {
     int auxCount = sectionCount(auxSection);
     QList<Dataset> ret;
     if (program.isValid() && program.value<Program>().supportsWebcam) {
-        ret.append(createWebcamDataset());
+        ret += createWebcamDatasets();
     }
     if (0 >= valCount) {
         return ret;

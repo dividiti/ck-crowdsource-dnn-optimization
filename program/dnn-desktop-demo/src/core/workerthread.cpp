@@ -42,9 +42,10 @@ static const long KILL_WAIT_MS = 1000 * 10;
 WorkerThread::WorkerThread(const Program& program, const Mode& mode, QObject* parent) : QThread(parent), program(program), mode(mode) {}
 
 QStringList WorkerThread::getArgs() {
+    QStringList ret;
     switch (mode.type) {
     case Mode::Type::RECOGNITION:
-        return QStringList {
+        ret = QStringList {
             "run",
             "program:" + program.programUoa,
             "--tmp_dir=" + program.targetDir,
@@ -52,14 +53,13 @@ QStringList WorkerThread::getArgs() {
             "--deps.caffemodel=" + model.uoa,
             "--deps.squeezedet=" + model.uoa,
             "--deps.detection-dataset=" + dataset.valUoa,
-            "--deps.lib-tensorflow=" + program.targetUoa,
-            "--env.FINISHER_FILE=" + AppConfig::finisherFilePath(),
-            "--quiet"
+            "--deps.lib-tensorflow=" + program.targetUoa
             };
+        break;
 
     case Mode::Type::CLASSIFICATION:
     default:
-        return QStringList {
+        ret = QStringList {
             "run",
             "program:" + program.programUoa,
             "--tmp_dir=" + program.targetDir,
@@ -67,11 +67,17 @@ QStringList WorkerThread::getArgs() {
             "--deps.caffemodel=" + model.uoa,
             "--deps.imagenet-aux=" + dataset.auxUoa,
             "--deps.imagenet-val=" + dataset.valUoa,
-            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize),
-            "--env.FINISHER_FILE=" + AppConfig::finisherFilePath(),
-            "--quiet"
+            "--env.CK_CAFFE_BATCH_SIZE=" + QString::number(batchSize)
             };
     }
+
+    for (auto e: dataset.env.toStdMap()) {
+        ret.append("--env." + e.first + "=" + e.second);
+    }
+
+    ret.append("--env.FINISHER_FILE=" + AppConfig::finisherFilePath());
+    ret.append("--quiet");
+    return ret;
 }
 
 static void insertOrUpdate(QMap<QString, int>& map, QString key, int v) {
