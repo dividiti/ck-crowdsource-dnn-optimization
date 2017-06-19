@@ -46,13 +46,36 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     _buttonPublish->setEnabled(false);
     connect(_buttonPublish, SIGNAL(clicked(bool)), this, SLOT(publishResults()));
 
+    _buttonZoomIn = new QPushButton("+");
+    _buttonZoomIn->setObjectName("buttonZoomIn");
+    _buttonZoomIn->setToolTip(tr("Zoom in"));
+    connect(_buttonZoomIn, SIGNAL(clicked(bool)), _context, SLOT(zoomIn()));
+
+    _buttonZoomOut = new QPushButton("-");
+    _buttonZoomOut->setObjectName("buttonZoomOut");
+    _buttonZoomOut->setToolTip(tr("Zoom out"));
+    connect(_buttonZoomOut, SIGNAL(clicked(bool)), _context, SLOT(zoomOut()));
+
+    _buttonZoomActual = new QPushButton("O");
+    _buttonZoomActual->setObjectName("buttonZoomActual");
+    _buttonZoomActual->setToolTip(tr("Actual size"));
+    connect(_buttonZoomActual, SIGNAL(clicked(bool)), _context, SLOT(zoomActual()));
+
     auto framesPanel = new FramesPanel(context);
     _featuresPanel = new FeaturesPanel(context);
     auto resultsPanel = new ResultsPanel(context);
 
     auto buttonsPanel = new QFrame;
     buttonsPanel->setObjectName("buttonsPanel");
-    buttonsPanel->setLayout(Ori::Gui::layoutH({0, _buttonStart, _buttonStop, _buttonPublish, 0}));
+    int top, left, right, bottom;
+    auto startLayout = Ori::Gui::layoutH({_buttonStart, _buttonStop, 0, _buttonPublish});
+    startLayout->getContentsMargins(&left, &top, &right, &bottom);
+    auto zoomLayout = Ori::Gui::layoutH({_buttonZoomIn, 0, _buttonZoomOut, 0, _buttonZoomActual});
+    zoomLayout->setContentsMargins(left, 0, right, 7);
+    buttonsPanel->setLayout(Ori::Gui::layoutV({
+        zoomLayout,
+        startLayout
+    }));
 
     adjustSidebar(_featuresPanel);
     adjustSidebar(resultsPanel);

@@ -41,3 +41,16 @@ void ExperimentContext::aggregateResults(ImageResult ir) {
     _top1.add(ir.correctAsTop1() ? 1 : 0);
     _top5.add(ir.correctAsTop5() ? 1 : 0);
 }
+
+void ExperimentContext::zoomIn() {
+    emit zoomChanged(AppConfig::adjustZoom(true));
+}
+
+void ExperimentContext::zoomOut() {
+    emit zoomChanged(AppConfig::adjustZoom(false));
+}
+
+void ExperimentContext::zoomActual() {
+    AppConfig::setZoom(1);
+    emit zoomChanged(1);
+}

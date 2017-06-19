@@ -23,6 +23,11 @@ public:
 
     static int recognitionImageHeight();
 
+    static double zoom();
+    static void setZoom(double z);
+    static double zoomStep();
+    static double adjustZoom(bool plus);
+
     static QString styleSheet();
 
     static QString logPath() { return localSubdir("logs_path", "logs"); }

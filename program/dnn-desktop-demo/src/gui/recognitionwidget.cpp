@@ -1,6 +1,7 @@
 #include "recognitionwidget.h"
 #include "appmodels.h"
 #include "appconfig.h"
+#include "experimentcontext.h"
 
 #include <QLabel>
 #include <QPixmap>
@@ -9,6 +10,10 @@
 #include <QVariant>
 #include <QMap>
 #include <QFrame>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QColor>
+#include <QPainter>
 
 static const QMap<QString, QString> ICONS {
     {"car", ":/images/ico-auto"},
@@ -36,38 +41,67 @@ static const QMap<QString, QString> ICONS {
     {"tvmonitor", ":/images/ico-tvmonitor"}
 };
 
-RecognitionWidget::RecognitionWidget(QWidget *parent) : QWidget(parent) {
+RecognitionWidget::RecognitionWidget(ExperimentContext* ctx, QWidget *parent) : QWidget(parent), context(ctx) {
+    connect(context, &ExperimentContext::zoomChanged, this, &RecognitionWidget::rescale);
+
     imageLabel = new QLabel;
 
-    auto hl = new QHBoxLayout;
-    hl->setMargin(0);
-    hl->addStretch();
-    hl->addWidget(imageLabel);
-    hl->addStretch();
-
-    auto frame = new QFrame;
-    frame->setLayout(hl);
+    scroll = new QScrollArea;
+    scroll->setStyleSheet("background-color:transparent; border: none;");
+    scroll->horizontalScrollBar()->setStyleSheet("QScrollBar {height:0px;}");
+    scroll->verticalScrollBar()->setStyleSheet("QScrollBar {width:0px;}");
 
     QVBoxLayout* l = new QVBoxLayout;
     l->setMargin(0);
-    l->addWidget(frame);
+    l->addWidget(scroll);
 
     descriptionLabel = new QLabel;
     descriptionLabel->setProperty("qss-role", "recognition-label");
-    descriptionLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    descriptionLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     l->addWidget(descriptionLabel);
 
     setLayout(l);
 }
 
-void RecognitionWidget::load(const ImageResult& ir) {
-    QPixmap pixmap(ir.imageFile);
+RecognitionWidget::~RecognitionWidget() {
+    disconnect(context, &ExperimentContext::zoomChanged, this, &RecognitionWidget::rescale);
+}
+
+static QPixmap makeLarger(const QPixmap& pixmap, int width, int height) {
+    if (width <= pixmap.width() && height <= pixmap.height()) {
+        return pixmap;
+    }
+    QPixmap ret(width, height);
+    ret.fill(QColor::fromRgbF(0, 0, 0, 0));
+    QPainter p(&ret);
+    int x = qMax(0, (width - pixmap.width())/2);
+    int y = qMax(0, (height - pixmap.height())/2);
+    p.drawPixmap(x, y, pixmap, 0, 0, 0, 0);
+    return ret;
+}
+
+static QPixmap scale(const QPixmap& pixmap, double factor) {
+    if (1 == factor || 0 >= factor) {
+        return pixmap;
+    }
+    return pixmap.scaled(pixmap.width() * factor, pixmap.height() * factor);
+}
+
+QPixmap RecognitionWidget::polishPixmap(const QPixmap& pmap) {
+    QPixmap pixmap = pmap;
     int h = AppConfig::recognitionImageHeight();
     if (0 < h) {
         pixmap = pixmap.scaledToHeight(h);
+    } else {
+        pixmap = scale(pixmap, AppConfig::zoom());
     }
-    imageLabel->setPixmap(pixmap);
-    imageLabel->setToolTip(ir.imageFile);
+    if (scroll->width() > pixmap.width() || scroll->height() > pixmap.height()) {
+        pixmap = makeLarger(pixmap, scroll->width() + 50, scroll->height() + 50);
+    }
+    return pixmap;
+}
+
+void RecognitionWidget::load(const ImageResult& ir) {
     QString text = "<style>"
                    "    th { "
                    "        text-align: center;"
@@ -104,9 +138,28 @@ void RecognitionWidget::load(const ImageResult& ir) {
     }
     text += "</table>";
     descriptionLabel->setText(text);
+
+    origPixmap = QPixmap(ir.imageFile);
+    imageLabel->setPixmap(polishPixmap(origPixmap));
+    imageLabel->setToolTip(ir.imageFile);
+    updateScrollArea();
+}
+
+void RecognitionWidget::updateScrollArea() {
+    scroll->setWidget(imageLabel);
+    scroll->verticalScrollBar()->setValue(scroll->verticalScrollBar()->maximum() / 2);
+    scroll->horizontalScrollBar()->setValue(scroll->horizontalScrollBar()->maximum() / 2);
 }
 
 void RecognitionWidget::clear() {
     imageLabel->clear();
     descriptionLabel->clear();
+    origPixmap = QPixmap();
+}
+
+void RecognitionWidget::rescale(double) {
+    if (!origPixmap.isNull()) {
+        imageLabel->setPixmap(polishPixmap(origPixmap));
+        updateScrollArea();
+    }
 }

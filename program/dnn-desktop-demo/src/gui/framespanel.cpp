@@ -53,12 +53,11 @@ void FramesPanel::initLayout() {
             l->addWidget(f, row, col);
         }
     } else {
-        _rec_widget = new RecognitionWidget;
+        _rec_widget = new RecognitionWidget(_context);
 
         QVBoxLayout* l = new QVBoxLayout;
         _layout = l;
         l->addWidget(_rec_widget);
-        l->addStretch();
         setLayout(l);
     }
 }

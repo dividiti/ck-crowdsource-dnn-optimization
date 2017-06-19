@@ -98,6 +98,17 @@ QPushButton#buttonPublish {
 	font-weight: 600;
 	font-family: Verdana;
 }
+QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomFit, QPushButton#buttonZoomActual {
+        height: 32px;
+        width: 64px;
+        background: #313c42;
+        border-radius: 16px;
+        border: 1px solid #232A2D;
+        color: #AFB3B5;
+        font-size: 10pt;
+        font-weight: 600;
+        font-family: Verdana;
+}
 QFrame[qss-role="divider"] {
 	border-top: 1px solid #21292C;
 	margin-left: 16px;

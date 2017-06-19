@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <algorithm>
 
+static const double EPSILON = 0.00001;
 static const QString STYLESHEET_PATH = ":/qss/app.qss";
 
 static QList<Dataset> createWebcamDatasets() {
@@ -81,6 +82,43 @@ QString AppConfig::footerRightUrl() {
 
 int AppConfig::recognitionImageHeight() {
     return config().value("recognition_image_height", -1).toInt();
+}
+
+double AppConfig::zoom() {
+    double ret = config().value("recognition_zoom", 1.0).toDouble();
+    return 0 < ret ? ret : 1;
+}
+
+static bool greaterThan0(double z) {
+    return qAbs(z) > EPSILON;
+}
+
+void AppConfig::setZoom(double z) {
+    if (greaterThan0(z)) {
+        config().setValue("recognition_zoom", z);
+    }
+}
+
+double AppConfig::zoomStep() {
+    double ret = config().value("recognition_zoom_step", 0.2).toDouble();
+    return greaterThan0(ret) ? ret : 1;
+}
+
+double AppConfig::adjustZoom(bool plus) {
+    double z = zoom();
+    if (plus) {
+        z += zoomStep();
+        setZoom(z);
+        return z;
+    } else {
+        auto z1 = z - zoomStep();
+        if (greaterThan0(z1)) {
+            setZoom(z1);
+            return z1;
+        } else {
+            return z;
+        }
+    }
 }
 
 int AppConfig::configValueInt(const QString& key, int defaultValue) {
