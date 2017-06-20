@@ -21,7 +21,6 @@ public:
     ~RecognitionWidget();
 
     void load(const ImageResult& imageResult);
-    void clear();
 
 private slots:
 
@@ -29,12 +28,11 @@ private slots:
 
 private:
 
-    QLabel* imageLabel;
     QLabel* descriptionLabel;
     ExperimentContext* context;
     QScrollArea* scroll;
-    QFrame* imageFrame;
     QPixmap origPixmap;
+    QString imageTooltip;
 
     void updateScrollArea();
     QPixmap polishPixmap(const QPixmap& pixmap);

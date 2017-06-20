@@ -14,6 +14,7 @@
 #include <QScrollBar>
 #include <QColor>
 #include <QPainter>
+#include <QDebug>
 
 static const QMap<QString, QString> ICONS {
     {"car", ":/images/ico-auto"},
@@ -44,8 +45,6 @@ static const QMap<QString, QString> ICONS {
 RecognitionWidget::RecognitionWidget(ExperimentContext* ctx, QWidget *parent) : QWidget(parent), context(ctx) {
     connect(context, &ExperimentContext::zoomChanged, this, &RecognitionWidget::rescale);
 
-    imageLabel = new QLabel;
-
     scroll = new QScrollArea;
     scroll->setStyleSheet("background-color:transparent; border: none;");
     scroll->horizontalScrollBar()->setStyleSheet("QScrollBar {height:0px;}");
@@ -71,7 +70,7 @@ static QPixmap makeLarger(const QPixmap& pixmap, int width, int height) {
     if (width <= pixmap.width() && height <= pixmap.height()) {
         return pixmap;
     }
-    QPixmap ret(width, height);
+    QPixmap ret(qMax(width, pixmap.width()), qMax(height, pixmap.height()));
     ret.fill(QColor::fromRgbF(0, 0, 0, 0));
     QPainter p(&ret);
     int x = qMax(0, (width - pixmap.width())/2);
@@ -84,7 +83,7 @@ static QPixmap scale(const QPixmap& pixmap, double factor) {
     if (1 == factor || 0 >= factor) {
         return pixmap;
     }
-    return pixmap.scaled(pixmap.width() * factor, pixmap.height() * factor);
+    return pixmap.scaled(pixmap.width() * factor, pixmap.height() * factor, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
 QPixmap RecognitionWidget::polishPixmap(const QPixmap& pmap) {
@@ -140,26 +139,27 @@ void RecognitionWidget::load(const ImageResult& ir) {
     descriptionLabel->setText(text);
 
     origPixmap = QPixmap(ir.imageFile);
-    imageLabel->setPixmap(polishPixmap(origPixmap));
-    imageLabel->setToolTip(ir.imageFile);
+    imageTooltip = ir.imageFile;
     updateScrollArea();
 }
 
 void RecognitionWidget::updateScrollArea() {
+    if (origPixmap.isNull()) {
+        return;
+    }
+    auto imageLabel = new QLabel;
+    imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    imageLabel->setPixmap(polishPixmap(origPixmap));
+    imageLabel->setToolTip(imageTooltip);
+    auto old = scroll->widget();
+    if (old) {
+        old->deleteLater();
+    }
     scroll->setWidget(imageLabel);
     scroll->verticalScrollBar()->setValue(scroll->verticalScrollBar()->maximum() / 2);
     scroll->horizontalScrollBar()->setValue(scroll->horizontalScrollBar()->maximum() / 2);
 }
 
-void RecognitionWidget::clear() {
-    imageLabel->clear();
-    descriptionLabel->clear();
-    origPixmap = QPixmap();
-}
-
 void RecognitionWidget::rescale(double) {
-    if (!origPixmap.isNull()) {
-        imageLabel->setPixmap(polishPixmap(origPixmap));
-        updateScrollArea();
-    }
+    updateScrollArea();
 }
