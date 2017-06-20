@@ -1,6 +1,7 @@
 #ifndef RECOGNITIONFRAME
 #define RECOGNITIONFRAME
 
+#include "appmodels.h"
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -10,7 +11,6 @@ class QFrame;
 class QPixmap;
 QT_END_NAMESPACE
 
-class ImageResult;
 class ExperimentContext;
 
 class RecognitionWidget : public QWidget {
@@ -32,10 +32,10 @@ private:
     ExperimentContext* context;
     QScrollArea* scroll;
     QPixmap origPixmap;
-    QString imageTooltip;
+    ImageResult imageResult;
 
     void updateScrollArea();
-    QPixmap polishPixmap(const QPixmap& pixmap);
+    QPixmap preparePixmap();
 };
 
 #endif // RECOGNITIONFRAME

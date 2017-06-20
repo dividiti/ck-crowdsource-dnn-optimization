@@ -15,6 +15,9 @@
 #include <QColor>
 #include <QPainter>
 #include <QDebug>
+#include <QRectF>
+#include <QFont>
+#include <QFontMetrics>
 
 static const QMap<QString, QString> ICONS {
     {"car", ":/images/ico-auto"},
@@ -39,7 +42,8 @@ static const QMap<QString, QString> ICONS {
     {"sheep", ":/images/ico-sheep"},
     {"sofa", ":/images/ico-sofa"},
     {"train", ":/images/ico-train"},
-    {"tvmonitor", ":/images/ico-tvmonitor"}
+    {"tvmonitor", ":/images/ico-tvmonitor"},
+    {"tv", ":/images/ico-tvmonitor"}
 };
 
 RecognitionWidget::RecognitionWidget(ExperimentContext* ctx, QWidget *parent) : QWidget(parent), context(ctx) {
@@ -86,14 +90,80 @@ static QPixmap scale(const QPixmap& pixmap, double factor) {
     return pixmap.scaled(pixmap.width() * factor, pixmap.height() * factor, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
-QPixmap RecognitionWidget::polishPixmap(const QPixmap& pmap) {
-    QPixmap pixmap = pmap;
-    int h = AppConfig::recognitionImageHeight();
-    if (0 < h) {
-        pixmap = pixmap.scaledToHeight(h);
-    } else {
-        pixmap = scale(pixmap, AppConfig::zoom());
+static QColor getColor(const ImageObject& o) {
+  static const QMap<QString, QColor> colors = {
+    {"background", QColor(0, 0, 0)},
+    {"aeroplane", QColor(128, 0, 0)},
+    {"bicycle", QColor(0, 191, 255)},
+    {"bird", QColor(128, 128, 0)},
+    {"boat", QColor(0, 0, 128)},
+    {"bottle", QColor(128, 0, 128)},
+    {"bus", QColor(0, 128, 128)},
+    {"car", QColor(255, 191, 0)},
+    {"cat", QColor(64, 0, 0)},
+    {"chair", QColor(192, 0, 0)},
+    {"cow", QColor(64, 128, 0)},
+    {"diningtable", QColor(192, 128, 0)},
+    {"dog", QColor(64, 0, 128)},
+    {"horse", QColor(192, 0, 128)},
+    {"motorbike", QColor(64, 128, 128)},
+    {"person", QColor(255, 0, 191)},
+    {"pottedplant", QColor(0, 64, 0)},
+    {"sheep", QColor(128, 64, 0)},
+    {"sofa", QColor(0, 192, 0)},
+    {"train", QColor(128, 192, 0)},
+    {"tvmonitor", QColor(0, 64, 128)}
+  };
+  static const QColor default_color = QColor(50, 50, 50);
+  static const QColor ground_truth_color = QColor(200, 200, 200);
+  if (o.ground_truth) {
+      return ground_truth_color;
+  } else {
+      return colors.contains(o.label) ? colors[o.label] : default_color;
+  }
+}
+
+static QRectF rectF(const ImageObject& o, double zoom) {
+    return QRectF(o.xmin * zoom, o.ymin * zoom, o.width() * zoom, o.height() * zoom);
+}
+
+static QRectF labelRectF(const ImageObject& o, const QRectF& r, const QFont& font, int padding) {
+    padding *= 2;
+    QFontMetrics fm(font);
+    QSize size = fm.size(Qt::TextSingleLine, o.label);
+    float top = o.ground_truth ? r.top() - padding - size.height() : r.bottom() - padding - size.height();
+    return QRectF(r.left(), top, size.width() + padding, size.height() + padding);
+}
+
+static QRectF labelTextRectF(const QRectF r, int padding) {
+    return QRectF(r.left() + padding, r.top() + padding, r.width() - padding, r.height() - padding);
+}
+
+static void drawBoxes(QPixmap& pixmap, const QVector<ImageObject>& objects, double zoom) {
+    static const QColor text_color = QColor(255, 255, 255);
+    static const QFont font("helvetica", 10);
+    static const int padding = 2;
+
+    QPainter p(&pixmap);
+    p.setFont(font);
+    for (auto o : objects) {
+        auto color = getColor(o);
+        p.setPen(color);
+        auto r = rectF(o, zoom);
+        p.drawRect(r);
+        auto lr = labelRectF(o, r, font, padding);
+        p.fillRect(lr, color);
+        p.setPen(text_color);
+        p.drawText(labelTextRectF(lr, padding), o.label);
     }
+}
+
+QPixmap RecognitionWidget::preparePixmap() {
+    QPixmap pixmap = origPixmap;
+    double zoom = AppConfig::zoom();
+    pixmap = scale(pixmap, zoom);
+    drawBoxes(pixmap, imageResult.groundTruth, zoom);
+    drawBoxes(pixmap, imageResult.detections, zoom);
     if (scroll->width() > pixmap.width() || scroll->height() > pixmap.height()) {
         pixmap = makeLarger(pixmap, scroll->width() + 50, scroll->height() + 50);
     }
@@ -138,8 +208,8 @@ void RecognitionWidget::load(const ImageResult& ir) {
     text += "</table>";
     descriptionLabel->setText(text);
 
+    imageResult = ir;
     origPixmap = QPixmap(ir.imageFile);
-    imageTooltip = ir.imageFile;
     updateScrollArea();
 }
 
@@ -149,8 +219,8 @@ void RecognitionWidget::updateScrollArea() {
     }
     auto imageLabel = new QLabel;
     imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    imageLabel->setPixmap(polishPixmap(origPixmap));
-    imageLabel->setToolTip(imageTooltip);
+    imageLabel->setPixmap(preparePixmap());
+    imageLabel->setToolTip(imageResult.imageFile);
     auto old = scroll->widget();
     if (old) {
         old->deleteLater();

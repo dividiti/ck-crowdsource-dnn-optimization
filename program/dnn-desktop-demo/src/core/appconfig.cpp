@@ -80,10 +80,6 @@ QString AppConfig::footerRightUrl() {
     return config().value("footer_right_url", "").toString();
 }
 
-int AppConfig::recognitionImageHeight() {
-    return config().value("recognition_image_height", -1).toInt();
-}
-
 double AppConfig::zoom() {
     double ret = config().value("recognition_zoom", 1.0).toDouble();
     return 0 < ret ? ret : 1;

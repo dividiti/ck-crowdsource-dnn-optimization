@@ -40,6 +40,24 @@ struct LabelSpec {
     double recall() const { return 0 == expected ? (0 == identified ? 1 : 0) : (double)trueObjects() / (double)expected; }
 };
 
+struct ImageObject {
+    QString label;
+    float score = 1;
+    float xmin = 0;
+    float ymin = 0;
+    float xmax = 0;
+    float ymax = 0;
+    bool ground_truth = false;
+
+    float width() const {
+        return xmax - xmin;
+    }
+
+    float height() const {
+        return ymax - ymin;
+    }
+};
+
 class ImageResult
 {
 public:
@@ -51,6 +69,8 @@ public:
     QMap<QString, int> recognizedObjects;
     QMap<QString, int> expectedObjects;
     QMap<QString, int> falsePositiveObjects;
+    QVector<ImageObject> detections;
+    QVector<ImageObject> groundTruth;
 
     bool correctAsTop1() const {
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;

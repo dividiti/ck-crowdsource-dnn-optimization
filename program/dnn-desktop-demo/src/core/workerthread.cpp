@@ -36,8 +36,22 @@ static const QRegExp RECOGNIZED_OBJECT_REGEX("Recognized ([^:]*): (\\d+)");
 static const QRegExp EXPECTED_OBJECT_REGEX("Expected ([^:]*): (\\d+)");
 static const QRegExp FALSE_POSITIVE_OBJECT_REGEX("False positive ([^:]*): (\\d+)");
 
+static const QRegExp DETECTION_REGEX("Detection ([^:]*): ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+)");
+static const QRegExp GROUND_TRUTH_REGEX("Ground truth ([^:]*): ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+)");
+
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
+
+static ImageObject objectFromMatch(const QRegExp& m) {
+    ImageObject ret;
+    ret.label = m.cap(1).trimmed();
+    ret.xmin = m.cap(2).toFloat();
+    ret.ymin = m.cap(3).toFloat();
+    ret.xmax = m.cap(4).toFloat();
+    ret.ymax = m.cap(5).toFloat();
+    ret.score = m.cap(6).toFloat();
+    return ret;
+}
 
 WorkerThread::WorkerThread(const Program& program, const Mode& mode, QObject* parent) : QThread(parent), program(program), mode(mode) {}
 
@@ -53,7 +67,8 @@ QStringList WorkerThread::getArgs() {
             "--deps.caffemodel=" + model.uoa,
             "--deps.squeezedet=" + model.uoa,
             "--deps.detection-dataset=" + dataset.valUoa,
-            "--deps.lib-tensorflow=" + program.targetUoa
+            "--deps.lib-tensorflow=" + program.targetUoa,
+            "--env.DRAW_BOXES=0"
             };
         break;
 
@@ -171,6 +186,14 @@ void WorkerThread::run() {
 
         } else if (FALSE_POSITIVE_OBJECT_REGEX.exactMatch(line)) {
             insertOrUpdate(ir.falsePositiveObjects, FALSE_POSITIVE_OBJECT_REGEX.cap(1).trimmed(), FALSE_POSITIVE_OBJECT_REGEX.cap(2).toInt());
+
+        } else if (DETECTION_REGEX.exactMatch(line)) {
+            ir.detections.append(objectFromMatch(DETECTION_REGEX));
+
+        } else if (GROUND_TRUTH_REGEX.exactMatch(line)) {
+            auto o = objectFromMatch(GROUND_TRUTH_REGEX);
+            o.ground_truth = true;
+            ir.groundTruth.append(o);
 
         } else if (predictionCount > 0) {
             // parsing a prediction line

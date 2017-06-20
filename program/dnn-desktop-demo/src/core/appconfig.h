@@ -21,8 +21,6 @@ public:
     static QString footerRightText();
     static QString footerRightUrl();
 
-    static int recognitionImageHeight();
-
     static double zoom();
     static void setZoom(double z);
     static double zoomStep();
