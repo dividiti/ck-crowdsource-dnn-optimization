@@ -37,9 +37,6 @@ private:
     FeaturesPanel* _featuresPanel;
     QPushButton *_buttonStart, *_buttonStop;
     QPushButton *_buttonPublish;
-    QPushButton *_buttonZoomIn;
-    QPushButton *_buttonZoomOut;
-    QPushButton *_buttonZoomActual;
 
     Program _program;
     Model _model;

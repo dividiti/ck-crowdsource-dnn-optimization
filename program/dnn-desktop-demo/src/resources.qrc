@@ -7,6 +7,10 @@
         <file alias="delete">../images/trash_bin.svg</file>
         <file alias="download">../images/download.svg</file>
         <file alias="publish">../images/ico-publish.svg</file>
+        <file alias="zoom-in">../images/zoom-in.png</file>
+        <file alias="zoom-out">../images/zoom-out.png</file>
+        <file alias="zoom-to-actual-size">../images/zoom-to-actual-size.png</file>
+        <file alias="zoom-to-fit">../images/zoom-to-fit.png</file>
     </qresource>
     <qresource prefix="/sample">
         <file alias="1">../images/sample1.jpg</file>

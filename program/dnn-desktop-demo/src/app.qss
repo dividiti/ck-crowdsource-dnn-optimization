@@ -44,17 +44,21 @@ QFrame#resultsPanel {
 	border-bottom: 1px solid #21292C;
 }
 QFrame[qss-role="features-panel"] {
-	margin: 0px;
+        margin: 0px;
         padding: 16px;
 }
 QFrame[qss-role="results-panel"] {
-	margin: 0px;
-	padding: 16px;
-	border-top: 1px solid #21292C;
+        margin: 0px;
+        padding: 16px;
+        border-top: 1px solid #21292C;
 }
 QFrame#buttonsPanel {
 	background: #313c42;
-	border-top: 1px solid #40494D;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-top: 1px solid #40494D;
 }
 QPushButton:focus {
         outline: none;
@@ -87,7 +91,7 @@ QPushButton#buttonStop {
 QPushButton#buttonStop:!enabled {
         background: #969494;
 }
-QPushButton#buttonPublish {
+QPushButton#buttonPublish, QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual {
 	height: 32px;
 	width: 32px;
 	background: #313c42;
@@ -97,17 +101,6 @@ QPushButton#buttonPublish {
 	font-size: 10pt;
 	font-weight: 600;
 	font-family: Verdana;
-}
-QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomFit, QPushButton#buttonZoomActual {
-        height: 32px;
-        width: 64px;
-        background: #313c42;
-        border-radius: 16px;
-        border: 1px solid #232A2D;
-        color: #AFB3B5;
-        font-size: 10pt;
-        font-weight: 600;
-        font-family: Verdana;
 }
 QFrame[qss-role="divider"] {
 	border-top: 1px solid #21292C;

@@ -23,6 +23,7 @@ private slots:
     void experimentStarted();
     void newImageResult(ImageResult);
     void updateOnModeChanged(Mode);
+    void updateOnZoomChanged(double);
 
 private:
     ExperimentContext* _context;
@@ -30,10 +31,12 @@ private:
     QLabel* _infoPrecision;
     QLabel* _infoMetricTop1;
     QLabel* _infoMetricTop5;
+    QLabel* _infoZoom;
     ImageView *_worstPredictedImage;
     QFrame* _panelMetrics;
     QFrame* _panelWorstPrediction;
     QFrame* _panelPrecision;
+    QFrame* _panelZoom;
 
     double _worstAccuracyDelta;
 

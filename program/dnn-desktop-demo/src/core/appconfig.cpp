@@ -100,7 +100,7 @@ void AppConfig::setZoom(double z) {
 }
 
 double AppConfig::zoomStep() {
-    double ret = config().value("recognition_zoom_step", 0.2).toDouble();
+    double ret = config().value("recognition_zoom_step", 0.1).toDouble();
     return greaterThan0(ret) ? ret : 1;
 }
 

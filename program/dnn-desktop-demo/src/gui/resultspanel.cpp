@@ -9,9 +9,14 @@
 #include <QVariant>
 #include <QDebug>
 #include <QDateTime>
+#include <QPushButton>
 
 #define WORST_PREDICTED_IMAGE_W 160
 #define WORST_PREDICTED_IMAGE_H 120
+
+static QObject* spacing(int px) {
+    return reinterpret_cast<QObject*>(px);
+}
 
 ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     : QFrame(parent), _updateIntervalMs(AppConfig::fpsUpdateIntervalMs())
@@ -22,6 +27,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
     connect(_context, &ExperimentContext::modeChanged, this, &ResultsPanel::updateOnModeChanged);
+    connect(_context, &ExperimentContext::zoomChanged, this, &ResultsPanel::updateOnZoomChanged);
 
     _infoImagesPerSec = makeInfoLabel();
     _infoPrecision = makeInfoLabel();
@@ -41,16 +47,45 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
         Ori::Gui::layoutH(0, 0, { 0, _worstPredictedImage, 0}),
     });
 
+    auto buttonZoomIn = new QPushButton;
+    buttonZoomIn->setObjectName("buttonZoomIn");
+    buttonZoomIn->setToolTip(tr("Zoom in"));
+    buttonZoomIn->setIcon(QIcon(":/tools/zoom-in"));
+    connect(buttonZoomIn, SIGNAL(clicked(bool)), _context, SLOT(zoomIn()));
+
+    auto buttonZoomOut = new QPushButton;
+    buttonZoomOut->setObjectName("buttonZoomOut");
+    buttonZoomOut->setToolTip(tr("Zoom out"));
+    buttonZoomOut->setIcon(QIcon(":/tools/zoom-out"));
+    connect(buttonZoomOut, SIGNAL(clicked(bool)), _context, SLOT(zoomOut()));
+
+    auto buttonZoomActual = new QPushButton;
+    buttonZoomActual->setObjectName("buttonZoomActual");
+    buttonZoomActual->setToolTip(tr("Actual size"));
+    buttonZoomActual->setIcon(QIcon(":/tools/zoom-to-actual-size"));
+    connect(buttonZoomActual, SIGNAL(clicked(bool)), _context, SLOT(zoomActual()));
+
+    _infoZoom = new QLabel;
+    _infoZoom->setAlignment(Qt::AlignTop | Qt::AlignRight);
+    _infoZoom->setProperty("qss-role", "link");
+
+    auto zoomLayout = Ori::Gui::layoutH({buttonZoomIn, spacing(8), buttonZoomOut, 0, buttonZoomActual});
+    _panelZoom = makePanel({
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("ZOOM"), 0, _infoZoom }),
+        zoomLayout
+    });
+
     setLayout(Ori::Gui::layoutV(0, 0,
-        { panelCounters, _panelPrecision, _panelMetrics, _panelWorstPrediction, 0 }));
+        { panelCounters, _panelPrecision, _panelZoom, _panelMetrics, _panelWorstPrediction, 0 }));
 
     resetInfo();
     updateOnModeChanged(AppConfig::currentMode().value<Mode>());
+    updateOnZoomChanged(AppConfig::zoom());
 }
 
 QLabel* ResultsPanel::makeInfoLabel(const QString &role) {
     auto label = new QLabel;
-    label->setProperty("qss-role", role.isEmpty()? QString("info-label"): role);
+    label->setProperty("qss-role", role.isEmpty() ? QString("info-label") : role);
     return label;
 }
 
@@ -103,4 +138,10 @@ void ResultsPanel::updateOnModeChanged(Mode mode) {
     _panelMetrics->setVisible(v);
     _panelWorstPrediction->setVisible(v);
     _panelPrecision->setVisible(!v);
+    _panelZoom->setVisible(!v);
+}
+
+void ResultsPanel::updateOnZoomChanged(double z) {
+    int p = z * 100;
+    _infoZoom->setText(QString("<span style='color:#969C9E'>%1%</span>").arg(p));
 }
