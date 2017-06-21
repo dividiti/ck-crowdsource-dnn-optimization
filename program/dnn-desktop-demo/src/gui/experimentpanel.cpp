@@ -28,8 +28,9 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     setObjectName("experimentPanel");
 
     _context = context;
-    connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
-    connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
+    connect(_context, &ExperimentContext::experimentStarted, this, &ExperimentPanel::experimentStarted);
+    connect(_context, &ExperimentContext::experimentFinished, this, &ExperimentPanel::experimentFinished);
+    connect(_context, &ExperimentContext::modeChanged, this, &ExperimentPanel::modeChanged);
 
     _buttonStart = new QPushButton(tr("Start"));
     _buttonStart->setObjectName("buttonStart");
@@ -43,8 +44,15 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     _buttonPublish->setToolTip(tr("No results for publishing. Please, start and finish an experiment first."));
     _buttonPublish->setIcon(QIcon(":/tools/publish"));
     _buttonPublish->setObjectName("buttonPublish");
-    _buttonPublish->setEnabled(false);
+    //_buttonPublish->setEnabled(false);
     connect(_buttonPublish, SIGNAL(clicked(bool)), this, SLOT(publishResults()));
+
+    _buttonStartOver = new QPushButton;
+    _buttonStartOver->setObjectName("buttonStartOver");
+    _buttonStartOver->setToolTip(tr("Start over"));
+    _buttonStartOver->setIcon(QIcon(":/tools/start-over"));
+    _buttonStartOver->setVisible(false);
+    connect(_buttonStartOver, SIGNAL(clicked(bool)), this, SLOT(startOver()));
 
     auto framesPanel = new FramesPanel(context);
     _featuresPanel = new FeaturesPanel(context);
@@ -52,7 +60,7 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
 
     auto buttonsPanel = new QFrame;
     buttonsPanel->setObjectName("buttonsPanel");
-    buttonsPanel->setLayout(Ori::Gui::layoutH(0, 0, {_buttonStart, _buttonStop, 0, _buttonPublish}));
+    buttonsPanel->setLayout(Ori::Gui::layoutH(0, 0, {_buttonStart, _buttonStop, (QObject*)8, _buttonStartOver, (QObject*)8, _buttonPublish}));
 
     adjustSidebar(_featuresPanel);
     adjustSidebar(resultsPanel);
@@ -75,8 +83,16 @@ void ExperimentPanel::updateExperimentConditions() {
     _featuresPanel->updateExperimentConditions();
 }
 
+bool ExperimentPanel::canResume() const {
+    return _context->resumable() && AppConfig::currentModeType() == _context->mode();
+}
+
 void ExperimentPanel::startExperiment() {
-    _context->startExperiment();
+    _context->startExperiment(canResume());
+}
+
+void ExperimentPanel::startOver() {
+    _context->startExperiment(false);
 }
 
 void ExperimentPanel::stopExperiment() {
@@ -98,7 +114,19 @@ void ExperimentPanel::experimentFinished() {
     enableControls(true);
 }
 
+void ExperimentPanel::modeChanged(Mode) {
+    enableControls(true);
+}
+
 void ExperimentPanel::enableControls(bool on) {
+    if (on && canResume()) {
+        _buttonStart->setText(tr("Resume"));
+        _buttonStartOver->setVisible(true);
+        _buttonStartOver->setEnabled(true);
+    } else {
+        _buttonStart->setText(tr("Start"));
+        _buttonStartOver->setVisible(false);
+    }
     _buttonStart->setVisible(on);
     _buttonStart->setEnabled(on);
     _buttonStop->setEnabled(!on);
@@ -201,7 +229,6 @@ void ExperimentPanel::publishResultsFinished(int exitCode, QProcess::ExitStatus 
         _buttonPublish->setToolTip(tr("Publish"));
     } else {
         AppEvents::info("Results are successfully pushed to the server. Thank you for contributing!");
-        _context->clearAggregatedResults();
         _buttonPublish->setEnabled(false);
         _buttonPublish->setToolTip(tr("Already published"));
     }

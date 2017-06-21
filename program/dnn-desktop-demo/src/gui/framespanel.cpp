@@ -14,8 +14,8 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
     setObjectName("framesPanel");
 
     _context = context;
-    connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
-    connect(_context, SIGNAL(experimentStopping()), this, SLOT(experimentStopping()));
+    connect(_context, &ExperimentContext::experimentStarted, this, &FramesPanel::experimentStarted);
+    connect(_context, &ExperimentContext::experimentStopping, this, &FramesPanel::experimentStopping);
 }
 
 FramesPanel::~FramesPanel() {
@@ -30,6 +30,7 @@ void FramesPanel::clearWidgets() {
     _frames.clear();
     delete _rec_widget;
     _rec_widget = Q_NULLPTR;
+    _widgets_init = false;
 }
 
 void FramesPanel::initLayout() {
@@ -60,6 +61,7 @@ void FramesPanel::initLayout() {
         l->addWidget(_rec_widget);
         setLayout(l);
     }
+    _widgets_init = true;
 }
 
 static QString cannotRunError() {
@@ -69,7 +71,7 @@ static QString cannotRunError() {
     return "";
 }
 
-void FramesPanel::experimentStarted() {
+void FramesPanel::experimentStarted(bool resume) {
     if (Q_NULLPTR != _worker) {
         return abortExperiment("Another experiment is already running");
     }
@@ -83,8 +85,13 @@ void FramesPanel::experimentStarted() {
             _worker->setBatchSize(AppConfig::batchSize());
         } else {
             _worker->setMinResultInterval(AppConfig::recognitionUpdateIntervalMs());
+            if (resume) {
+                _worker->setSkipFilesIncluding(_context->lastResult().originalImageFile);
+            }
         }
-        initLayout();
+        if (!resume || !_widgets_init) {
+            initLayout();
+        }
         connect(_worker, &WorkerThread::newImageResult, this, &FramesPanel::newImageResult);
         connect(_worker, &WorkerThread::newImageResult, _context, &ExperimentContext::newImageResult);
         connect(_worker, &WorkerThread::finished, this, &FramesPanel::workerStopped);

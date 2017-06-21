@@ -62,6 +62,7 @@ class ImageResult
 {
 public:
     QString imageFile;
+    QString originalImageFile;
     double duration;
     QVector<PredictionResult> predictions;
     QString correctLabels;
@@ -90,7 +91,7 @@ public:
     }
 
     bool isEmpty() const {
-        return predictions.isEmpty() && recognizedObjects.isEmpty();
+        return predictions.isEmpty() && recognizedObjects.isEmpty() && imageFile.isEmpty();
     }
 
     double imagesPerSecond() const {

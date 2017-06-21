@@ -26,6 +26,7 @@ static QString getBinPath() {
 }
 
 static const QString FILE_PREFIX = "File: ";
+static const QString ORIGINAL_FILE_PREFIX = "Original file: ";
 static const QString DURATION_PREFIX = "Duration: ";
 static const QString DURATION_SUFFIX = " sec";
 static const QString CORRECT_LABEL_PREFIX = "Correct label: ";
@@ -70,6 +71,9 @@ QStringList WorkerThread::getArgs() {
             "--deps.lib-tensorflow=" + program.targetUoa,
             "--env.DRAW_BOXES=0"
             };
+        if (!skipFilesIncluding.isEmpty()) {
+            ret.append("--env.SKIP_FILES_INCLUDING=" + skipFilesIncluding);
+        }
         break;
 
     case Mode::Type::CLASSIFICATION:
@@ -166,6 +170,9 @@ void WorkerThread::run() {
 
         } else if (line.startsWith(FILE_PREFIX)) {
             ir.imageFile = line.mid(FILE_PREFIX.size());
+
+        } else if (line.startsWith(ORIGINAL_FILE_PREFIX)) {
+            ir.originalImageFile = line.mid(ORIGINAL_FILE_PREFIX.size());
 
         } else if (line.startsWith(DURATION_PREFIX)) {
             QStringRef t = line.midRef(DURATION_PREFIX.size());

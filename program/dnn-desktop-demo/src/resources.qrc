@@ -11,6 +11,7 @@
         <file alias="zoom-out">../images/zoom-out.png</file>
         <file alias="zoom-to-actual-size">../images/zoom-to-actual-size.png</file>
         <file alias="zoom-to-fit">../images/zoom-to-fit.png</file>
+        <file alias="start-over">../images/start-over.png</file>
     </qresource>
     <qresource prefix="/sample">
         <file alias="1">../images/sample1.jpg</file>

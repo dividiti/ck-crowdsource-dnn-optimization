@@ -23,6 +23,7 @@ public:
     void setDataset(const Dataset& dataset) { this->dataset = dataset; }
     void setBatchSize(int batchSize) { this->batchSize = batchSize; }
     void setMinResultInterval(long milliseconds) { minResultIntervalMs = milliseconds; }
+    void setSkipFilesIncluding(const QString& path) { this->skipFilesIncluding = path; }
 
 signals:
     void newImageResult(ImageResult result);
@@ -41,6 +42,7 @@ private:
     Mode mode;
     long minResultIntervalMs = 0;
     qint64 lastResultMs = 0;
+    QString skipFilesIncluding;
 };
 
 #endif // WORKERTHREAD_H

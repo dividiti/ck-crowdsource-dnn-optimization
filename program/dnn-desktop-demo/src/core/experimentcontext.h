@@ -35,7 +35,7 @@ public:
 
     ExperimentContext();
 
-    void startExperiment();
+    void startExperiment(bool resume);
     void stopExperiment();
     void notifyModeChanged(const Mode& mode);
     bool isExperimentStarted() const { return _isExperimentStarted; }
@@ -48,11 +48,13 @@ public:
     Mode::Type mode() const { return _mode; }
     int batchSize() const { return _batchSize; }
 
+    bool resumable() const { return _isExperimentInterrupted && Mode::Type::RECOGNITION == mode() && !_lastResult.originalImageFile.isEmpty(); }
+    ImageResult lastResult() const { return _lastResult; }
+
     bool hasAggregatedResults() const { return _duration.count > 0; }
-    void clearAggregatedResults();
 
 signals:
-    void experimentStarted();
+    void experimentStarted(bool);
     void experimentStopping();
     void experimentFinished();
     void newImageResult(ImageResult);
@@ -69,12 +71,16 @@ private slots:
 
 private:
     bool _isExperimentStarted = false;
+    bool _isExperimentInterrupted = false;
     Stat _duration;
     Stat _precision;
     Stat _top1;
     Stat _top5;
     Mode::Type _mode;
     int _batchSize;
+    ImageResult _lastResult;
+
+    void clearAggregatedResults();
 };
 
 #endif // EXPERIMENTCONTEXT_H

@@ -25,18 +25,22 @@ public:
 
 private slots:
     void startExperiment();
+    void startOver();
     void stopExperiment();
     void experimentStarted();
     void experimentFinished();
     void publishResults();
     void publishResultsFinished(int, QProcess::ExitStatus);
     void publishResultsError(QProcess::ProcessError);
+    void modeChanged(Mode);
 
 private:
     ExperimentContext* _context;
     FeaturesPanel* _featuresPanel;
-    QPushButton *_buttonStart, *_buttonStop;
-    QPushButton *_buttonPublish;
+    QPushButton* _buttonStart;
+    QPushButton* _buttonStop;
+    QPushButton* _buttonStartOver;
+    QPushButton* _buttonPublish;
 
     Program _program;
     Model _model;
@@ -47,6 +51,7 @@ private:
 
     void enableControls(bool on);
     void adjustSidebar(QWidget* w);
+    bool canResume() const;
 };
 
 #endif // EXPERIMENTPANEL_H

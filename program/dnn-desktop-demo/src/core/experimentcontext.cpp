@@ -11,14 +11,20 @@ ExperimentContext::ExperimentContext() {
     connect(this, &ExperimentContext::newImageResult, this, &ExperimentContext::aggregateResults);
 }
 
-void ExperimentContext::startExperiment() {
-    clearAggregatedResults();
+void ExperimentContext::startExperiment(bool resume) {
+    if (!resume) {
+        clearAggregatedResults();
+    }
+    _mode = AppConfig::currentModeType();
+    _batchSize = AppConfig::batchSize();
     _isExperimentStarted = true;
-    emit experimentStarted();
+    _isExperimentInterrupted = false;
+    emit experimentStarted(resume);
 }
 
 void ExperimentContext::stopExperiment() {
     _isExperimentStarted = false;
+    _isExperimentInterrupted = true;
     emit experimentStopping();
 }
 
@@ -31,8 +37,7 @@ void ExperimentContext::clearAggregatedResults() {
     _precision.clear();
     _top1.clear();
     _top5.clear();
-    _mode = AppConfig::currentModeType();
-    _batchSize = AppConfig::batchSize();
+    _lastResult = ImageResult();
 }
 
 void ExperimentContext::aggregateResults(ImageResult ir) {
@@ -40,6 +45,7 @@ void ExperimentContext::aggregateResults(ImageResult ir) {
     _precision.add(ir.precision());
     _top1.add(ir.correctAsTop1() ? 1 : 0);
     _top5.add(ir.correctAsTop5() ? 1 : 0);
+    _lastResult = ir;
 }
 
 void ExperimentContext::zoomIn() {

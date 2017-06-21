@@ -97,8 +97,10 @@ QFrame* ResultsPanel::makePanel(const std::initializer_list<QObject *> &items, c
     return panel;
 }
 
-void ResultsPanel::experimentStarted() {
-    resetInfo();
+void ResultsPanel::experimentStarted(bool resume) {
+    if (!resume) {
+        resetInfo();
+    }
 }
 
 void ResultsPanel::newImageResult(ImageResult ir) {

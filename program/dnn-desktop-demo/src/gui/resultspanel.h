@@ -20,7 +20,7 @@ public:
     explicit ResultsPanel(ExperimentContext* context, QWidget *parent = 0);
 
 private slots:
-    void experimentStarted();
+    void experimentStarted(bool);
     void newImageResult(ImageResult);
     void updateOnModeChanged(Mode);
     void updateOnZoomChanged(double);

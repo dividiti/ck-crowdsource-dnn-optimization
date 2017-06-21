@@ -25,7 +25,7 @@ public:
     ~FramesPanel();
 
 private slots:
-    void experimentStarted();
+    void experimentStarted(bool);
     void experimentStopping();
 
     void newImageResult(ImageResult);
@@ -41,6 +41,8 @@ private:
     int _current_frame = 0;
 
     RecognitionWidget* _rec_widget = Q_NULLPTR;
+
+    bool _widgets_init = false;
 
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();

@@ -18,8 +18,8 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     setObjectName("featuresPanel");
 
     _context = context;
-    connect(_context, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
-    connect(_context, SIGNAL(experimentFinished()), this, SLOT(experimentFinished()));
+    connect(_context, &ExperimentContext::experimentStarted, this, &FeaturesPanel::experimentStarted);
+    connect(_context, &ExperimentContext::experimentFinished, this, &FeaturesPanel::experimentFinished);
 
     _infoEngine = makeInfoLabel();
     _infoModel = makeInfoLabel();
