@@ -18,7 +18,6 @@ class RecognitionWidget : public QWidget {
 
 public:
     explicit RecognitionWidget(ExperimentContext* context, QWidget* parent = Q_NULLPTR);
-    ~RecognitionWidget();
 
     void load(const ImageResult& imageResult);
 

@@ -66,10 +66,6 @@ RecognitionWidget::RecognitionWidget(ExperimentContext* ctx, QWidget *parent) : 
     setLayout(l);
 }
 
-RecognitionWidget::~RecognitionWidget() {
-    disconnect(context, &ExperimentContext::zoomChanged, this, &RecognitionWidget::rescale);
-}
-
 static QPixmap makeLarger(const QPixmap& pixmap, int width, int height) {
     if (width <= pixmap.width() && height <= pixmap.height()) {
         return pixmap;
