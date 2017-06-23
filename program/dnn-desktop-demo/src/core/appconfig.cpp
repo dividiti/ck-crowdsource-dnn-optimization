@@ -89,9 +89,14 @@ static bool greaterThan0(double z) {
     return qAbs(z) > EPSILON;
 }
 
-void AppConfig::setZoom(double z) {
+double AppConfig::setZoom(double z) {
     if (greaterThan0(z)) {
         config().setValue("recognition_zoom", z);
+        config().sync();
+        setZoomToFit(false);
+        return z;
+    } else {
+        return zoom();
     }
 }
 
@@ -104,17 +109,29 @@ double AppConfig::adjustZoom(bool plus) {
     double z = zoom();
     if (plus) {
         z += zoomStep();
-        setZoom(z);
-        return z;
+        return setZoom(z);
     } else {
         auto z1 = z - zoomStep();
         if (greaterThan0(z1)) {
-            setZoom(z1);
-            return z1;
+            return setZoom(z1);
         } else {
             return z;
         }
     }
+}
+
+bool AppConfig::zoomToFit() {
+    return config().value("recognition_zoom_to_fit", false).toBool();
+}
+
+bool AppConfig::setZoomToFit(bool on) {
+    config().setValue("recognition_zoom_to_fit", on);
+    config().sync();
+    return on;
+}
+
+bool AppConfig::toggleZoomToFit() {
+    return setZoomToFit(!zoomToFit());
 }
 
 int AppConfig::configValueInt(const QString& key, int defaultValue) {

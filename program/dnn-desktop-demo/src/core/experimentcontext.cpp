@@ -48,15 +48,22 @@ void ExperimentContext::aggregateResults(ImageResult ir) {
     _lastResult = ir;
 }
 
+void ExperimentContext::emitZoomChanged(double z, bool ztf) {
+    emit zoomChanged(z, ztf);
+}
+
 void ExperimentContext::zoomIn() {
-    emit zoomChanged(AppConfig::adjustZoom(true));
+    emitZoomChanged(AppConfig::adjustZoom(true), AppConfig::zoomToFit());
 }
 
 void ExperimentContext::zoomOut() {
-    emit zoomChanged(AppConfig::adjustZoom(false));
+    emitZoomChanged(AppConfig::adjustZoom(false), AppConfig::zoomToFit());
 }
 
 void ExperimentContext::zoomActual() {
-    AppConfig::setZoom(1);
-    emit zoomChanged(1);
+    emitZoomChanged(AppConfig::setZoom(1), AppConfig::zoomToFit());
+}
+
+void ExperimentContext::zoomToFit() {
+    emitZoomChanged(AppConfig::zoom(), AppConfig::toggleZoomToFit());
 }

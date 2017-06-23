@@ -156,7 +156,13 @@ static void drawBoxes(QPixmap& pixmap, const QVector<ImageObject>& objects, doub
 
 QPixmap RecognitionWidget::preparePixmap() {
     QPixmap pixmap = origPixmap;
-    double zoom = AppConfig::zoom();
+    double zoom = 1;
+    if (AppConfig::zoomToFit()) {
+        zoom = static_cast<double>(scroll->width()) / static_cast<double>(pixmap.width());
+        emit context->effectiveZoomChanged(AppConfig::setZoom(zoom));
+    } else {
+        zoom = AppConfig::zoom();
+    }
     pixmap = scale(pixmap, zoom);
     drawBoxes(pixmap, imageResult.groundTruth, zoom);
     drawBoxes(pixmap, imageResult.detections, zoom);
@@ -226,6 +232,6 @@ void RecognitionWidget::updateScrollArea() {
     scroll->horizontalScrollBar()->setValue(scroll->horizontalScrollBar()->maximum() / 2);
 }
 
-void RecognitionWidget::rescale(double) {
+void RecognitionWidget::rescale(double, bool) {
     updateScrollArea();
 }

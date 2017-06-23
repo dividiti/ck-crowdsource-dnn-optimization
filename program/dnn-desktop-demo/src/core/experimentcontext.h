@@ -59,12 +59,14 @@ signals:
     void experimentFinished();
     void newImageResult(ImageResult);
     void modeChanged(Mode);
-    void zoomChanged(double);
+    void zoomChanged(double, bool);
+    void effectiveZoomChanged(double);
 
 public slots:
     void zoomIn();
     void zoomOut();
     void zoomActual();
+    void zoomToFit();
 
 private slots:
     void aggregateResults(ImageResult);
@@ -81,6 +83,7 @@ private:
     ImageResult _lastResult;
 
     void clearAggregatedResults();
+    void emitZoomChanged(double, bool);
 };
 
 #endif // EXPERIMENTCONTEXT_H

@@ -27,7 +27,8 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
     connect(_context, &ExperimentContext::modeChanged, this, &ResultsPanel::updateOnModeChanged);
-    connect(_context, &ExperimentContext::zoomChanged, this, &ResultsPanel::updateOnZoomChanged);
+    connect(_context, &ExperimentContext::zoomChanged, this, &ResultsPanel::updateOnEffectiveZoomChanged);
+    connect(_context, &ExperimentContext::effectiveZoomChanged, this, &ResultsPanel::updateOnEffectiveZoomChanged);
 
     _infoImagesPerSec = makeInfoLabel();
     _infoPrecision = makeInfoLabel();
@@ -65,11 +66,19 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     buttonZoomActual->setIcon(QIcon(":/tools/zoom-to-actual-size"));
     connect(buttonZoomActual, SIGNAL(clicked(bool)), _context, SLOT(zoomActual()));
 
-    _infoZoom = makeInfoLabel();
+    auto buttonZoomToFit = new QPushButton;
+    buttonZoomToFit->setObjectName("buttonZoomToFit");
+    buttonZoomToFit->setToolTip(tr("Zoom to fit"));
+    buttonZoomToFit->setIcon(QIcon(":/tools/zoom-to-fit"));
+    connect(buttonZoomToFit, SIGNAL(clicked(bool)), _context, SLOT(zoomToFit()));
 
-    auto zoomLayout = Ori::Gui::layoutH({_infoZoom, 0, buttonZoomActual, spacing(8), buttonZoomOut, spacing(8), buttonZoomIn});
+    _infoZoom = new QLabel;
+    _infoZoom->setAlignment(Qt::AlignTop | Qt::AlignRight);
+    _infoZoom->setProperty("qss-role", "link");
+
+    auto zoomLayout = Ori::Gui::layoutH({buttonZoomActual, 0, buttonZoomOut, 0, buttonZoomIn, 0, buttonZoomToFit});
     _panelZoom = makePanel({
-        Ori::Gui::makeTitle("ZOOM"),
+         Ori::Gui::layoutH({ Ori::Gui::makeTitle("ZOOM"), 0, _infoZoom }),
         zoomLayout
     });
 
@@ -78,7 +87,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
 
     resetInfo();
     updateOnModeChanged(AppConfig::currentMode().value<Mode>());
-    updateOnZoomChanged(AppConfig::zoom());
+    updateOnEffectiveZoomChanged(AppConfig::zoom());
 }
 
 QLabel* ResultsPanel::makeInfoLabel(const QString &role) {
@@ -141,7 +150,7 @@ void ResultsPanel::updateOnModeChanged(Mode mode) {
     _panelZoom->setVisible(!v);
 }
 
-void ResultsPanel::updateOnZoomChanged(double z) {
+void ResultsPanel::updateOnEffectiveZoomChanged(double z) {
     int p = z * 100;
-    _infoZoom->setText(QString("%1%").arg(p));
+    _infoZoom->setText(QString("<span style='color:#969C9E'>%1%</span>").arg(p));
 }

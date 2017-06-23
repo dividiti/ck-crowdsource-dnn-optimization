@@ -22,9 +22,12 @@ public:
     static QString footerRightUrl();
 
     static double zoom();
-    static void setZoom(double z);
+    static double setZoom(double z);
     static double zoomStep();
     static double adjustZoom(bool plus);
+    static bool zoomToFit();
+    static bool setZoomToFit(bool on);
+    static bool toggleZoomToFit();
 
     static QString styleSheet();
 

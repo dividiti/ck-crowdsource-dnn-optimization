@@ -91,7 +91,7 @@ QPushButton#buttonStop {
 QPushButton#buttonStop:!enabled {
         background: #969494;
 }
-QPushButton#buttonPublish, QPushButton#buttonStartOver, QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual {
+QPushButton#buttonPublish, QPushButton#buttonStartOver, QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual, QPushButton#buttonZoomToFit {
 	height: 32px;
 	width: 32px;
 	background: #313c42;

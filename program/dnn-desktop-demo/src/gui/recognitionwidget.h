@@ -23,7 +23,7 @@ public:
 
 private slots:
 
-    void rescale(double);
+    void rescale(double, bool);
 
 private:
 

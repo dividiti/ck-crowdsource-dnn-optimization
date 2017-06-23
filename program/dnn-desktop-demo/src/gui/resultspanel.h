@@ -23,7 +23,7 @@ private slots:
     void experimentStarted(bool);
     void newImageResult(ImageResult);
     void updateOnModeChanged(Mode);
-    void updateOnZoomChanged(double);
+    void updateOnEffectiveZoomChanged(double);
 
 private:
     ExperimentContext* _context;
