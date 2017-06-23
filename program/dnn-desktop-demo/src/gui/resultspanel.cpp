@@ -65,13 +65,11 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     buttonZoomActual->setIcon(QIcon(":/tools/zoom-to-actual-size"));
     connect(buttonZoomActual, SIGNAL(clicked(bool)), _context, SLOT(zoomActual()));
 
-    _infoZoom = new QLabel;
-    _infoZoom->setAlignment(Qt::AlignTop | Qt::AlignRight);
-    _infoZoom->setProperty("qss-role", "link");
+    _infoZoom = makeInfoLabel();
 
-    auto zoomLayout = Ori::Gui::layoutH({buttonZoomIn, spacing(8), buttonZoomOut, 0, buttonZoomActual});
+    auto zoomLayout = Ori::Gui::layoutH({_infoZoom, 0, buttonZoomActual, spacing(8), buttonZoomOut, spacing(8), buttonZoomIn});
     _panelZoom = makePanel({
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("ZOOM"), 0, _infoZoom }),
+        Ori::Gui::makeTitle("ZOOM"),
         zoomLayout
     });
 
@@ -145,5 +143,5 @@ void ResultsPanel::updateOnModeChanged(Mode mode) {
 
 void ResultsPanel::updateOnZoomChanged(double z) {
     int p = z * 100;
-    _infoZoom->setText(QString("<span style='color:#969C9E'>%1%</span>").arg(p));
+    _infoZoom->setText(QString("%1%").arg(p));
 }
