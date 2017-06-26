@@ -14,10 +14,6 @@
 #define WORST_PREDICTED_IMAGE_W 160
 #define WORST_PREDICTED_IMAGE_H 120
 
-static QObject* spacing(int px) {
-    return reinterpret_cast<QObject*>(px);
-}
-
 ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     : QFrame(parent), _updateIntervalMs(AppConfig::fpsUpdateIntervalMs())
 {
