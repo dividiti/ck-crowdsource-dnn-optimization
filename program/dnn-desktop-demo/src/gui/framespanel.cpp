@@ -16,6 +16,7 @@ FramesPanel::FramesPanel(ExperimentContext *context, QWidget *parent) : QFrame(p
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &FramesPanel::experimentStarted);
     connect(_context, &ExperimentContext::experimentStopping, this, &FramesPanel::experimentStopping);
+    connect(_context, &ExperimentContext::currentResultChanged, this, &FramesPanel::currentResultChanged);
 }
 
 FramesPanel::~FramesPanel() {
@@ -31,6 +32,7 @@ void FramesPanel::clearWidgets() {
     delete _rec_widget;
     _rec_widget = Q_NULLPTR;
     _widgets_init = false;
+    _current_result = -1;
 }
 
 void FramesPanel::initLayout() {
@@ -110,6 +112,16 @@ void FramesPanel::experimentStopping() {
     }
 }
 
+void FramesPanel::currentResultChanged(int index, int, ImageResult ir) {
+    if (Q_NULLPTR == _rec_widget) {
+        return;
+    }
+    if (_current_result != index) {
+        _rec_widget->load(ir);
+        _current_result = index;
+    }
+}
+
 void FramesPanel::newImageResult(ImageResult ir) {
     if (Q_NULLPTR == _worker) {
         return;
@@ -118,8 +130,6 @@ void FramesPanel::newImageResult(ImageResult ir) {
         FrameWidget* f = _frames[_current_frame];
         f->load(ir);
         _current_frame = (_current_frame + 1) % _frame_count;
-    } else {
-        _rec_widget->load(ir);
     }
 }
 

@@ -4,7 +4,7 @@
 #include "appmodels.h"
 
 #include <QObject>
-#include <QList>
+#include <QVector>
 
 class ExperimentContext : public QObject
 {
@@ -48,8 +48,21 @@ public:
     Mode::Type mode() const { return _mode; }
     int batchSize() const { return _batchSize; }
 
-    bool resumable() const { return _isExperimentInterrupted && Mode::Type::RECOGNITION == mode() && !_lastResult.originalImageFile.isEmpty(); }
-    ImageResult lastResult() const { return _lastResult; }
+    bool resumable() const {
+        return _isExperimentInterrupted && Mode::Type::RECOGNITION == mode() && !lastResult().originalImageFile.isEmpty();
+    }
+
+    ImageResult lastResult() const {
+        return _results.empty() ? ImageResult() : _results.last();
+    }
+
+    int currentResult() const {
+        return _current_result;
+    }
+
+    int resultCount() const {
+        return _results.size();
+    }
 
     bool hasAggregatedResults() const { return _duration.count > 0; }
 
@@ -58,6 +71,7 @@ signals:
     void experimentStopping();
     void experimentFinished();
     void newImageResult(ImageResult);
+    void currentResultChanged(int, int, ImageResult);
     void modeChanged(Mode);
     void zoomChanged(double, bool);
     void effectiveZoomChanged(double);
@@ -67,6 +81,11 @@ public slots:
     void zoomOut();
     void zoomActual();
     void zoomToFit();
+
+    void gotoNextResult();
+    void gotoPrevResult();
+    void gotoFirstResult();
+    void gotoLastResult();
 
 private slots:
     void aggregateResults(ImageResult);
@@ -80,10 +99,12 @@ private:
     Stat _top5;
     Mode::Type _mode;
     int _batchSize;
-    ImageResult _lastResult;
+    QVector<ImageResult> _results;
+    int _current_result;
 
     void clearAggregatedResults();
     void emitZoomChanged(double, bool);
+    void emitCurrentResult();
 };
 
 #endif // EXPERIMENTCONTEXT_H

@@ -34,7 +34,7 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
 
     _buttonStart = new QPushButton(tr("Start"));
     _buttonStart->setObjectName("buttonStart");
-    _buttonStop = new QPushButton(tr("Stop"));
+    _buttonStop = new QPushButton(tr("Pause"));
     _buttonStop->setObjectName("buttonStop");
     _buttonStop->setVisible(false);
     connect(_buttonStart, SIGNAL(clicked(bool)), this, SLOT(startExperiment()));
@@ -60,7 +60,7 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
 
     auto buttonsPanel = new QFrame;
     buttonsPanel->setObjectName("buttonsPanel");
-    buttonsPanel->setLayout(Ori::Gui::layoutH(0, 0, {_buttonStart, _buttonStop, (QObject*)8, _buttonStartOver, (QObject*)8, _buttonPublish}));
+    buttonsPanel->setLayout(Ori::Gui::layoutH(0, 8, {_buttonStart, _buttonStop, _buttonStartOver, _buttonPublish}));
 
     adjustSidebar(_featuresPanel);
     adjustSidebar(resultsPanel);
@@ -97,7 +97,6 @@ void ExperimentPanel::startOver() {
 
 void ExperimentPanel::stopExperiment() {
     _buttonStop->setEnabled(false);
-    _buttonStop->setText(tr("Stopping..."));
     _context->stopExperiment();
 }
 
@@ -110,7 +109,6 @@ void ExperimentPanel::experimentStarted() {
 }
 
 void ExperimentPanel::experimentFinished() {
-    _buttonStop->setText(tr("Stop"));
     enableControls(true);
 }
 
@@ -207,7 +205,6 @@ void ExperimentPanel::publishResults() {
     qDebug() << "Run CK command: " << runCmd;
     _publisher->start();
     _buttonStart->setEnabled(false);
-    _buttonStart->setText(tr("Publishing..."));
     _buttonPublish->setEnabled(false);
     _buttonPublish->setToolTip(tr("Publishing in process"));
 }
@@ -222,7 +219,6 @@ static void reportPublisherFail(QProcess* publisher) {
 void ExperimentPanel::publishResultsFinished(int exitCode, QProcess::ExitStatus exitStatus) {
     qDebug() << "Publishing results finished with exit code " << exitCode << " and exit status " << exitStatus;
     _buttonStart->setEnabled(true);
-    _buttonStart->setText(tr("Start"));
     if (0 != exitCode) {
         reportPublisherFail(_publisher);
         _buttonPublish->setEnabled(true);

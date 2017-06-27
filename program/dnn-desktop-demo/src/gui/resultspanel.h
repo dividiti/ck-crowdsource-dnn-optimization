@@ -22,6 +22,7 @@ public:
 private slots:
     void experimentStarted(bool);
     void newImageResult(ImageResult);
+    void currentResultChanged(int, int);
     void updateOnModeChanged(Mode);
     void updateOnEffectiveZoomChanged(double);
 
@@ -32,11 +33,13 @@ private:
     QLabel* _infoMetricTop1;
     QLabel* _infoMetricTop5;
     QLabel* _infoZoom;
+    QLabel* _infoNav;
     ImageView *_worstPredictedImage;
     QFrame* _panelMetrics;
     QFrame* _panelWorstPrediction;
     QFrame* _panelPrecision;
     QFrame* _panelZoom;
+    QFrame* _panelNav;
 
     double _worstAccuracyDelta;
 

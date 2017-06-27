@@ -22,6 +22,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     _context = context;
     connect(_context, &ExperimentContext::experimentStarted, this, &ResultsPanel::experimentStarted);
     connect(_context, &ExperimentContext::newImageResult, this, &ResultsPanel::newImageResult);
+    connect(_context, &ExperimentContext::currentResultChanged, this, &ResultsPanel::currentResultChanged);
     connect(_context, &ExperimentContext::modeChanged, this, &ResultsPanel::updateOnModeChanged);
     connect(_context, &ExperimentContext::zoomChanged, this, &ResultsPanel::updateOnEffectiveZoomChanged);
     connect(_context, &ExperimentContext::effectiveZoomChanged, this, &ResultsPanel::updateOnEffectiveZoomChanged);
@@ -74,12 +75,46 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
 
     auto zoomLayout = Ori::Gui::layoutH({buttonZoomActual, 0, buttonZoomOut, 0, buttonZoomIn, 0, buttonZoomToFit});
     _panelZoom = makePanel({
-         Ori::Gui::layoutH({ Ori::Gui::makeTitle("ZOOM"), 0, _infoZoom }),
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("ZOOM"), 0, _infoZoom }),
         zoomLayout
     });
 
+    auto buttonFirst = new QPushButton;
+    buttonFirst->setObjectName("buttonFirst");
+    buttonFirst->setToolTip(tr("First image"));
+    buttonFirst->setIcon(QIcon(":/tools/first-img"));
+    connect(buttonFirst, SIGNAL(clicked(bool)), _context, SLOT(gotoFirstResult()));
+
+    auto buttonPrev = new QPushButton;
+    buttonPrev->setObjectName("buttonPrev");
+    buttonPrev->setToolTip(tr("Previous image"));
+    buttonPrev->setIcon(QIcon(":/tools/prev-img"));
+    connect(buttonPrev, SIGNAL(clicked(bool)), _context, SLOT(gotoPrevResult()));
+
+    auto buttonNext = new QPushButton;
+    buttonNext->setObjectName("buttonNext");
+    buttonNext->setToolTip(tr("Next image"));
+    buttonNext->setIcon(QIcon(":/tools/next-img"));
+    connect(buttonNext, SIGNAL(clicked(bool)), _context, SLOT(gotoNextResult()));
+
+    auto buttonLast = new QPushButton;
+    buttonLast->setObjectName("buttonLast");
+    buttonLast->setToolTip(tr("Last image"));
+    buttonLast->setIcon(QIcon(":/tools/last-img"));
+    connect(buttonLast, SIGNAL(clicked(bool)), _context, SLOT(gotoLastResult()));
+
+    _infoNav = new QLabel;
+    _infoNav->setAlignment(Qt::AlignTop | Qt::AlignRight);
+    _infoNav->setProperty("qss-role", "link");
+
+    auto navLayout = Ori::Gui::layoutH({buttonFirst, 0, buttonPrev, 0, buttonNext, 0, buttonLast});
+    _panelNav = makePanel({
+        Ori::Gui::layoutH({ Ori::Gui::makeTitle("NAVIGATION"), 0, _infoNav }),
+        navLayout
+    });
+
     setLayout(Ori::Gui::layoutV(0, 0,
-        { panelCounters, _panelPrecision, _panelZoom, _panelMetrics, _panelWorstPrediction, 0 }));
+        { panelCounters, _panelPrecision, _panelZoom, _panelNav, _panelMetrics, _panelWorstPrediction, 0 }));
 
     resetInfo();
     updateOnModeChanged(AppConfig::currentMode().value<Mode>());
@@ -104,6 +139,10 @@ void ResultsPanel::experimentStarted(bool resume) {
     if (!resume) {
         resetInfo();
     }
+}
+
+void ResultsPanel::currentResultChanged(int currentResult, int resultCount) {
+    _infoNav->setText(QString("<span style='color:#969C9E'>%1 / %2</span>").arg(currentResult + 1).arg(resultCount));
 }
 
 void ResultsPanel::newImageResult(ImageResult ir) {
@@ -136,6 +175,7 @@ void ResultsPanel::resetInfo() {
     _worstPredictedImage->clearImage();
     _worstPredictedImage->setToolTip("");
     _lastUpdateMs = 0;
+    _infoNav->setText("");
 }
 
 void ResultsPanel::updateOnModeChanged(Mode mode) {
@@ -144,6 +184,7 @@ void ResultsPanel::updateOnModeChanged(Mode mode) {
     _panelWorstPrediction->setVisible(v);
     _panelPrecision->setVisible(!v);
     _panelZoom->setVisible(!v);
+    _panelNav->setVisible(!v);
 }
 
 void ResultsPanel::updateOnEffectiveZoomChanged(double z) {

@@ -65,7 +65,7 @@ QPushButton:focus {
 }
 QPushButton#buttonStart {
 	height: 32px;
-	width: 154px;
+        width: 154px;
 	background: #009688;
 	border-radius: 16px;
 	border: 1px solid #1F272A;
@@ -79,7 +79,7 @@ QPushButton#buttonStart:!enabled {
 }
 QPushButton#buttonStop {
 	height: 32px;
-	width: 154px;
+        width: 154px;
 	background: #c94747;
 	border-radius: 16px;
 	border: 1px solid #2D2D30;
@@ -91,10 +91,11 @@ QPushButton#buttonStop {
 QPushButton#buttonStop:!enabled {
         background: #969494;
 }
-QPushButton#buttonPublish, QPushButton#buttonStartOver, QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual, QPushButton#buttonZoomToFit {
-	height: 32px;
-	width: 32px;
-	background: #313c42;
+QPushButton#buttonPublish, QPushButton#buttonStartOver, QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual, QPushButton#buttonZoomToFit,
+QPushButton#buttonFirst, QPushButton#buttonPrev, QPushButton#buttonNext, QPushButton#buttonLast {
+        min-height: 32px;
+        width: 32px;
+        background: #313c42;
 	border-radius: 16px;
 	border: 1px solid #232A2D;
 	color: #AFB3B5;

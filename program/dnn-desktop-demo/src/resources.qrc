@@ -12,6 +12,12 @@
         <file alias="zoom-to-actual-size">../images/zoom-to-actual-size.png</file>
         <file alias="zoom-to-fit">../images/zoom-to-fit.png</file>
         <file alias="start-over">../images/start-over.png</file>
+        <file alias="first-img">../images/ico-first-img.png</file>
+        <file alias="last-img">../images/ico-last-img.png</file>
+        <file alias="next-img">../images/ico-next-img.png</file>
+        <file alias="pause">../images/ico-pause.png</file>
+        <file alias="play">../images/ico-play.png</file>
+        <file alias="prev-img">../images/ico-prev-img.png</file>
     </qresource>
     <qresource prefix="/sample">
         <file alias="1">../images/sample1.jpg</file>

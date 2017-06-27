@@ -29,6 +29,7 @@ private slots:
     void experimentStopping();
 
     void newImageResult(ImageResult);
+    void currentResultChanged(int, int, ImageResult);
     void workerStopped();
 
 private:
@@ -41,16 +42,14 @@ private:
     int _current_frame = 0;
 
     RecognitionWidget* _rec_widget = Q_NULLPTR;
+    int _current_result;
 
     bool _widgets_init = false;
 
     void abortExperiment(const QString &errorMsg = QString());
     void releaseExperiment();
-
     void clearWorker();
-
     void initLayout();
-
     void clearWidgets();
 };
 

@@ -37,7 +37,8 @@ void ExperimentContext::clearAggregatedResults() {
     _precision.clear();
     _top1.clear();
     _top5.clear();
-    _lastResult = ImageResult();
+    _results = QVector<ImageResult>();
+    _current_result = -1;
 }
 
 void ExperimentContext::aggregateResults(ImageResult ir) {
@@ -45,7 +46,11 @@ void ExperimentContext::aggregateResults(ImageResult ir) {
     _precision.add(ir.precision());
     _top1.add(ir.correctAsTop1() ? 1 : 0);
     _top5.add(ir.correctAsTop5() ? 1 : 0);
-    _lastResult = ir;
+    _results.append(ir);
+    if (_current_result == _results.size() - 2) {
+        _current_result = _results.size() - 1;
+    }
+    emitCurrentResult();
 }
 
 void ExperimentContext::emitZoomChanged(double z, bool ztf) {
@@ -66,4 +71,36 @@ void ExperimentContext::zoomActual() {
 
 void ExperimentContext::zoomToFit() {
     emitZoomChanged(AppConfig::zoom(), AppConfig::toggleZoomToFit());
+}
+
+void ExperimentContext::emitCurrentResult() {
+    emit currentResultChanged(_current_result, _results.size(), _results.at(_current_result));
+}
+
+void ExperimentContext::gotoNextResult() {
+    if (_current_result < _results.size() - 1) {
+        ++_current_result;
+        emitCurrentResult();
+    }
+}
+
+void ExperimentContext::gotoPrevResult() {
+    if (0 < _current_result && _current_result < _results.size()) {
+        --_current_result;
+        emitCurrentResult();
+    }
+}
+
+void ExperimentContext::gotoFirstResult() {
+    if (!_results.empty() && 0 < _current_result) {
+        _current_result = 0;
+        emitCurrentResult();
+    }
+}
+
+void ExperimentContext::gotoLastResult() {
+    if (!_results.empty() && _current_result < _results.size() - 1) {
+        _current_result = _results.size() - 1;
+        emitCurrentResult();
+    }
 }
