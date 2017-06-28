@@ -114,7 +114,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     });
 
     setLayout(Ori::Gui::layoutV(0, 0,
-        { panelCounters, _panelPrecision, _panelZoom, _panelNav, _panelMetrics, _panelWorstPrediction, 0 }));
+        { panelCounters, _panelPrecision, _panelMetrics, _panelWorstPrediction, 0, _panelZoom, _panelNav }));
 
     resetInfo();
     updateOnModeChanged(AppConfig::currentMode().value<Mode>());
