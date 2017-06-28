@@ -29,9 +29,8 @@ private slots:
     void stopExperiment();
     void experimentStarted();
     void experimentFinished();
-    void publishResults();
-    void publishResultsFinished(int, QProcess::ExitStatus);
-    void publishResultsError(QProcess::ProcessError);
+    void publishStarted();
+    void publishFinished(bool);
     void modeChanged(Mode);
 
 private:
@@ -40,14 +39,7 @@ private:
     QPushButton* _buttonStart;
     QPushButton* _buttonStop;
     QPushButton* _buttonStartOver;
-    QPushButton* _buttonPublish;
-
-    Program _program;
-    Model _model;
-    Dataset _dataset;
-    qint64 _experiment_start_time;
-
-    QProcess* _publisher;
+    bool _restart = false;
 
     void enableControls(bool on);
     void adjustSidebar(QWidget* w);

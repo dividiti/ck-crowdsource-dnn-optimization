@@ -74,10 +74,21 @@ QPushButton#buttonStart {
 	font-weight: 600;
 	font-family: Verdana;
 }
-QPushButton#buttonStart:!enabled {
+QPushButton#buttonPublish {
+        min-height: 32px;
+        width: 154px;
+        background: #009688;
+        border-radius: 16px;
+        border: 1px solid #1F272A;
+        color: #ffffff;
+        font-size: 10pt;
+        font-weight: 600;
+        font-family: Verdana;
+}
+QPushButton#buttonStart:!enabled, QPushButton#buttonPublish::!enabled {
         background: #969494;
 }
-QPushButton#buttonStop {
+QPushButton#buttonStop, QPushButton#buttonStartOver {
 	height: 32px;
         width: 154px;
 	background: #c94747;
@@ -88,10 +99,10 @@ QPushButton#buttonStop {
 	font-weight: 600;
 	font-family: Verdana;
 }
-QPushButton#buttonStop:!enabled {
+QPushButton#buttonStop:!enabled, QPushButton#buttonStartOver::!enabled {
         background: #969494;
 }
-QPushButton#buttonPublish, QPushButton#buttonStartOver, QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual, QPushButton#buttonZoomToFit,
+QPushButton#buttonZoomIn, QPushButton#buttonZoomOut, QPushButton#buttonZoomActual, QPushButton#buttonZoomToFit,
 QPushButton#buttonFirst, QPushButton#buttonPrev, QPushButton#buttonNext, QPushButton#buttonLast {
         min-height: 32px;
         width: 32px;

@@ -11,6 +11,7 @@
 #include <QMouseEvent>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QPushButton>
 
 static QLabel* createCredential(const QString& text, const QUrl& url) {
     auto ret = new ClickableLabel(url);
@@ -33,9 +34,14 @@ static void addCompany(QBoxLayout* layout, QString name, QString host) {
     layout->addSpacing(40);
 }
 
-FooterPanel::FooterPanel(QWidget* parent) : QFrame(parent) {
+FooterPanel::FooterPanel(ExperimentContext* context, QWidget* parent) : QFrame(parent), _context(context) {
+    connect(_context, &ExperimentContext::publishStarted, this, &FooterPanel::publishStarted);
+    connect(_context, &ExperimentContext::publishFinished, this, &FooterPanel::publishFinished);
+    connect(_context, &ExperimentContext::experimentStarted, this, &FooterPanel::enablePublish);
+    connect(_context, &ExperimentContext::experimentFinished, this, &FooterPanel::enablePublish);
+
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    setFixedHeight(40);
+    setFixedHeight(50);
     setObjectName("footerPanel");
 
     auto layout = new QHBoxLayout;\
@@ -55,6 +61,25 @@ FooterPanel::FooterPanel(QWidget* parent) : QFrame(parent) {
         layout->addWidget(label);
     }
 
+    _buttonPublish = new QPushButton(tr("Publish"));
+    _buttonPublish->setObjectName("buttonPublish");
+    enablePublish();
+    connect(_buttonPublish, SIGNAL(clicked(bool)), _context, SLOT(publishResults()));
+    layout->addWidget(_buttonPublish);
+
     setLayout(layout);
 }
 
+void FooterPanel::publishStarted() {
+    _buttonPublish->setText(tr("Publishing..."));
+    _buttonPublish->setEnabled(false);
+}
+
+void FooterPanel::publishFinished(bool) {
+    _buttonPublish->setText(tr("Publish"));
+    enablePublish();
+}
+
+void FooterPanel::enablePublish() {
+    _buttonPublish->setEnabled(!_context->isExperimentStarted() && _context->hasAggregatedResults());
+}

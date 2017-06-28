@@ -10,15 +10,8 @@
 
 #include <QBoxLayout>
 #include <QPushButton>
-#include <QDateTime>
 #include <QVariant>
-#include <QProcess>
 #include <QDebug>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QFileInfo>
-#include <QDir>
-#include <QTemporaryFile>
 
 #define PANELS_W
 
@@ -31,6 +24,8 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     connect(_context, &ExperimentContext::experimentStarted, this, &ExperimentPanel::experimentStarted);
     connect(_context, &ExperimentContext::experimentFinished, this, &ExperimentPanel::experimentFinished);
     connect(_context, &ExperimentContext::modeChanged, this, &ExperimentPanel::modeChanged);
+    connect(_context, &ExperimentContext::publishStarted, this, &ExperimentPanel::publishStarted);
+    connect(_context, &ExperimentContext::publishFinished, this, &ExperimentPanel::publishFinished);
 
     _buttonStart = new QPushButton(tr("Start"));
     _buttonStart->setObjectName("buttonStart");
@@ -40,17 +35,9 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
     connect(_buttonStart, SIGNAL(clicked(bool)), this, SLOT(startExperiment()));
     connect(_buttonStop, SIGNAL(clicked(bool)), this, SLOT(stopExperiment()));
 
-    _buttonPublish = new QPushButton;
-    _buttonPublish->setToolTip(tr("No results for publishing. Please, start and finish an experiment first."));
-    _buttonPublish->setIcon(QIcon(":/tools/publish"));
-    _buttonPublish->setObjectName("buttonPublish");
-    //_buttonPublish->setEnabled(false);
-    connect(_buttonPublish, SIGNAL(clicked(bool)), this, SLOT(publishResults()));
-
-    _buttonStartOver = new QPushButton;
+    _buttonStartOver = new QPushButton(tr("Stop"));
     _buttonStartOver->setObjectName("buttonStartOver");
     _buttonStartOver->setToolTip(tr("Start over"));
-    _buttonStartOver->setIcon(QIcon(":/tools/start-over"));
     _buttonStartOver->setVisible(false);
     connect(_buttonStartOver, SIGNAL(clicked(bool)), this, SLOT(startOver()));
 
@@ -60,7 +47,7 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
 
     auto buttonsPanel = new QFrame;
     buttonsPanel->setObjectName("buttonsPanel");
-    buttonsPanel->setLayout(Ori::Gui::layoutH(0, 8, {_buttonStart, _buttonStop, _buttonStartOver, _buttonPublish}));
+    buttonsPanel->setLayout(Ori::Gui::layoutH(0, 8, {_buttonStart, _buttonStop, _buttonStartOver }));
 
     adjustSidebar(_featuresPanel);
     adjustSidebar(resultsPanel);
@@ -71,12 +58,6 @@ ExperimentPanel::ExperimentPanel(ExperimentContext *context, QWidget *parent) : 
         framesPanel,
         Ori::Gui::layoutV(0, 0, { _featuresPanel, resultsPanel, buttonsPanel })
     }));
-
-    _publisher = new QProcess;
-    _publisher->setWorkingDirectory(AppConfig::ckBinPath());
-    _publisher->setProgram(AppConfig::ckExeName());
-    connect(_publisher, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(publishResultsFinished(int, QProcess::ExitStatus)));
-    connect(_publisher, SIGNAL(error(QProcess::ProcessError)), this, SLOT(publishResultsError(QProcess::ProcessError)));
 }
 
 void ExperimentPanel::updateExperimentConditions() {
@@ -88,11 +69,13 @@ bool ExperimentPanel::canResume() const {
 }
 
 void ExperimentPanel::startExperiment() {
-    _context->startExperiment(canResume());
+    _context->startExperiment(!_restart && canResume());
+    _restart = false;
 }
 
 void ExperimentPanel::startOver() {
-    _context->startExperiment(false);
+    _restart = true;
+    enableControls(true);
 }
 
 void ExperimentPanel::stopExperiment() {
@@ -102,10 +85,6 @@ void ExperimentPanel::stopExperiment() {
 
 void ExperimentPanel::experimentStarted() {
     enableControls(false);
-    _experiment_start_time = QDateTime::currentMSecsSinceEpoch();
-    _program = AppConfig::currentProgram().value<Program>();
-    _model = AppConfig::currentModel().value<Model>();
-    _dataset = AppConfig::currentDataset().value<Dataset>();
 }
 
 void ExperimentPanel::experimentFinished() {
@@ -117,7 +96,7 @@ void ExperimentPanel::modeChanged(Mode) {
 }
 
 void ExperimentPanel::enableControls(bool on) {
-    if (on && canResume()) {
+    if (on && !_restart && canResume()) {
         _buttonStart->setText(tr("Resume"));
         _buttonStartOver->setVisible(true);
         _buttonStartOver->setEnabled(true);
@@ -129,14 +108,6 @@ void ExperimentPanel::enableControls(bool on) {
     _buttonStart->setEnabled(on);
     _buttonStop->setEnabled(!on);
     _buttonStop->setVisible(!on);
-
-    bool pubOn = on && _context->hasAggregatedResults();
-    _buttonPublish->setEnabled(pubOn);
-    if (pubOn) {
-        _buttonPublish->setToolTip(tr("Publish"));
-    } else {
-        _buttonPublish->setToolTip(tr("Experiment in progress"));
-    }
 }
 
 void ExperimentPanel::adjustSidebar(QWidget* w) {
@@ -144,97 +115,12 @@ void ExperimentPanel::adjustSidebar(QWidget* w) {
     w->setFixedWidth(226);
 }
 
-static QJsonObject toJson(const ExperimentContext::Stat& stat) {
-    QJsonObject dict;
-    dict["avg"] = stat.avg;
-    dict["min"] = stat.min;
-    dict["max"] = stat.max;
-    return dict;
-}
-
-static QJsonObject toJsonClassification(const ExperimentContext* context) {
-    QJsonObject dict;
-    dict["top1"] = context->top1().avg;
-    dict["top5"] = context->top5().avg;
-    dict["batch_size"] = context->batchSize();
-    return dict;
-}
-
-static QJsonObject toJsonDetection(const ExperimentContext* context) {
-    QJsonObject dict;
-    dict["precision"] = toJson(context->precision());
-    return dict;
-}
-
-void ExperimentPanel::publishResults() {
-    if (!_context->hasAggregatedResults()) {
-        // nothing to publish
-        return;
-    }
-    QJsonObject dict;
-    dict["duration"] = toJson(_context->duration());
-    dict["detection"] = toJsonDetection(_context);
-    dict["classification"] = toJsonClassification(_context);
-    dict["mode"] = Mode(_context->mode()).name();
-    dict["model_uoa"] = _model.uoa;
-    dict["dataset_uoa"] = _dataset.valUoa;
-    dict["program_uoa"] = _program.programUoa;
-    dict["tmp_dir"] = _program.targetDir;
-    dict["engine_uoa"] = _program.targetUoa;
-    QJsonObject results;
-    results["dict"] = dict;
-    QFileInfo out(_program.outputFile);
-    QDir dir = out.absoluteDir();
-    QTemporaryFile tmp(dir.absolutePath() + QDir::separator() + "tmp-publish-XXXXXX.json");
-    tmp.setAutoRemove(false);
-    if (!tmp.open()) {
-        AppEvents::error("Failed to create a results JSON file");
-        return;
-    }
-    QFileInfo tmpInfo(tmp);
-    QString absoluteTmpPath = tmpInfo.absoluteFilePath();
-    QJsonDocument doc(results);
-    tmp.write(doc.toJson());
-    tmp.close();
-    _publisher->setArguments(QStringList {
-                        "submit",
-                        "experiment.bench.dnn.desktop",
-                        "@" + absoluteTmpPath
-                        });
-    const QString runCmd = _publisher->program() + " " +  _publisher->arguments().join(" ");
-    qDebug() << "Run CK command: " << runCmd;
-    _publisher->start();
+void ExperimentPanel::publishStarted() {
     _buttonStart->setEnabled(false);
-    _buttonPublish->setEnabled(false);
-    _buttonPublish->setToolTip(tr("Publishing in process"));
+    _buttonStartOver->setEnabled(false);
 }
 
-static void reportPublisherFail(QProcess* publisher) {
-    const QString runCmd = publisher->program() + " " +  publisher->arguments().join(" ");
-    AppEvents::error("Failed to publish results. "
-                     "Please, select the command below, copy it and run manually from command line "
-                     "to investigate the issue:\n\n" + runCmd);
-}
-
-void ExperimentPanel::publishResultsFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    qDebug() << "Publishing results finished with exit code " << exitCode << " and exit status " << exitStatus;
+void ExperimentPanel::publishFinished(bool) {
     _buttonStart->setEnabled(true);
-    if (0 != exitCode) {
-        reportPublisherFail(_publisher);
-        _buttonPublish->setEnabled(true);
-        _buttonPublish->setToolTip(tr("Publish"));
-    } else {
-        AppEvents::info("Results are successfully pushed to the server. Thank you for contributing!");
-        _buttonPublish->setEnabled(false);
-        _buttonPublish->setToolTip(tr("Already published"));
-    }
-}
-
-void ExperimentPanel::publishResultsError(QProcess::ProcessError error) {
-    qDebug() << "Publishing results error " << error;
-    reportPublisherFail(_publisher);
-    if (_context->hasAggregatedResults()) {
-        _buttonPublish->setEnabled(true);
-        _buttonPublish->setToolTip(tr("Publish"));
-    }
+    _buttonStartOver->setEnabled(true);
 }

@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         experimentsWidget->layout()->addWidget(e->panel);
     }
 
-    experimentsWidget->layout()->addWidget(new FooterPanel);
+    experimentsWidget->layout()->addWidget(new FooterPanel(&(_experiments.at(0)->context)));
 
     setCentralWidget(experimentsWidget);
     setInitialWindowGeometry(this);

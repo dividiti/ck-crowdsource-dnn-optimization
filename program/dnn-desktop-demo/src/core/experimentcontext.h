@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QProcess>
 
 class ExperimentContext : public QObject
 {
@@ -66,6 +67,8 @@ public:
 
     bool hasAggregatedResults() const { return _duration.count > 0; }
 
+    void clearAggregatedResults();
+
 signals:
     void experimentStarted(bool);
     void experimentStopping();
@@ -75,6 +78,8 @@ signals:
     void modeChanged(Mode);
     void zoomChanged(double, bool);
     void effectiveZoomChanged(double);
+    void publishStarted();
+    void publishFinished(bool);
 
 public slots:
     void zoomIn();
@@ -87,8 +92,12 @@ public slots:
     void gotoFirstResult();
     void gotoLastResult();
 
+    void publishResults();
+
 private slots:
     void aggregateResults(ImageResult);
+    void publishResultsFinished(int, QProcess::ExitStatus);
+    void publishResultsError(QProcess::ProcessError);
 
 private:
     bool _isExperimentStarted = false;
@@ -102,7 +111,12 @@ private:
     QVector<ImageResult> _results;
     int _current_result;
 
-    void clearAggregatedResults();
+    Program _program;
+    Model _model;
+    Dataset _dataset;
+
+    QProcess* _publisher;
+
     void emitZoomChanged(double, bool);
     void emitCurrentResult();
 };
