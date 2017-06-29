@@ -29,6 +29,8 @@ public:
     static bool setZoomToFit(bool on);
     static bool toggleZoomToFit();
 
+    static bool recognitionAutoRestart();
+
     static QString styleSheet();
 
     static QString logPath() { return localSubdir("logs_path", "logs"); }

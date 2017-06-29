@@ -135,8 +135,9 @@ void FramesPanel::newImageResult(ImageResult ir) {
 
 void FramesPanel::workerStopped() {
     qDebug() << "Batch processing finished";
+    bool normalExit = _worker->isNormalExit();
     clearWorker();
-    emit _context->experimentFinished();
+    emit _context->experimentFinished(normalExit);
 }
 
 void FramesPanel::abortExperiment(const QString& errorMsg) {

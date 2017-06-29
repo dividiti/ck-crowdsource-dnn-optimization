@@ -12,6 +12,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QTemporaryFile>
+#include <QTimer>
 
 ExperimentContext::ExperimentContext() {
     connect(this, &ExperimentContext::newImageResult, this, &ExperimentContext::aggregateResults);
@@ -44,8 +45,15 @@ void ExperimentContext::stopExperiment() {
     emit experimentStopping();
 }
 
-void ExperimentContext::onExperimentFinished() {
+void ExperimentContext::onExperimentFinished(bool normalExit) {
     _isExperimentStarted = false;
+    if (normalExit && !_isExperimentInterrupted && currentResult() == resultCount() - 1 && Mode::Type::RECOGNITION == mode() && AppConfig::recognitionAutoRestart()) {
+        QTimer::singleShot(200, this, SLOT(restartExperiment()));
+    }
+}
+
+void ExperimentContext::restartExperiment() {
+    startExperiment(false);
 }
 
 void ExperimentContext::notifyModeChanged(const Mode& mode) {

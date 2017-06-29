@@ -134,6 +134,10 @@ bool AppConfig::toggleZoomToFit() {
     return setZoomToFit(!zoomToFit());
 }
 
+bool AppConfig::recognitionAutoRestart() {
+    return config().value("recognition_auto_restart", true).toBool();
+}
+
 int AppConfig::configValueInt(const QString& key, int defaultValue) {
     bool ok;
     int value = config().value(key, defaultValue).toInt(&ok);

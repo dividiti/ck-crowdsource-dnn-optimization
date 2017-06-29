@@ -72,7 +72,7 @@ public:
 signals:
     void experimentStarted(bool);
     void experimentStopping();
-    void experimentFinished();
+    void experimentFinished(bool);
     void newImageResult(ImageResult);
     void currentResultChanged(int, int, ImageResult);
     void modeChanged(Mode);
@@ -98,7 +98,8 @@ private slots:
     void aggregateResults(ImageResult);
     void publishResultsFinished(int, QProcess::ExitStatus);
     void publishResultsError(QProcess::ProcessError);
-    void onExperimentFinished();
+    void onExperimentFinished(bool);
+    void restartExperiment();
 
 private:
     bool _isExperimentStarted = false;

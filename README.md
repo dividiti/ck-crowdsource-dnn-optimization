@@ -135,6 +135,8 @@ Parameters supported:
 
 1. `--params.footer_right_url`: if specified, and `footer_right_text` is also specified, the text becomes clickable, and this URL is opened on click
 
+1. `--params.recognition_auto_restart`: can be enabled or disabled (`1`/`0`). Enabled by default. If enabled, and an object detection experiment finishes normally (i.e. the dataset is exhausted), the experiment restarts automatically with the same parameters. Example: `ck run program:dnn-desktop-demo --params.recognition_auto_restart=0`
+
 Parameter values are saved for the future use. So, next time you call `ck run`, you don't need to specify them again.
 
 Select DNN engine, data set and press start button! Enjoy!

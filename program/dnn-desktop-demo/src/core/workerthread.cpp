@@ -107,6 +107,8 @@ static void insertOrUpdate(QMap<QString, int>& map, QString key, int v) {
 }
 
 void WorkerThread::run() {
+    normalExit = false;
+
     QProcess ck;
     ck.setWorkingDirectory(getBinPath());
     ck.setProgram(getExe());
@@ -226,6 +228,8 @@ void WorkerThread::run() {
     }
     qDebug() << "Closing classification data file";
     outputFile.close();
+
+    normalExit = true;
 }
 
 void WorkerThread::emitStopped() {

@@ -25,6 +25,8 @@ public:
     void setMinResultInterval(long milliseconds) { minResultIntervalMs = milliseconds; }
     void setSkipFilesIncluding(const QString& path) { this->skipFilesIncluding = path; }
 
+    bool isNormalExit() const { return normalExit; }
+
 signals:
     void newImageResult(ImageResult result);
 
@@ -43,6 +45,7 @@ private:
     long minResultIntervalMs = 0;
     qint64 lastResultMs = 0;
     QString skipFilesIncluding;
+    bool normalExit = false;
 };
 
 #endif // WORKERTHREAD_H
