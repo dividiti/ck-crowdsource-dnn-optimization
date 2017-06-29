@@ -68,8 +68,7 @@ QStringList WorkerThread::getArgs() {
             "--deps.caffemodel=" + model.uoa,
             "--deps.squeezedet=" + model.uoa,
             "--deps.detection-dataset=" + dataset.valUoa,
-            "--deps.lib-tensorflow=" + program.targetUoa,
-            "--env.DRAW_BOXES=0"
+            "--deps.lib-tensorflow=" + program.targetUoa
             };
         if (!skipFilesIncluding.isEmpty()) {
             ret.append("--env.SKIP_FILES_INCLUDING=" + skipFilesIncluding);
