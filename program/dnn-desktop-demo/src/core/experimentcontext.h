@@ -98,6 +98,7 @@ private slots:
     void aggregateResults(ImageResult);
     void publishResultsFinished(int, QProcess::ExitStatus);
     void publishResultsError(QProcess::ProcessError);
+    void onExperimentFinished();
 
 private:
     bool _isExperimentStarted = false;

@@ -15,6 +15,7 @@
 
 ExperimentContext::ExperimentContext() {
     connect(this, &ExperimentContext::newImageResult, this, &ExperimentContext::aggregateResults);
+    connect(this, &ExperimentContext::experimentFinished, this, &ExperimentContext::onExperimentFinished);
 
     _publisher = new QProcess;
     _publisher->setWorkingDirectory(AppConfig::ckBinPath());
@@ -41,6 +42,10 @@ void ExperimentContext::stopExperiment() {
     _isExperimentStarted = false;
     _isExperimentInterrupted = true;
     emit experimentStopping();
+}
+
+void ExperimentContext::onExperimentFinished() {
+    _isExperimentStarted = false;
 }
 
 void ExperimentContext::notifyModeChanged(const Mode& mode) {
