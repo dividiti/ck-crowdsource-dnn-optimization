@@ -40,6 +40,9 @@ static const QRegExp FALSE_POSITIVE_OBJECT_REGEX("False positive ([^:]*): (\\d+)
 static const QRegExp DETECTION_REGEX("Detection ([^:]*): ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+)");
 static const QRegExp GROUND_TRUTH_REGEX("Ground truth ([^:]*): ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+) ([0-9.]+)");
 
+static const QRegExp ROLLING_AP_REGEX("Rolling AP ([^:]*): ([0-9.]+) easy, ([0-9.]+) moderate, ([0-9.]+) hard");
+static const QRegExp ROLLING_MEAN_AP_REGEX("Rolling mAP: ([0-9.]+)");
+
 static const long NORMAL_WAIT_MS = 50;
 static const long KILL_WAIT_MS = 1000 * 10;
 
@@ -202,6 +205,18 @@ void WorkerThread::run() {
             auto o = objectFromMatch(GROUND_TRUTH_REGEX);
             o.ground_truth = true;
             ir.groundTruth.append(o);
+
+        } else if (ROLLING_AP_REGEX.exactMatch(line)) {
+            QString k = ROLLING_AP_REGEX.cap(1);
+            QVector<double> p = {
+                ROLLING_AP_REGEX.cap(2).toDouble(),
+                ROLLING_AP_REGEX.cap(3).toDouble(),
+                ROLLING_AP_REGEX.cap(4).toDouble()
+            };
+            ir.rollingAP[k] = p;
+
+        } else if (ROLLING_MEAN_AP_REGEX.exactMatch(line)) {
+            ir.rollingMeanAP = ROLLING_MEAN_AP_REGEX.cap(1).toDouble();
 
         } else if (predictionCount > 0) {
             // parsing a prediction line

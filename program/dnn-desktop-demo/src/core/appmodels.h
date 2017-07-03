@@ -58,6 +58,14 @@ struct ImageObject {
     }
 };
 
+enum Difficulty {
+  UNASSIGNED = -2,
+  UNKNOWN = -1,
+  EASY = 0,
+  MODERATE = 1,
+  HARD = 2
+};
+
 class ImageResult
 {
 public:
@@ -72,6 +80,9 @@ public:
     QMap<QString, int> falsePositiveObjects;
     QVector<ImageObject> detections;
     QVector<ImageObject> groundTruth;
+
+    QMap<QString, QVector<double>> rollingAP;
+    double rollingMeanAP;
 
     bool correctAsTop1() const {
         return !predictions.isEmpty() && predictions[0].labels == correctLabels;

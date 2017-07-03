@@ -34,10 +34,13 @@ private:
     QLabel* _infoMetricTop5;
     QLabel* _infoZoom;
     QLabel* _infoNav;
+    QLabel* _infoModerate;
+    QLabel* _infoMean;
     ImageView *_worstPredictedImage;
     QFrame* _panelMetrics;
     QFrame* _panelWorstPrediction;
     QFrame* _panelPrecision;
+    QFrame* _panelMean;
     QFrame* _panelZoom;
     QFrame* _panelNav;
 

@@ -28,14 +28,29 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     connect(_context, &ExperimentContext::effectiveZoomChanged, this, &ResultsPanel::updateOnEffectiveZoomChanged);
 
     _infoImagesPerSec = makeInfoLabel();
-    _infoPrecision = makeInfoLabel();
     _infoMetricTop1 = makeInfoLabel();
     _infoMetricTop5 = makeInfoLabel();
+
+    _infoPrecision = makeInfoLabel();
+    _infoPrecision->setToolTip(tr("Simple average precision across all objects"));
+    _infoModerate = makeInfoLabel();
+    _infoModerate->setToolTip(tr("Average precision for objects of moderate difficulty"));
+    _infoMean = makeInfoLabel();
+    _infoMean->setToolTip(tr("Mean average precision across objects of easy, moderate and hard difficulties"));
 
     _worstPredictedImage = new ImageView(WORST_PREDICTED_IMAGE_W, WORST_PREDICTED_IMAGE_H);
 
     auto panelCounters = makePanel({ Ori::Gui::makeTitle("IMAGES PER SECOND"), _infoImagesPerSec });
     _panelPrecision = makePanel({ Ori::Gui::makeTitle("AVERAGE PRECISION"), _infoPrecision });
+
+    _panelMean = makePanel({
+        Ori::Gui::layoutH(0, 0, {
+            Ori::Gui::layoutV(0, 0, {Ori::Gui::makeTitle("MODERATE"), _infoModerate}),
+            0,
+            Ori::Gui::layoutV(0, 0, {Ori::Gui::makeTitle("MEAN"), _infoMean}),
+        })
+    });
+
     auto panelMetricTop1 = makePanel({ Ori::Gui::makeTitle("TOP-1"), _infoMetricTop1 });
     auto panelMetricTop5 = makePanel({ Ori::Gui::makeTitle("TOP-5"), _infoMetricTop5 });
     _panelMetrics = new QFrame;
@@ -114,7 +129,7 @@ ResultsPanel::ResultsPanel(ExperimentContext *context, QWidget *parent)
     });
 
     setLayout(Ori::Gui::layoutV(0, 0,
-        { panelCounters, _panelPrecision, _panelMetrics, _panelWorstPrediction, 0, _panelZoom, _panelNav }));
+        { panelCounters, _panelPrecision, _panelMean, _panelMetrics, _panelWorstPrediction, 0, _panelZoom, _panelNav }));
 
     resetInfo();
     updateOnModeChanged(AppConfig::currentMode().value<Mode>());
@@ -149,7 +164,11 @@ void ResultsPanel::newImageResult(ImageResult ir) {
     qint64 curTimeMs = QDateTime::currentMSecsSinceEpoch();
     if (curTimeMs - _lastUpdateMs > _updateIntervalMs) {
         _infoImagesPerSec->setText(QString(QStringLiteral("%1")).arg(ir.imagesPerSecond(), 0, 'f', 2));
+
         _infoPrecision->setText(QString(QStringLiteral("%1")).arg(_context->precision().avg, 0, 'f', 2));
+        _infoModerate->setText(QString(QStringLiteral("%1")).arg(_context->averagePrecision(MODERATE).avg, 0, 'f', 2));
+        _infoMean->setText(QString(QStringLiteral("%1")).arg(ir.rollingMeanAP, 0, 'f', 2));
+
         _infoMetricTop1->setText(QString::number(_context->top1().avg, 'f', 2));
         _infoMetricTop5->setText(QString::number(_context->top5().avg, 'f', 2));
 
@@ -169,6 +188,8 @@ void ResultsPanel::newImageResult(ImageResult ir) {
 void ResultsPanel::resetInfo() {
     _infoImagesPerSec->setText("N/A");
     _infoPrecision->setText("N/A");
+    _infoModerate->setText("N/A");
+    _infoMean->setText("N/A");
     _infoMetricTop1->setText("N/A");
     _infoMetricTop5->setText("N/A");
     _worstAccuracyDelta = 0;
@@ -183,6 +204,7 @@ void ResultsPanel::updateOnModeChanged(Mode mode) {
     _panelMetrics->setVisible(v);
     _panelWorstPrediction->setVisible(v);
     _panelPrecision->setVisible(!v);
+    _panelMean->setVisible(!v);
     _panelZoom->setVisible(!v);
     _panelNav->setVisible(!v);
 }

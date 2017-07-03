@@ -1,6 +1,9 @@
 #include "appconfig.h"
+#include "appmodels.h"
 #include "appevents.h"
 #include "experimentcontext.h"
+
+#include <limits>
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -66,7 +69,18 @@ void ExperimentContext::clearAggregatedResults() {
     _top1.clear();
     _top5.clear();
     _results = QVector<ImageResult>();
+    _combinedRollingAP = {Stat(), Stat(), Stat()};
     _current_result = -1;
+}
+
+static bool eq(float a, float b) {
+  return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
+}
+
+static void addIf(ExperimentContext::Stat& stat, double v) {
+    if (!eq(v, 0)) {
+        stat.add(v);
+    }
 }
 
 void ExperimentContext::aggregateResults(ImageResult ir) {
@@ -77,6 +91,11 @@ void ExperimentContext::aggregateResults(ImageResult ir) {
     _results.append(ir);
     if (_current_result == _results.size() - 2) {
         _current_result = _results.size() - 1;
+    }
+    for (const auto& v : ir.rollingAP) {
+        addIf(_combinedRollingAP[EASY], v[EASY]);
+        addIf(_combinedRollingAP[MODERATE], v[MODERATE]);
+        addIf(_combinedRollingAP[HARD], v[HARD]);
     }
     emitCurrentResult();
 }

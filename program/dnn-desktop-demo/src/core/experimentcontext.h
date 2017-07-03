@@ -65,6 +65,10 @@ public:
         return _results.size();
     }
 
+    Stat averagePrecision(int difficulty) const {
+        return _combinedRollingAP[difficulty];
+    }
+
     bool hasAggregatedResults() const { return _duration.count > 0; }
 
     void clearAggregatedResults();
@@ -112,6 +116,8 @@ private:
     int _batchSize;
     QVector<ImageResult> _results;
     int _current_result;
+
+    QVector<Stat> _combinedRollingAP;
 
     Program _program;
     Model _model;
