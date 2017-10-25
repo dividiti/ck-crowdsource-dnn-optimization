@@ -107,6 +107,11 @@ First, pull the repo:
 $ ck pull repo:ck-tensorflow
 ```
 
+Then install working model (other may work too but not yet thoroughtly tested):
+```
+$ ck install package --tags=model,squeezedet
+```
+
 After that, you should be able to successfully run a simple demo:
 ```
 $ ck run program:squeezedet --cmd_key=default
