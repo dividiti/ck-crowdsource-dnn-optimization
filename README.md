@@ -46,7 +46,9 @@ $ sudo apt-get install qtdeclarative5-dev
 $ sudo yum install qt5-declarative-devel
 ```
 
-**Windows:** Download Qt from [official website](https://www.qt.io/download-open-source) and install to `C:\Qt`. (CK will then pick it up automatically.)
+**Windows:** If you use Anaconda python, CK will then automatically pick up its Qt version (we used 5.6.2 for our builds). 
+Alternatively, you can download Qt from [official website](https://www.qt.io/download-open-source) and install to `C:\Qt`.
+However, we experienced some minor issues when compiling this app with such versions.
 
 Troubleshooting
 ===============
@@ -107,13 +109,12 @@ $ ck pull repo:ck-tensorflow
 
 After that, you should be able to successfully run a simple demo:
 ```
-$ ck compile program:squeezedet
 $ ck run program:squeezedet --cmd_key=default
 ```
 
 (it may ask a couple of questions and install some stuff like a dataset at the first run).
 
-Note that you will need Python 3.5 on Windows!
+Note that you will need Python 3.5 on Windows for TF 1.2.0!
 
 If this works for you, the object detection mode in the UI will be available.
 
