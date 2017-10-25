@@ -118,6 +118,11 @@ Note that you will need Python 3.5 on Windows for TF 1.2.0!
 
 If this works for you, the object detection mode in the UI will be available.
 
+You can then install KITTI image set to test it in our application:
+```
+$ ck install package --tags=kitti-drive-0009
+```
+
 Running the app
 ===============
 
