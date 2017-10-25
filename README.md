@@ -114,7 +114,7 @@ $ ck run program:squeezedet --cmd_key=default
 
 (it may ask a couple of questions and install some stuff like a dataset at the first run).
 
-Note that you will need Python 3.5 on Windows for TF 1.2.0!
+Note that we managed to run it on Windows using Python 3.5 only (lower versions or Python 3.x didn't work well with TF)!
 
 If this works for you, the object detection mode in the UI will be available.
 
