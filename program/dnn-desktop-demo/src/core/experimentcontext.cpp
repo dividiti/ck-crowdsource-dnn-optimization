@@ -4,6 +4,7 @@
 #include "experimentcontext.h"
 
 #include <limits>
+#include <cmath>
 
 #include <QBoxLayout>
 #include <QDebug>
