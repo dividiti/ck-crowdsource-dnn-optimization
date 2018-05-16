@@ -34,7 +34,7 @@ Minimal requirements
 * [Collective Knowledge Framework](https://github.com/ctuning/ck)
 * [Various compilers](https://github.com/ctuning/ck/wiki/Compiler-autotuning#Installing_compilers)
 
-* QT5+ library. You can install it as following:
+* QT5+ library. You can install it as follows:
 
 **Ubuntu:**
 ```
