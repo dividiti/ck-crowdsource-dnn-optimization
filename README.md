@@ -9,7 +9,7 @@ This is a [CK-powered](http://github.com/ctuning/ck) QT-based open-source
 cross-platform and customizable desktop tool set (at least, for Linux and Windows) 
 to benchmark and optimize deep learning engines, models and inputs across diverse HW/SW via
 [CK](https://github.com/ctuning/ck). It complements our 
-[Android application](https://play.google.com/store/apps/details?id=openscience.crowdsource.video.experiments)
+[Android application](http://cKnowledge.org/android-apps.html)
 to crowdsource deep learning optimization across mobile and IoT devices
 provided by volunteers.
 

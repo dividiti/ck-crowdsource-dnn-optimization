@@ -1,2 +1,1 @@
-
-crowdsource-video-experiments-on-desktop.exe
+ck run program:dnn-desktop-demo
