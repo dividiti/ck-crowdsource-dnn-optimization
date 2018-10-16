@@ -1,6 +1,5 @@
-[![logo](https://github.com/ctuning/ck-guide-images/blob/master/logo-powered-by-ck.png)](http://cKnowledge.org)
-[![logo](https://github.com/ctuning/ck-guide-images/blob/master/logo-validated-by-the-community-simple.png)](http://cTuning.org)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![compatibility](https://github.com/ctuning/ck-guide-images/blob/master/ck-compatible.svg)](https://github.com/ctuning/ck)
 
 Introduction
 ============
@@ -12,6 +11,8 @@ to benchmark and optimize deep learning engines, models and inputs across divers
 [Android application](http://cKnowledge.org/android-apps.html)
 to crowdsource deep learning optimization across mobile and IoT devices
 provided by volunteers.
+
+[![logo](http://cknowledge.org/_resources/partners/ck-dnn-live-crowd-optimization-dashboard-1.jpg)](http://cKnowledge.org/partners.html)
 
 At the moment, it calculates the sustainable rate of continuous image classification via 
 [CK-Caffe](https://github.com/dviditi/ck-caffe) or 
