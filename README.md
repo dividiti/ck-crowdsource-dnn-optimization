@@ -19,7 +19,8 @@ At the moment, it calculates the sustainable rate of continuous image classifica
 [CK-TensorFlow](https://github.com/ctuning/ck-tensorflow) 
 DNN engines needed for life object recognition!
 
-See our [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
+See [General Motors presentation](https://www.youtube.com/embed/1ldgVZ64hEI?rel=0) 
+and the [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
 
 We validated this app on ARM, Intel and NVidia-based devices 
 with Linux and Windows (from laptops, servers and powerful high-end tablets such as Surface Pro 4 
@@ -108,7 +109,7 @@ First, pull the repo:
 $ ck pull repo:ck-tensorflow
 ```
 
-Then install working model (other may work too but not yet thoroughtly tested):
+Then install working model (other may work too but not yet thoroughly tested):
 ```
 $ ck install package --tags=model,squeezedet
 ```
