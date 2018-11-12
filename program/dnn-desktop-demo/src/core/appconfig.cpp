@@ -187,6 +187,7 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
         auto programPath = sectionValue(section, i, "path");
         auto programUoa = sectionValue(section, i, "uoa");
         bool webcam = "1" == sectionValue(section, i, "webcam");
+        bool isCompilationNeeded = "1" == sectionValue(section, i, "need_compilation");
         auto programEngine = Engine::parse(sectionValue(section, i, "engine"));
         int targetCount = configValueInt(section + "/" + QString::number(i) + "_target_count", 0);
         for (int j = 0; j < targetCount; ++j) {
@@ -194,6 +195,8 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
             Program p;
             p.name = sectionValue(section, i, keyPrefix + "name");
             p.targetUoa = sectionValue(section, i, keyPrefix + "uoa");
+            p.targetVersion = sectionValue(section, i, keyPrefix + "version");
+            p.targetDepsInfo = sectionValue(section, i, keyPrefix + "deps_info");
             p.programUoa = programUoa;
             p.engine = programEngine;
             p.supportsWebcam = webcam;
@@ -205,7 +208,7 @@ QList<Program> AppConfig::programs(Mode::Type mode) {
             p.outputFile = pathAppend(targetFullPath, outputFile);
             p.exe = pathAppend(targetFullPath, exe);
 
-            if ("squeezedet" == programUoa || isCompiled(p)) {
+            if (!isCompilationNeeded || isCompiled(p)) {
                 ret.append(p);
             }
         }

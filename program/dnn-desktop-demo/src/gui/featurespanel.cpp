@@ -3,7 +3,7 @@
 #include "appevents.h"
 #include "experimentcontext.h"
 #include "featurespanel.h"
-#include "../ori/OriWidgets.h"
+#include "engineselectordialog.h"
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -12,6 +12,52 @@
 #include <QRadioButton>
 #include <QDialogButtonBox>
 #include <QSpinBox>
+#include <QScrollArea>
+
+namespace {
+QLabel* makeInfoLabel()
+{
+    auto label = new QLabel;
+    label->setWordWrap(true);
+    label->setProperty("qss-role", "info-label");
+    return label;
+}
+
+QWidget* makeDivider()
+{
+    auto divider = new QFrame;
+    divider->setProperty("qss-role", "divider");
+    divider->setFrameShape(QFrame::HLine);
+    return divider;
+}
+
+QFrame* makeFeaturesPanel(const QString& title, QWidget* selectFeatureLink, QWidget* content)
+{
+    auto panel = new QFrame;
+    panel->setProperty("qss-role", "features-panel");
+
+    auto titleLabel = new QLabel(title);
+    titleLabel->setProperty("qss-role", "panel-title");
+    auto f = titleLabel->font();
+    f.setLetterSpacing(QFont::AbsoluteSpacing, 0.8);
+    titleLabel->setFont(f);
+
+    auto titleLayout = new QHBoxLayout;
+    titleLayout->setMargin(0);
+    titleLayout->setSpacing(0);
+    titleLayout->addWidget(titleLabel);
+    titleLayout->addStretch();
+    titleLayout->addWidget(selectFeatureLink);
+
+    auto layout = new QVBoxLayout(panel);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    layout->addLayout(titleLayout);
+    layout->addWidget(content);
+
+    return panel;
+}
+}
 
 FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFrame(parent)
 {
@@ -31,49 +77,27 @@ FeaturesPanel::FeaturesPanel(ExperimentContext* context, QWidget *parent) : QFra
     _linkSelectImages = makeLink("Select", "Select image source", SLOT(selectImages()));
     _linkSelectMode = makeLink("Select", "Select mode", SLOT(selectMode()));
 
-    auto panelEngine = new QFrame;
-    panelEngine->setProperty("qss-role", "features-panel");
-    panelEngine->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("ENGINE"), 0, _linkSelectEngine }),
-        _infoEngine,
-    }));
-
-    auto panelModel = new QFrame;
-    panelModel->setProperty("qss-role", "features-panel");
-    panelModel->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("MODEL"), 0, _linkSelectModel }),
-        _infoModel,
-    }));
-
-    auto panelImages = new QFrame;
-    panelImages->setProperty("qss-role", "features-panel");
-    panelImages->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("IMAGE SOURCE"), 0, _linkSelectImages }),
-        _infoImages,
-    }));
-
-    auto panelMode = new QFrame;
-    panelMode->setProperty("qss-role", "features-panel");
-    panelMode->setLayout(Ori::Gui::layoutV(0, 0, {
-        Ori::Gui::layoutH({ Ori::Gui::makeTitle("MODE"), 0, _linkSelectMode }),
-        _infoMode,
-    }));
+    auto panelEngine = makeFeaturesPanel("ENGINE", _linkSelectEngine, _infoEngine);
+    auto panelModel = makeFeaturesPanel("MODEL", _linkSelectModel, _infoModel);
+    auto panelImages = makeFeaturesPanel("IMAGE SOURCE", _linkSelectImages, _infoImages);
+    auto panelMode = makeFeaturesPanel("MODE", _linkSelectMode, _infoMode);
 
     auto settingsPanel = new QFrame;
-    settingsPanel->setLayout(Ori::Gui::layoutV(0, 0, {
-        panelEngine,
-        Ori::Gui::makeDivider(),
-        panelModel,
-        Ori::Gui::makeDivider(),
-        panelImages,
-    }));
+    auto settingsLayout = new QVBoxLayout(settingsPanel);
+    settingsLayout->setMargin(0);
+    settingsLayout->setSpacing(0);
+    settingsLayout->addWidget(panelEngine);
+    settingsLayout->addWidget(makeDivider());
+    settingsLayout->addWidget(panelModel);
+    settingsLayout->addWidget(makeDivider());
+    settingsLayout->addWidget(panelImages);
 
-    setLayout(Ori::Gui::layoutV(0, 0,
-    {
-        panelMode,
-        Ori::Gui::makeDivider(),
-        settingsPanel
-    }));
+    auto mainLayout = new QVBoxLayout(this);
+    mainLayout->setMargin(0);
+    mainLayout->setSpacing(0);
+    mainLayout->addWidget(panelMode);
+    mainLayout->addWidget(makeDivider());
+    mainLayout->addWidget(settingsPanel);
 }
 
 QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, const char* slot)
@@ -84,14 +108,6 @@ QWidget* FeaturesPanel::makeLink(const QString& text, const QString& tooltip, co
     link->setToolTip(tooltip);
     connect(link, SIGNAL(linkActivated(QString)), this, slot);
     return link;
-}
-
-QLabel* FeaturesPanel::makeInfoLabel()
-{
-    auto label = new QLabel;
-    label->setWordWrap(true);
-    label->setProperty("qss-role", "info-label");
-    return label;
 }
 
 template<typename T>
@@ -123,74 +139,8 @@ static QVariant selectCurrentViaDialog(const QList<T>& items, QVariant current) 
     return ret;
 }
 
-static QVariant selectEngineAndBatchSizeViaDialog() {
-    QVariant ret;
-
-    const Mode::Type m = AppConfig::currentModeType();
-
-    auto items = AppConfig::programs(m);
-    if (items.isEmpty()) {
-        AppEvents::info("Recognition engines not found");
-        return ret;
-    }
-
-    auto current = AppConfig::currentProgram(m);
-    QDialog dlg;
-    auto layout = new QVBoxLayout;
-
-    QVector<QRadioButton*> flags;
-    for (int i = 0; i < items.size(); i++) {
-        auto flag = new QRadioButton(items.at(i).title());
-        flag->setChecked(current.isValid() && items[i] == current.value<Program>());
-        layout->addWidget(flag);
-        flags << flag;
-    }
-
-    auto batchSize = new QSpinBox;
-    batchSize->setMinimum(1);
-    batchSize->setSingleStep(1);
-    batchSize->setValue(AppConfig::batchSize());
-
-    auto batchSizeWidget = new QWidget;
-    auto batchSizeLayout = new QHBoxLayout;
-    batchSizeLayout->addWidget(new QLabel("Batch size: "));
-    batchSizeLayout->addWidget(batchSize);
-    batchSizeWidget->setLayout(batchSizeLayout);
-
-    if (Mode::Type::CLASSIFICATION == m) {
-        auto line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addSpacing(12);
-        layout->addWidget(line);
-    } else {
-        batchSizeWidget->setVisible(false);
-    }
-
-    layout->addWidget(batchSizeWidget);
-
-    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    dlg.connect(buttons, SIGNAL(accepted()), &dlg, SLOT(accept()));
-    dlg.connect(buttons, SIGNAL(rejected()), &dlg, SLOT(reject()));
-    layout->addWidget(buttons);
-
-    dlg.setLayout(layout);
-    if (dlg.exec() == QDialog::Accepted) {
-        if (Mode::Type::CLASSIFICATION == m) {
-            AppConfig::setBatchSize(batchSize->value());
-        }
-        for (int i = 0; i < flags.size(); i++) {
-            if (flags.at(i)->isChecked()) {
-                ret.setValue(items[i]);
-                break;
-            }
-        }
-    }
-    return ret;
-}
-
 void FeaturesPanel::selectEngine() {
-    QVariant v = selectEngineAndBatchSizeViaDialog();
+    QVariant v = EngineSelectorDialog::selectEngineAndBatchSize();
     if (v.isValid()) {
         AppConfig::setCurrentProgram(v.value<Program>().targetUoa);
         updateExperimentConditions();

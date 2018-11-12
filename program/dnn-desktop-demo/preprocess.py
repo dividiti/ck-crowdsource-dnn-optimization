@@ -1,3 +1,12 @@
+#
+# Copyright (c) 2018 cTuning foundation.
+# See CK COPYRIGHT.txt for copyright details.
+#
+# SPDX-License-Identifier: BSD-3-Clause.
+# See CK LICENSE.txt for licensing details.
+#
+
+import json
 import sys
 import os
 
@@ -35,13 +44,13 @@ def ck_preprocess(i):
     if 'win' == host_os:
         exe_extension = '.exe'
 
-    r = fill_programs(ck, conf, exe_extension, 'Programs', 'caffe-classification,continuous')
+    r = fill_programs_caffe(ck, conf, exe_extension, 'Programs', 'caffe-classification,continuous')
     if r['return'] > 0: return r
 
-    r = fill_programs(ck, conf, exe_extension, 'DetectionPrograms', 'caffe-detection,continuous')
+    r = fill_programs_caffe(ck, conf, exe_extension, 'DetectionPrograms', 'caffe-detection,continuous')
     if r['return'] > 0: return r
 
-    r = fill_squeezedet(ck, conf, 'DetectionPrograms', start_count=len(r['lst']))
+    r = fill_programs_squeezedet(ck, conf, 'DetectionPrograms', start_count=len(r['lst']))
     if r['return'] > 0: return r
 
     r = fill_aux(ck, conf)
@@ -159,7 +168,7 @@ def fill_models(ck, conf, section, tags, exclude_tags=[], engine='', start_count
 
     return {'return':0, 'lst': lst}
 
-def fill_programs(ck, conf, exe_extension, section, tags):
+def fill_programs_caffe(ck, conf, exe_extension, section, tags):
     import glob
 
     r = fill_section(ck, conf, section=section, tags=tags)
@@ -192,9 +201,7 @@ def fill_programs(ck, conf, exe_extension, section, tags):
             print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
             continue
 
-        target_paths = []
-        target_names = []
-        target_uoas = []
+        targets = []
 
         for target_path in target_dirs:
             full_target_path = os.path.join(program_path, target_path)
@@ -213,15 +220,18 @@ def fill_programs(ck, conf, exe_extension, section, tags):
                 print('! Not found Caffe lib data_name for ' + full_target_path)
                 continue
 
-            if target_caffe_name in target_names:
+            if filter(lambda target: target['name'] == target_caffe_name, targets):
                 print('! Duplicate Caffe lib "' + target_caffe_name + '", skipping directory ' + full_target_path)
                 continue
 
-            target_names.append(target_caffe_name)
-            target_paths.append(os.path.basename(target_path))
-            target_uoas.append(target_uoa)
+            targets.append({
+              'name': target_caffe_name,
+              'path': os.path.basename(target_path),
+              'uoa': target_uoa,
+              'version': ck.get_by_flat_key({'dict': r['dict'], 'key': '##lib-caffe#ver'}).get('value', None)
+            })
 
-        if not target_paths:
+        if not filter(lambda target: target['path'], targets):
             print('! Program "' + u['data_uoa'] + '" is not compiled. For use it in desktop demo, please compile it first')
             continue
 
@@ -229,14 +239,17 @@ def fill_programs(ck, conf, exe_extension, section, tags):
         setstr(conf, section, str(i) + '_output_file', output_file)
         setstr(conf, section, str(i) + '_exe', target_file)
         setstr(conf, section, str(i) + '_engine', CAFFE_ENGINE)
+        conf.set(section, str(i) + '_need_compilation', '1')
         conf.set(section, str(i) + '_webcam', str(1 if is_webcam else 0))
 
-        conf.set(section, str(i) + '_target_count', str(len(target_paths)))
-        for j, target_path in enumerate(target_paths):
+        conf.set(section, str(i) + '_target_count', str(len(targets)))
+        for j, target in enumerate(targets):
             k = str(i) + '_target_' + str(j)
-            setstr(conf, section, k + '_path', target_path)
-            setstr(conf, section, k + '_name', target_names[j])
-            setstr(conf, section, k + '_uoa', target_uoas[j])
+            for key in target.keys():
+                setstr(conf, section, k + '_' + key, target[key])
+            #setstr(conf, section, k + '_path', target['path'])
+            #setstr(conf, section, k + '_name', target['name'])
+            #setstr(conf, section, k + '_uoa', target['uoa'])
 
     return {'return': 0, 'lst': lst}
 
@@ -267,7 +280,7 @@ def fill_val(ck, conf, section, tags):
         setstr(conf, section, str(i) + '_aux_package_uoa', r.get('dict', {}).get('aux_uoa', ''))
     return {'return': 0}
 
-def fill_squeezedet(ck, conf, section, start_count):
+def fill_programs_squeezedet(ck, conf, section, start_count):
     r = fill_section(ck, conf, section=section, tags='tensorflow,squeezedet,continuous', start_count=start_count)
     if r['return'] > 0: return r
     lst = r['lst']
@@ -290,6 +303,7 @@ def fill_squeezedet(ck, conf, section, start_count):
         
         setstr(conf, section, str(i) + '_path', program_path)
         setstr(conf, section, str(i) + '_engine', TF_ENGINE)
+        conf.set(section, str(i) + '_need_compilation', '0')
         conf.set(section, str(i) + '_webcam', str(1 if is_webcam else 0))
 
         r = find_by_tags(ck, tags='lib,tensorflow', module='env')
@@ -303,6 +317,12 @@ def fill_squeezedet(ck, conf, section, start_count):
             setstr(conf, section, k + '_path', 'tmp')
             setstr(conf, section, k + '_name', target['data_name'])
             setstr(conf, section, k + '_uoa', target['data_uoa'])
+            setstr(conf, section, k + '_version', target['meta'].get('customize',{}).get('version',''))
+            deps = target['meta'].get('deps', {})
+            setstr(conf, section, k + '_deps_info', ';'.join(map(
+              lambda key: '{} {}'.format(key, deps[key]['ver']) if 'ver' in deps[key] else '',
+              deps.keys()
+            )))
 
     return {'return': 0}
 

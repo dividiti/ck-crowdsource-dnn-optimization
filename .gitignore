@@ -4,3 +4,4 @@ redist*
 *.user
 *.autosave
 *.pyc
+program/build-*

@@ -15,7 +15,7 @@ class FeaturesPanel : public QFrame
 {
     Q_OBJECT
 public:
-    explicit FeaturesPanel(ExperimentContext *context, QWidget *parent = 0);
+    explicit FeaturesPanel(ExperimentContext *context, QWidget *parent = nullptr);
 
     void updateExperimentConditions();
 
@@ -33,7 +33,6 @@ private:
     QWidget *_linkSelectEngine, *_linkSelectModel, *_linkSelectImages, *_linkSelectMode;
 
     QWidget* makeLink(const QString &text, const QString& tooltip, const char* slot);
-    QLabel* makeInfoLabel();
     void enableControls(bool on);
 };
 
