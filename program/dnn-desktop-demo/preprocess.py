@@ -247,9 +247,6 @@ def fill_programs_caffe(ck, conf, exe_extension, section, tags):
             k = str(i) + '_target_' + str(j)
             for key in target.keys():
                 setstr(conf, section, k + '_' + key, target[key])
-            #setstr(conf, section, k + '_path', target['path'])
-            #setstr(conf, section, k + '_name', target['name'])
-            #setstr(conf, section, k + '_uoa', target['uoa'])
 
     return {'return': 0, 'lst': lst}
 
