@@ -168,6 +168,12 @@ def fill_models(ck, conf, section, tags, exclude_tags=[], engine='', start_count
 
     return {'return':0, 'lst': lst}
 
+def make_deps_info_str(deps):
+    return ';'.join(map(
+       lambda key: '{} {}'.format(key, deps[key]['ver']) if 'ver' in deps[key] else '',
+       deps.keys()
+    ))
+
 def fill_programs_caffe(ck, conf, exe_extension, section, tags):
     import glob
 
@@ -203,6 +209,9 @@ def fill_programs_caffe(ck, conf, exe_extension, section, tags):
 
         targets = []
 
+        def get_json_value(ck_loaded_json, flat_key, def_value=None):
+          return ck.get_by_flat_key({'dict': ck_loaded_json['dict'], 'key': flat_key}).get('value', def_value)
+
         for target_path in target_dirs:
             full_target_path = os.path.join(program_path, target_path)
             r = ck.load_json_file({'json_file': os.path.join(full_target_path, 'tmp-deps.json')})
@@ -210,12 +219,12 @@ def fill_programs_caffe(ck, conf, exe_extension, section, tags):
                 print('! Failed to load tmp-deps.json from ' + full_target_path + ': ' + r['error'])
                 continue
 
-            target_uoa = ck.get_by_flat_key({'dict': r['dict'], 'key': '##lib-caffe#uoa'}).get('value', None)
+            target_uoa = get_json_value(r, '##lib-caffe#uoa')
             if not target_uoa:
                 print('! Not found Caffe lib env UOA for ' + full_target_path)
                 continue
 
-            target_caffe_name = ck.get_by_flat_key({'dict': r['dict'], 'key': '##lib-caffe#dict#data_name'}).get('value', None)
+            target_caffe_name = get_json_value(r, '##lib-caffe#dict#data_name')
             if not target_caffe_name:
                 print('! Not found Caffe lib data_name for ' + full_target_path)
                 continue
@@ -228,7 +237,8 @@ def fill_programs_caffe(ck, conf, exe_extension, section, tags):
               'name': target_caffe_name,
               'path': os.path.basename(target_path),
               'uoa': target_uoa,
-              'version': ck.get_by_flat_key({'dict': r['dict'], 'key': '##lib-caffe#ver'}).get('value', None)
+              'version': get_json_value(r, '##lib-caffe#ver'),
+              'deps_info': make_deps_info_str(get_json_value(r, '##lib-caffe#dict#deps', {}))
             })
 
         if not filter(lambda target: target['path'], targets):
@@ -315,11 +325,7 @@ def fill_programs_squeezedet(ck, conf, section, start_count):
             setstr(conf, section, k + '_name', target['data_name'])
             setstr(conf, section, k + '_uoa', target['data_uoa'])
             setstr(conf, section, k + '_version', target['meta'].get('customize',{}).get('version',''))
-            deps = target['meta'].get('deps', {})
-            setstr(conf, section, k + '_deps_info', ';'.join(map(
-              lambda key: '{} {}'.format(key, deps[key]['ver']) if 'ver' in deps[key] else '',
-              deps.keys()
-            )))
+            setstr(conf, section, k + '_deps_info', make_deps_info_str(target['meta'].get('deps', {}))) 
 
     return {'return': 0}
 

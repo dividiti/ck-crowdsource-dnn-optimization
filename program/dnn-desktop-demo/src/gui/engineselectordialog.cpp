@@ -6,13 +6,27 @@
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDialogButtonBox>
+#include <QDesktopWidget>
 #include <QLabel>
 #include <QMessageBox>
 #include <QRadioButton>
+#include <QScreen>
 #include <QScrollArea>
 #include <QSpinBox>
 #include <QStyle>
 #include <QTextBrowser>
+
+namespace {
+QScreen* findScreenOrPrimary(QWidget* w)
+{
+    if (!w)
+        return QGuiApplication::primaryScreen();
+    int screenNumber = qApp->desktop()->screenNumber(w);
+    if (screenNumber < 0)
+        return QGuiApplication::primaryScreen();
+    return QGuiApplication::screens().at(screenNumber);
+}
+}
 
 EngineSelectorDialog::EngineSelectorDialog(QWidget *parent) : QDialog(parent)
 {
@@ -40,28 +54,45 @@ QVariant EngineSelectorDialog::selectEngineAndBatchSize()
     auto flagsLayout = new QGridLayout(flagsWidget);
     enum FlagsColumn { FLAG_COL_NAME, FLAG_COL_VERSION, FLAG_COL_SPACING, FLAG_COL_INFO };
 
+    QFontMetrics basicFontMetrics(dlg.font());
+    int maxTitleW = 0, maxVersionW = 0;
+    int depsLabelW = basicFontMetrics.boundingRect("Deps").width();
+
+    QFont versionFont = dlg.font();
+    versionFont.setBold(true);
+    QFontMetrics versionFontMetrics(versionFont);
+
     QVector<QRadioButton*> flags;
     for (int i = 0; i < items.size(); i++) {
-        auto flag = new QRadioButton(items.at(i).title());
+        auto title = items.at(i).title();
+        auto flag = new QRadioButton(title);
         flag->setChecked(current.isValid() && items[i] == current.value<Program>());
         flagsLayout->addWidget(flag, i, FLAG_COL_NAME);
         flags << flag;
+        int titleW = basicFontMetrics.boundingRect(title).width();
 
         auto version = items.at(i).targetVersion;
+        int versionW = 0;
         if (!version.isEmpty()) {
-            auto versionLabel = new QLabel("<b>" + version + "</b>");
+            auto versionLabel = new QLabel(version);
+            versionLabel->setFont(versionFont);
             flagsLayout->addWidget(versionLabel, i, FLAG_COL_VERSION);
+            versionW += versionFontMetrics.boundingRect(versionLabel->text()).width();
         }
 
         auto targetDepsInfo = items.at(i).targetDepsInfo;
         if (!targetDepsInfo.isEmpty()) {
             auto infoKey = QString::number(i);
-            auto infoLabel = new QLabel(QString("<a href='%1'>Deps info</a>").arg(infoKey));
+            auto infoLabel = new QLabel(QString("<a href='%1'>Deps</a>").arg(infoKey));
             infoLabel->setProperty("qss-role", "link");
             connect(infoLabel, SIGNAL(linkActivated(QString)), &dlg, SLOT(showInfo(QString)));
             flagsLayout->addWidget(infoLabel, i, FLAG_COL_INFO);
             dlg.flagsInfo.insert(infoKey, targetDepsInfo);
+            titleW += depsLabelW;
         }
+
+        maxTitleW = qMax(maxTitleW, titleW);
+        maxVersionW = qMax(maxVersionW, versionW);
     }
 
     auto flagsScrollArea = new QScrollArea;
@@ -94,11 +125,18 @@ QVariant EngineSelectorDialog::selectEngineAndBatchSize()
     dlg.setLayout(layout);
     dlg.adjustSize();
 
+    // Roughgly calculate size of dialog basing on the text size and giving some ad-hoc margins
+    const int extraW = 80;
+    int dlgW = dlg.width();
+    if (dlgW < maxTitleW + maxVersionW + extraW) {
+        auto screenRect = findScreenOrPrimary(nullptr)->availableGeometry();
+        dlgW = qMin(maxTitleW + maxVersionW + extraW, screenRect.width() * 3/4);
+    }
     // Take extra width to give a room for vertical scroll bar
     if (flagsWidget->height() > flagsScrollArea->height()) {
-        int w = qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
-        dlg.resize(dlg.width() + w, dlg.height());
+        dlgW += qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
     }
+    dlg.resize(dlgW, dlg.height());
 
     if (dlg.exec() == QDialog::Accepted) {
         if (Mode::Type::CLASSIFICATION == m) {
@@ -133,15 +171,30 @@ void EngineSelectorDialog::showInfo(const QString& key)
     QDialog dlg;
 
     auto layout = new QVBoxLayout(&dlg);
+    layout->setSpacing(6);
 
     auto textView = new QTextBrowser;
     textView->setHtml(report.join(""));
     layout->addWidget(textView);
 
+    // Roughly calculate size of text
+    int textH = 0, textW = 0;
+    QFontMetrics fontMetrics(textView->font());
+    for (const QString& line: report) {
+        auto r = fontMetrics.boundingRect(line);
+        textH += r.height();
+        textW = qMax(textW, r.width());
+    }
+
     auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok);
     dlg.connect(buttons, SIGNAL(accepted()), &dlg, SLOT(accept()));
-    layout->addSpacing(6);
     layout->addWidget(buttons);
 
+    // Roughgly calculate size of dialog basing on the text size and giving some ad-hoc margins
+    auto screenRect = findScreenOrPrimary(this)->availableGeometry();
+    int dlgW = qMin(textW + 100, screenRect.width() * 3/4);
+    int dlgH = qMin(textH + 100, screenRect.height() * 3/4);
+
+    dlg.resize(dlgW, dlgH);
     dlg.exec();
 }
