@@ -19,6 +19,24 @@
       "tags": "lib,qt"
     }
   },
+  "compiler_env": "CK_CXX",
+  "data_name": "dnn-desktop-demo",
+  "process_in_tmp": "yes",
+  "program": "yes",
+  "run_cmds": {
+    "default": {
+      "dataset_tags": [],
+      "ignore_return_code": "no",
+      "run_time": {
+        "pre_process_via_ck": {
+          "script_name": "preprocess"
+        },
+        "run_cmd_main": "$#BIN_FILE#$",
+        "run_correctness_output_files": [],
+        "run_output_files": []
+      }
+    }
+  },
   "run_deps": {
     "lib-qt": {
       "local": "yes",
@@ -27,30 +45,10 @@
       "tags": "lib,qt"
     }
   },
-  "compiler_env": "CK_CXX",
-  "data_name": "dnn-desktop-demo", 
-  "process_in_tmp": "yes", 
-  "program": "yes", 
-  "run_cmds": {
-    "default": {
-      "dataset_tags": [],
-      "ignore_return_code": "no", 
-      "run_time": {
-        "pre_process_via_ck": {
-          "script_name": "preprocess"
-        },
-        "run_cmd_main": "$#BIN_FILE#$",
-        "run_correctness_output_files": [],
-        "run_output_files": [
-        ]
-      }
-    }
-  }, 
-  "run_vars": {
-  }, 
+  "run_vars": {},
   "tags": [
     "dnn-desktop-demo"
-  ], 
+  ],
   "target_file": "crowdsource-video-experiments-on-desktop",
   "use_compile_script": "yes"
 }
