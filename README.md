@@ -30,6 +30,10 @@ We validated this app on ARM, Intel and NVidia-based devices
 with Linux and Windows (from laptops, servers and powerful high-end tablets such as Surface Pro 4 
 to budget devices with constrained resources such as Raspberry Pi 3 and Odroid-XU3).
 
+Maintainers
+===========
+* [dividiti](http://dividiti.com)
+
 License
 =======
 * Permissive 3-clause BSD license. (See `LICENSE.txt` for more details).
