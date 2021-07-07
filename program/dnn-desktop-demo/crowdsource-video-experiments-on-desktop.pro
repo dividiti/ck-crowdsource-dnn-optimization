@@ -43,7 +43,8 @@ SOURCES += \
     src/core/workerthread.cpp \
     src/gui/recognitionwidget.cpp \
     src/gui/footerpanel.cpp \
-    src/ori/clickablelabel.cpp
+    src/ori/clickablelabel.cpp \
+    src/gui/engineselectordialog.cpp
 
 HEADERS += \
     src/gui/mainwindow.h \
@@ -61,7 +62,8 @@ HEADERS += \
     src/core/workerthread.h \
     src/gui/recognitionwidget.h \
     src/gui/footerpanel.h \
-    src/ori/clickablelabel.h
+    src/ori/clickablelabel.h \
+    src/gui/engineselectordialog.h
 
 RESOURCES += \
     src/resources.qrc

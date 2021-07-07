@@ -205,6 +205,8 @@ struct Program {
     QString outputFile;
     QString exe;
     QString targetDir;
+    QString targetVersion;
+    QString targetDepsInfo;
     bool supportsWebcam;
 
     Engine::Type engine;
